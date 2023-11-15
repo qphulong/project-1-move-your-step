@@ -8,5 +8,5 @@ class Cell:
     def __del__(self):
         pass
 
-    def print(self):
+    def printSelf(self):
         print(self.y, self.x, self.cellType)
