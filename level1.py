@@ -17,10 +17,10 @@ class Level1:
             row_values = list(map(str, lines[i].strip().split(',')))
             for j in range(cols):
                 if str(row_values[j])=="A1":
-                    self.floor.table[i-2][j] += "0"
+                    self.floor.appendToCell(i-2, j, "0")
                     self.agent_Yposition = i-2
                     self.agent_Xposition = j
-                self.floor.table[i-2][j] += str(row_values[j])
+                self.floor.appendToCell(i-2, j, row_values[j])
 
     def printSelf(self):
         self.floor.printSelf()
@@ -29,7 +29,10 @@ class Level1:
     def __del__(self):
         pass
 
+
+#Duoi nay la test code
 m = Level1()
 m.getInputFile("input//input1-level1.txt")
-
+m.floor.appendToCell(2,2,"A")
+m.floor.removeFromCell(2,2,"0")
 m.printSelf()
