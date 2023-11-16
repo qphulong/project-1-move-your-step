@@ -37,3 +37,4 @@ for i in range(board_size):
 
 # Run the Tkinter main loop
 root.mainloop()
+

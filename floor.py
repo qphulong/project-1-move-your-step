@@ -2,7 +2,7 @@ class Floor:
     def __init__(self,rows,cols):
         self.rows=rows
         self.cols=cols
-        self.table = [[None for _ in range(cols)] for _ in range(rows)]
+        self.table = [['' for _ in range(cols)] for _ in range(rows)]
 
     def printSelf(self):
         for row in self.table:
