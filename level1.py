@@ -21,9 +21,3 @@ class Level1:
     
     def __del__(self):
         pass
-
-
-m = Level1()
-m.getInputFile("input//input1-level1.txt")
-m.floor.appendToCell(0,0,str("T"))
-m.printSelf()
