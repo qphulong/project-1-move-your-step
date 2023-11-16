@@ -25,6 +25,30 @@ class Level1:
     def printSelf(self):
         self.floor.printSelf()
         print(self.agent_Yposition, self.agent_Xposition)
+
+    def moveN(self):
+        return
+    
+    def moveS(self):
+        return
+    
+    def moveE(self):
+        return
+    
+    def moveW(self):
+        return
+    
+    def moveNE(self):
+        return
+    
+    def moveNW(self):
+        return
+    
+    def moveSE(self):
+        return
+    
+    def moveSW(self):
+        return
     
     def __del__(self):
         pass
