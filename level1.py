@@ -3,6 +3,8 @@ import floor
 class Level1:
     def __init__(self):
         self.floor = None
+        self.agent_Yposition = None
+        self.agent_Xposition = None
         
     def getInputFile(self,filePath):
         with open (filePath, "r") as file:
@@ -14,10 +16,20 @@ class Level1:
         for i in range(2, len(lines)):
             row_values = list(map(str, lines[i].strip().split(',')))
             for j in range(cols):
+                if str(row_values[j])=="A1":
+                    self.floor.table[i-2][j] += "0"
+                    self.agent_Yposition = i-2
+                    self.agent_Xposition = j
                 self.floor.table[i-2][j] += str(row_values[j])
 
     def printSelf(self):
         self.floor.printSelf()
+        print(self.agent_Yposition, self.agent_Xposition)
     
     def __del__(self):
         pass
+
+m = Level1()
+m.getInputFile("input//input1-level1.txt")
+
+m.printSelf()
