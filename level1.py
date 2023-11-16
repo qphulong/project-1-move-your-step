@@ -27,16 +27,33 @@ class Level1:
         print(self.agent_Yposition, self.agent_Xposition)
 
     def moveN(self):
-        return
+        if self.agent_Yposition > 0 and self.floor.checkValueInCell(self.agent_Yposition-1, self.agent_Xposition, "-1")==False:
+            old_y, old_x = self.agent_Yposition, self.agent_Xposition
+            self.agent_Yposition -= 1
+            self.floor.removeFromCell(old_y, old_x, "A1")
+            self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
     
     def moveS(self):
-        return
-    
+        if self.agent_Yposition < self.floor.rows - 1 and self.floor.checkValueInCell(self.agent_Yposition + 1, self.agent_Xposition, "-1") == False:
+            old_y, old_x = self.agent_Yposition, self.agent_Xposition
+            self.agent_Yposition += 1
+            self.floor.removeFromCell(old_y, old_x, "A1")
+            self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
+
     def moveE(self):
-        return
-    
+        if self.agent_Xposition < self.floor.cols - 1 and self.floor.checkValueInCell(self.agent_Yposition, self.agent_Xposition + 1, "-1") == False:
+            old_y, old_x = self.agent_Yposition, self.agent_Xposition
+            self.agent_Xposition += 1
+            self.floor.removeFromCell(old_y, old_x, "A1")
+            self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
+
     def moveW(self):
-        return
+        if self.agent_Xposition > 0 and self.floor.checkValueInCell(self.agent_Yposition, self.agent_Xposition - 1, "-1") == False:
+            old_y, old_x = self.agent_Yposition, self.agent_Xposition
+            self.agent_Xposition -= 1
+            self.floor.removeFromCell(old_y, old_x, "A1")
+            self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
+
     
     def moveNE(self):
         return
@@ -57,6 +74,5 @@ class Level1:
 #Duoi nay la test code
 m = Level1()
 m.getInputFile("input//input1-level1.txt")
-m.floor.appendToCell(2,2,"A")
-m.floor.removeFromCell(2,2,"0")
+m.moveN()
 m.printSelf()
