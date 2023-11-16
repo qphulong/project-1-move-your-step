@@ -25,4 +25,5 @@ class Level1:
 
 m = Level1()
 m.getInputFile("input//input1-level1.txt")
+m.floor.appendToCell(0,0,str("T"))
 m.printSelf()
