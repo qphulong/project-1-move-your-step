@@ -14,9 +14,17 @@ class Floor:
     def checkValueInCell(self, row, col, value):
         return value in self.table[row][col]
 
+    #cai function nay de debug trong console thoi
     def printSelf(self):
         for row in self.table:
-            print(" ".join(map(str, row)))
+            for cell_value in row:
+                if "0" in cell_value:
+                    print("A1" if "A1" in cell_value else "0", end=" ")
+                elif "-1" in cell_value:
+                    print("-1", end=" ")
+                else:
+                    print(" ".join(map(str, cell_value)), end=" ")
+            print()
 
 
         
