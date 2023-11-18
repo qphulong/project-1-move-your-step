@@ -55,7 +55,7 @@ class Level1:
         copyState.setPrevious(self)
 
         if copyState.agent_Xposition > 0 and copyState.floor.checkValueInCell(copyState.agent_Xposition-1, copyState.agent_Yposition, "-1")==False:
-            old_x, old_y = copyState.agent_Yposition, copyState.agent_Xposition
+            old_x, old_y = copyState.agent_Xposition, copyState.agent_Yposition
             copyState.agent_Xposition -= 1
             copyState.floor.removeFromCell(old_x, old_y, "A1")
             copyState.floor.appendToCell(copyState.agent_Xposition, copyState.agent_Yposition, "A1")
