@@ -1,5 +1,7 @@
 import tkinter as tk
 
+from graphical import root
+
 
 class Floor:
     def __init__(self, rows, cols):
@@ -11,17 +13,17 @@ class Floor:
         self.table[row][col] = value
 
     def removeFromCell(self, row, col, value):
-        if value in self.table[row][col]:
-            self.table[row][col].remove(value)
+        if self.table[row][col] == value:
+            self.table[row][col] = ''
 
     def checkValueInCell(self, row, col, value):
-        return value in self.table[row][col]
+        return value == self.table[row][col]
+
+    def checkGoal(self):
+        return False
 
     # cai function nay de debug trong console thoi
     def printSelf(self):
-        root = tk.Tk()
-        root.title("Move Your Step")
-
         board_size = 8  # Define the size of the board
         cell_size = 50  # Define the size of each cell in pixels
 
