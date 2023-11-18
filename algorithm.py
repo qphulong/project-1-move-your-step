@@ -13,10 +13,14 @@ class BFS:
             if current_state is None:
                 continue
 
-            current_path.append((current_state.agent_Xposition, current_state.agent_Yposition))
-
             #check goal
             if current_state.checkGoal():
+                current_path.append((current_state.agent_Xposition, current_state.agent_Yposition))
+                previous = current_state.previous
+
+                while previous is not None:
+                    current_path.append((previous.agent_Xposition, previous.agent_Yposition))
+                    previous = previous.previous
                 break
 
             if current_state not in visited:
@@ -49,7 +53,7 @@ class BFS:
 
                 canvas.create_rectangle(
                     x1, y1, x2, y2,
-                    fill=("black" if floor.table[i][j] == "-1" else "red" if (i,j) in path else "white"),
+                    fill=("black" if floor.table[i][j] == "-1" else "green" if (i,j) in path else "white"),
                     outline="grey"  # Specify the color of the border (here, "grey")
                 )
 

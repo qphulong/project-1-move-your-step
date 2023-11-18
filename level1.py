@@ -11,6 +11,7 @@ class Level1:
         self.goal_Yposition = None
 
         self.bfs = BFS()
+
         self.previous = None
 
     def __hash__(self):
@@ -53,11 +54,11 @@ class Level1:
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
-        if self.agent_Xposition > 0 and self.floor.checkValueInCell(self.agent_Xposition-1, self.agent_Yposition, "-1")==False:
-            old_x, old_y = self.agent_Yposition, self.agent_Xposition
-            self.agent_Xposition -= 1
-            self.floor.removeFromCell(old_x, old_y, "A1")
-            self.floor.appendToCell(self.agent_Xposition, self.agent_Yposition, "A1")
+        if copyState.agent_Xposition > 0 and copyState.floor.checkValueInCell(copyState.agent_Xposition-1, copyState.agent_Yposition, "-1")==False:
+            old_x, old_y = copyState.agent_Yposition, copyState.agent_Xposition
+            copyState.agent_Xposition -= 1
+            copyState.floor.removeFromCell(old_x, old_y, "A1")
+            copyState.floor.appendToCell(copyState.agent_Xposition, copyState.agent_Yposition, "A1")
             return copyState
         return None
     
