@@ -17,10 +17,9 @@ class Level1:
             row_values = list(map(str, lines[i].strip().split(',')))
             for j in range(cols):
                 if str(row_values[j])=="A1":
-                    self.floor.appendToCell(i-2, j, "0")
                     self.agent_Yposition = i-2
                     self.agent_Xposition = j
-                self.floor.appendToCell(i-2, j, row_values[j])
+                self.floor.appendToCell(i-2, j, row_values[j]) #set value for the board cell
 
     def printSelf(self):
         print("Agent Y: "+str(self.agent_Yposition))

@@ -1,55 +1,32 @@
-import floor
-import tkinter as tk
+from level1 import Level1
 
-root = tk.Tk()
-root.title("Move Your Step")
+#Duoi nay la test code
+m = Level1()
+m.getInputFile("input//input1-level1.txt")
 
-# Open the file in read mode
-with open('input/input1-level1.txt', 'r') as file:
-    size_info = file.readline().strip().split(',')
-    m, n = map(int, size_info)
+while True:
+    m.printSelf()  # Print the table each loop
+    user_input = input("Enter 1 to move SW, 2 to move S, 3 to move SE, 4 to move W, 6 to move E, 7 to move NW, 8 to move N, 9 to move NE, or 'q' to quit: ")
 
-    # Read the second line describing the floor index
-    floor_info = file.readline().strip()
-
-    # Read the grid layout
-    map = []
-    for _ in range(m):
-        line = file.readline().strip().split(',')
-        map.append(line)
-
-# Display the information read from the file
-print(f"Number of rows: {m}")
-print(f"Number of columns: {n}")
-print(f"Floor Information: {floor_info}")
-
-board_size = 8  # Define the size of the board
-cell_size = 50  # Define the size of each cell in pixels
-
-canvas = tk.Canvas(root, width=board_size * cell_size, height=board_size * cell_size)
-canvas.pack()
-
-# Draw the board
-for i in range(m):
-    for j in range(n):
-        x1 = j * cell_size
-        y1 = i * cell_size
-        x2 = x1 + cell_size
-        y2 = y1 + cell_size
-
-        canvas.create_rectangle(
-            x1, y1, x2, y2,
-            fill=("black" if map[i][j] == "-1" else "white"),
-            outline="grey"  # Specify the color of the border (here, "grey")
-        )
-
-        text_x = x1 + cell_size // 2
-        text_y = y1 + cell_size // 2
-
-        canvas.create_text(text_x, text_y,
-                           text=(map[i][j] if map[i][j].__contains__("A") or map[i][j]=="T1" else "")
-                           , fill=("blue" if map[i][j] == "T1" else "red" if map[i][j].__contains__("A") else "white")
-                           , font=("Arial", 25))
-
-# Run the Tkinter main loop
-root.mainloop()
+    if user_input == 'q':
+        break  # Exit the loop if the user enters 'q'
+    elif user_input in {'1', '2', '3', '4', '6', '7', '8', '9'}:
+        # Move the agent based on user input
+        if user_input == '1':
+            m.moveSW()
+        elif user_input == '2':
+            m.moveS()
+        elif user_input == '3':
+            m.moveSE()
+        elif user_input == '4':
+            m.moveW()
+        elif user_input == '6':
+            m.moveE()
+        elif user_input == '7':
+            m.moveNW()
+        elif user_input == '8':
+            m.moveN()
+        elif user_input == '9':
+            m.moveNE()
+    else:
+        print("Invalid input. Please enter 1, 2, 3, 4, 6, 7, 8, 9, or 'q'.")
