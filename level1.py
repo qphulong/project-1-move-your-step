@@ -1,5 +1,5 @@
 import floor
-from algorithm import DFS
+from algorithm import BFS
 import copy
 
 class Level1:
@@ -10,7 +10,7 @@ class Level1:
         self.goal_Xposition = None
         self.goal_Yposition = None
 
-        self.dfs = DFS()
+        self.bfs = BFS()
         self.previous = None
 
     def __hash__(self):
@@ -53,7 +53,7 @@ class Level1:
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
-        if self.agent_Xposition > 0 and self.floor.checkValueInCell(self.agent_Xposition-1, self.agent_Xposition, "-1")==False:
+        if self.agent_Xposition > 0 and self.floor.checkValueInCell(self.agent_Xposition-1, self.agent_Yposition, "-1")==False:
             old_x, old_y = self.agent_Yposition, self.agent_Xposition
             self.agent_Xposition -= 1
             self.floor.removeFromCell(old_x, old_y, "A1")
@@ -65,7 +65,7 @@ class Level1:
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
-        if copyState.agent_Yposition < copyState.floor.rows - 1 and copyState.floor.checkValueInCell(copyState.agent_Yposition + 1, copyState.agent_Xposition, "-1") == False:
+        if copyState.agent_Xposition < copyState.floor.rows - 1 and copyState.floor.checkValueInCell(copyState.agent_Xposition + 1, copyState.agent_Yposition, "-1") == False:
             old_x, old_y = copyState.agent_Xposition, copyState.agent_Yposition
             copyState.agent_Xposition += 1
             copyState.floor.removeFromCell(old_x, old_y, "A1")
@@ -89,7 +89,7 @@ class Level1:
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
-        if copyState.agent_Xposition > 0 and copyState.floor.checkValueInCell(copyState.agent_Xposition, copyState.agent_Yposition - 1, "-1") == False:
+        if copyState.agent_Yposition > 0 and copyState.floor.checkValueInCell(copyState.agent_Xposition, copyState.agent_Yposition - 1, "-1") == False:
             old_x, old_y = copyState.agent_Xposition, copyState.agent_Yposition
             copyState.agent_Yposition -= 1
             copyState.floor.removeFromCell(old_x, old_y, "A1")
@@ -209,8 +209,8 @@ class Level1:
         pass
 
     def solve(self):
-        path = self.dfs.DFS(self)
-        self.dfs.visualize_path(self,path,50)
+        path = self.bfs.BFS(self)
+        self.bfs.visualize_path(self,path,8,50)
 
 
 

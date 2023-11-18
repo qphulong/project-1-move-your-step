@@ -1,18 +1,18 @@
 import tkinter as tk
 
-class DFS:
-    def DFS(self, start):
+class BFS:
+    def BFS(self, start):
         visited = set()
         current_path = [start]
-        frontier = [start]
+        frontier = [start] #queue
 
         while frontier:
-            current_state = frontier.pop()
+            current_state = frontier.pop(0)
 
             if current_state is None:
                 continue
 
-            print(f"{current_state.agent_Xposition} - {current_state.agent_Yposition} - {current_state.goal_Xposition} - {current_state.goal_Yposition}")
+            print(f"Agent: {current_state.agent_Xposition}, {current_state.agent_Yposition} - Goal: {current_state.goal_Xposition}, {current_state.goal_Yposition}")
 
             current_path.append(current_state)
 
@@ -27,14 +27,17 @@ class DFS:
 
                 # Explore neighbors in reverse order to maintain LIFO behavior
                 for successor in successors:
-                    if current_state is not None and current_state not in visited:
+                    if successor is not None and successor not in visited:
+                        print("Successor: ")
+                        print(
+                            f"Agent: {successor.agent_Xposition}, {successor.agent_Yposition}")
                         frontier.append(successor)
 
         return current_path
 
 
-    def visualize_path(self, root, path, cell_size):
-        canvas = tk.Canvas(root, width=len(path[0]) * cell_size, height=len(path) * cell_size)
+    def visualize_path(self, root, path, board_size, cell_size):
+        canvas = tk.Canvas(root, width=board_size * cell_size, height=board_size * cell_size)
         canvas.pack()
 
         for i in range(len(path)):
