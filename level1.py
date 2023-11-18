@@ -27,34 +27,52 @@ class Level1:
         self.floor.printSelf()
 
     def moveN(self):
+        copy = Level1(self)
+
         if self.agent_Yposition > 0 and self.floor.checkValueInCell(self.agent_Yposition-1, self.agent_Xposition, "-1")==False:
             old_y, old_x = self.agent_Yposition, self.agent_Xposition
             self.agent_Yposition -= 1
             self.floor.removeFromCell(old_y, old_x, "A1")
             self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
+            return copy
+        return None
     
     def moveS(self):
+        copy = Level1(self)
+
         if self.agent_Yposition < self.floor.rows - 1 and self.floor.checkValueInCell(self.agent_Yposition + 1, self.agent_Xposition, "-1") == False:
             old_y, old_x = self.agent_Yposition, self.agent_Xposition
             self.agent_Yposition += 1
             self.floor.removeFromCell(old_y, old_x, "A1")
             self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
+            return copy
+        return None
 
     def moveE(self):
+        copy = Level1(self)
+
         if self.agent_Xposition < self.floor.cols - 1 and self.floor.checkValueInCell(self.agent_Yposition, self.agent_Xposition + 1, "-1") == False:
             old_y, old_x = self.agent_Yposition, self.agent_Xposition
             self.agent_Xposition += 1
             self.floor.removeFromCell(old_y, old_x, "A1")
             self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
+            return copy
+        return None
 
     def moveW(self):
+        copy = Level1(self)
+
         if self.agent_Xposition > 0 and self.floor.checkValueInCell(self.agent_Yposition, self.agent_Xposition - 1, "-1") == False:
             old_y, old_x = self.agent_Yposition, self.agent_Xposition
             self.agent_Xposition -= 1
             self.floor.removeFromCell(old_y, old_x, "A1")
             self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
+            return copy
+        return None
 
     def moveNE(self):
+        copy = Level1(self)
+
         destination_y = self.agent_Yposition - 1
         destination_x = self.agent_Xposition + 1
 
@@ -73,9 +91,13 @@ class Level1:
 
             # Add value "A1" to the new cell
             self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
+            return copy
+        return None
 
     
     def moveSE(self):
+        copy = Level1(self)
+
         destination_y = self.agent_Yposition + 1
         destination_x = self.agent_Xposition + 1
 
@@ -94,9 +116,13 @@ class Level1:
 
             # Add value "A1" to the new cell
             self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
+            return copy
+        return None
 
 
     def moveSW(self):
+        copy = Level1(self)
+
         destination_y = self.agent_Yposition + 1
         destination_x = self.agent_Xposition - 1
 
@@ -115,9 +141,13 @@ class Level1:
 
             # Add value "A1" to the new cell
             self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
+            return copy
+        return None
 
 
     def moveNW(self):
+        copy = Level1(self)
+
         destination_y = self.agent_Yposition - 1
         destination_x = self.agent_Xposition - 1
 
@@ -136,6 +166,28 @@ class Level1:
 
             # Add value "A1" to the new cell
             self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
+            return copy
+        return None
+
+    def successors(self):
+        if user_input == '1':
+            m.moveSW()
+        elif user_input == '2':
+            m.moveS()
+        elif user_input == '3':
+            m.moveSE()
+        elif user_input == '4':
+            m.moveW()
+        elif user_input == '6':
+            m.moveE()
+        elif user_input == '7':
+            m.moveNW()
+        elif user_input == '8':
+            m.moveN()
+        elif user_input == '9':
+            m.moveNE()
+        successors = [self.moveE(),self.moveW(),self.moveN(),self.moveS(),self.moveSW(),self.moveSE(),self.moveNE(),self.moveNW()]
+        return successors
 
     
     def __del__(self):

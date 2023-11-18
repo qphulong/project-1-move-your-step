@@ -7,7 +7,7 @@ class Floor:
         self.cols = cols
         self.table = [[[] for _ in range(cols)] for _ in range(rows)]
 
-    def appendToCell(self, row, col, value):
+    def appendToCell(self, row, col, value): #save values on the map
         self.table[row][col] = value
 
     def removeFromCell(self, row, col, value):
