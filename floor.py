@@ -19,8 +19,6 @@ class Floor:
     def checkValueInCell(self, row, col, value):
         return value == self.table[row][col]
 
-    def checkGoal(self):
-        return False
 
     # cai function nay de debug trong console thoi
     def printSelf(self):

@@ -12,9 +12,13 @@ class DFS:
             if current_state is None:
                 continue
 
+            print(f"{current_state.agent_Xposition} - {current_state.agent_Yposition} - {current_state.goal_Xposition} - {current_state.goal_Yposition}")
+
             current_path.append(current_state)
 
             #check goal
+            if current_state.checkGoal():
+                break
 
             if current_state not in visited:
                 visited.add(current_state)
