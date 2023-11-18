@@ -16,4 +16,12 @@ class CellNode:
     def getParrent(self):
         return self.parrent
     
+    def getCell(self):
+        return self.referenceTo
     
+    def getPathCostFromRoot(self):
+        return self.pathCostFromRoot
+    
+    def setPathCostFromRoot(self,pathCostFromRoot):
+        self.pathCostFromRoot = pathCostFromRoot
+

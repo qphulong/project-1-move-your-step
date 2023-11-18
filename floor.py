@@ -12,6 +12,12 @@ class Cell:
         
     def checkValue(self, value):
         return value in self.values
+    
+    def calculateManhattanFrom(self, Cell):
+        return abs(self.x - Cell.x) + abs(self.y - Cell.y)
+    
+    def isWall(self):
+        return "-1" in self.values
 
     def __del__(self):
         pass

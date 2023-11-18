@@ -152,5 +152,6 @@ m.floor.appendToCell(0,0,"-1")
 root = cell_node.CellNode(m.floor.getCell(0,0))
 aChild = cell_node.CellNode(m.floor.getCell(0,1))
 root.addChild(aChild)
+m.floor.appendToCell(0,1,"B")
 m.printSelf()
 
