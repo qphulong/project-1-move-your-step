@@ -1,4 +1,5 @@
 import floor
+import cell_node
 
 class Level1:
     def __init__(self):
@@ -27,116 +28,116 @@ class Level1:
         print("Agent X: "+str(self.agent_Xposition))
         self.floor.printSelf()
 
-    def moveN(self):
-        if self.agent_Yposition > 0 and self.floor.checkValueInCell(self.agent_Yposition-1, self.agent_Xposition, "-1")==False:
-            old_y, old_x = self.agent_Yposition, self.agent_Xposition
-            self.agent_Yposition -= 1
-            self.floor.removeFromCell(old_y, old_x, "A1")
-            self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
+    # def moveN(self):
+    #     if self.agent_Yposition > 0 and self.floor.checkValueInCell(self.agent_Yposition-1, self.agent_Xposition, "-1")==False:
+    #         old_y, old_x = self.agent_Yposition, self.agent_Xposition
+    #         self.agent_Yposition -= 1
+    #         self.floor.removeFromCell(old_y, old_x, "A1")
+    #         self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
     
-    def moveS(self):
-        if self.agent_Yposition < self.floor.rows - 1 and self.floor.checkValueInCell(self.agent_Yposition + 1, self.agent_Xposition, "-1") == False:
-            old_y, old_x = self.agent_Yposition, self.agent_Xposition
-            self.agent_Yposition += 1
-            self.floor.removeFromCell(old_y, old_x, "A1")
-            self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
+    # def moveS(self):
+    #     if self.agent_Yposition < self.floor.rows - 1 and self.floor.checkValueInCell(self.agent_Yposition + 1, self.agent_Xposition, "-1") == False:
+    #         old_y, old_x = self.agent_Yposition, self.agent_Xposition
+    #         self.agent_Yposition += 1
+    #         self.floor.removeFromCell(old_y, old_x, "A1")
+    #         self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
 
-    def moveE(self):
-        if self.agent_Xposition < self.floor.cols - 1 and self.floor.checkValueInCell(self.agent_Yposition, self.agent_Xposition + 1, "-1") == False:
-            old_y, old_x = self.agent_Yposition, self.agent_Xposition
-            self.agent_Xposition += 1
-            self.floor.removeFromCell(old_y, old_x, "A1")
-            self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
+    # def moveE(self):
+    #     if self.agent_Xposition < self.floor.cols - 1 and self.floor.checkValueInCell(self.agent_Yposition, self.agent_Xposition + 1, "-1") == False:
+    #         old_y, old_x = self.agent_Yposition, self.agent_Xposition
+    #         self.agent_Xposition += 1
+    #         self.floor.removeFromCell(old_y, old_x, "A1")
+    #         self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
 
-    def moveW(self):
-        if self.agent_Xposition > 0 and self.floor.checkValueInCell(self.agent_Yposition, self.agent_Xposition - 1, "-1") == False:
-            old_y, old_x = self.agent_Yposition, self.agent_Xposition
-            self.agent_Xposition -= 1
-            self.floor.removeFromCell(old_y, old_x, "A1")
-            self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
+    # def moveW(self):
+    #     if self.agent_Xposition > 0 and self.floor.checkValueInCell(self.agent_Yposition, self.agent_Xposition - 1, "-1") == False:
+    #         old_y, old_x = self.agent_Yposition, self.agent_Xposition
+    #         self.agent_Xposition -= 1
+    #         self.floor.removeFromCell(old_y, old_x, "A1")
+    #         self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
 
-    def moveNE(self):
-        destination_y = self.agent_Yposition - 1
-        destination_x = self.agent_Xposition + 1
+    # def moveNE(self):
+    #     destination_y = self.agent_Yposition - 1
+    #     destination_x = self.agent_Xposition + 1
 
-        # Check if the destination cell is within bounds and available
-        if (
-            destination_y >= 0 and destination_x < self.floor.cols and
-            self.floor.checkValueInCell(destination_y, self.agent_Xposition, "-1") == False and
-            self.floor.checkValueInCell(self.agent_Yposition, destination_x, "-1") == False and
-            self.floor.checkValueInCell(destination_y, destination_x, "-1") == False
-        ):
-            old_y, old_x = self.agent_Yposition, self.agent_Xposition
-            self.agent_Yposition, self.agent_Xposition = destination_y, destination_x
+    #     # Check if the destination cell is within bounds and available
+    #     if (
+    #         destination_y >= 0 and destination_x < self.floor.cols and
+    #         self.floor.checkValueInCell(destination_y, self.agent_Xposition, "-1") == False and
+    #         self.floor.checkValueInCell(self.agent_Yposition, destination_x, "-1") == False and
+    #         self.floor.checkValueInCell(destination_y, destination_x, "-1") == False
+    #     ):
+    #         old_y, old_x = self.agent_Yposition, self.agent_Xposition
+    #         self.agent_Yposition, self.agent_Xposition = destination_y, destination_x
 
-            # Remove value "A1" from the old cell
-            self.floor.removeFromCell(old_y, old_x, "A1")
+    #         # Remove value "A1" from the old cell
+    #         self.floor.removeFromCell(old_y, old_x, "A1")
 
-            # Add value "A1" to the new cell
-            self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
+    #         # Add value "A1" to the new cell
+    #         self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
 
     
-    def moveSE(self):
-        destination_y = self.agent_Yposition + 1
-        destination_x = self.agent_Xposition + 1
+    # def moveSE(self):
+    #     destination_y = self.agent_Yposition + 1
+    #     destination_x = self.agent_Xposition + 1
 
-        # Check if the destination cell is within bounds and available
-        if (
-            destination_y < self.floor.rows and destination_x < self.floor.cols and
-            self.floor.checkValueInCell(destination_y, self.agent_Xposition, "-1") == False and
-            self.floor.checkValueInCell(self.agent_Yposition, destination_x, "-1") == False and
-            self.floor.checkValueInCell(destination_y, destination_x, "-1") == False
-        ):
-            old_y, old_x = self.agent_Yposition, self.agent_Xposition
-            self.agent_Yposition, self.agent_Xposition = destination_y, destination_x
+    #     # Check if the destination cell is within bounds and available
+    #     if (
+    #         destination_y < self.floor.rows and destination_x < self.floor.cols and
+    #         self.floor.checkValueInCell(destination_y, self.agent_Xposition, "-1") == False and
+    #         self.floor.checkValueInCell(self.agent_Yposition, destination_x, "-1") == False and
+    #         self.floor.checkValueInCell(destination_y, destination_x, "-1") == False
+    #     ):
+    #         old_y, old_x = self.agent_Yposition, self.agent_Xposition
+    #         self.agent_Yposition, self.agent_Xposition = destination_y, destination_x
 
-            # Remove value "A1" from the old cell
-            self.floor.removeFromCell(old_y, old_x, "A1")
+    #         # Remove value "A1" from the old cell
+    #         self.floor.removeFromCell(old_y, old_x, "A1")
 
-            # Add value "A1" to the new cell
-            self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
-
-
-    def moveSW(self):
-        destination_y = self.agent_Yposition + 1
-        destination_x = self.agent_Xposition - 1
-
-        # Check if the destination cell is within bounds and available
-        if (
-            destination_y < self.floor.rows and destination_x >= 0 and
-            self.floor.checkValueInCell(destination_y, self.agent_Xposition, "-1") == False and
-            self.floor.checkValueInCell(self.agent_Yposition, destination_x, "-1") == False and
-            self.floor.checkValueInCell(destination_y, destination_x, "-1") == False
-        ):
-            old_y, old_x = self.agent_Yposition, self.agent_Xposition
-            self.agent_Yposition, self.agent_Xposition = destination_y, destination_x
-
-            # Remove value "A1" from the old cell
-            self.floor.removeFromCell(old_y, old_x, "A1")
-
-            # Add value "A1" to the new cell
-            self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
+    #         # Add value "A1" to the new cell
+    #         self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
 
 
-    def moveNW(self):
-        destination_y = self.agent_Yposition - 1
-        destination_x = self.agent_Xposition - 1
+    # def moveSW(self):
+    #     destination_y = self.agent_Yposition + 1
+    #     destination_x = self.agent_Xposition - 1
 
-        # Check if the destination cell is within bounds and available
-        if (
-            destination_y >= 0 and destination_x >= 0 and
-            self.floor.checkValueInCell(destination_y, self.agent_Xposition, "-1") == False and
-            self.floor.checkValueInCell(self.agent_Yposition, destination_x, "-1") == False and
-            self.floor.checkValueInCell(destination_y, destination_x, "-1") == False
-        ):
-            old_y, old_x = self.agent_Yposition, self.agent_Xposition
-            self.agent_Yposition, self.agent_Xposition = destination_y, destination_x
+    #     # Check if the destination cell is within bounds and available
+    #     if (
+    #         destination_y < self.floor.rows and destination_x >= 0 and
+    #         self.floor.checkValueInCell(destination_y, self.agent_Xposition, "-1") == False and
+    #         self.floor.checkValueInCell(self.agent_Yposition, destination_x, "-1") == False and
+    #         self.floor.checkValueInCell(destination_y, destination_x, "-1") == False
+    #     ):
+    #         old_y, old_x = self.agent_Yposition, self.agent_Xposition
+    #         self.agent_Yposition, self.agent_Xposition = destination_y, destination_x
 
-            # Remove value "A1" from the old cell
-            self.floor.removeFromCell(old_y, old_x, "A1")
+    #         # Remove value "A1" from the old cell
+    #         self.floor.removeFromCell(old_y, old_x, "A1")
 
-            # Add value "A1" to the new cell
-            self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
+    #         # Add value "A1" to the new cell
+    #         self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
+
+
+    # def moveNW(self):
+    #     destination_y = self.agent_Yposition - 1
+    #     destination_x = self.agent_Xposition - 1
+
+    #     # Check if the destination cell is within bounds and available
+    #     if (
+    #         destination_y >= 0 and destination_x >= 0 and
+    #         self.floor.checkValueInCell(destination_y, self.agent_Xposition, "-1") == False and
+    #         self.floor.checkValueInCell(self.agent_Yposition, destination_x, "-1") == False and
+    #         self.floor.checkValueInCell(destination_y, destination_x, "-1") == False
+    #     ):
+    #         old_y, old_x = self.agent_Yposition, self.agent_Xposition
+    #         self.agent_Yposition, self.agent_Xposition = destination_y, destination_x
+
+    #         # Remove value "A1" from the old cell
+    #         self.floor.removeFromCell(old_y, old_x, "A1")
+
+    #         # Add value "A1" to the new cell
+    #         self.floor.appendToCell(self.agent_Yposition, self.agent_Xposition, "A1")
 
     
     def __del__(self):
@@ -146,31 +147,10 @@ class Level1:
 #Duoi nay la test code
 m = Level1()
 m.getInputFile("input//input1-level1.txt")
-
-while True:
-    m.printSelf()  # Print the table each loop
-    user_input = input("Enter 1 to move SW, 2 to move S, 3 to move SE, 4 to move W, 6 to move E, 7 to move NW, 8 to move N, 9 to move NE, or 'q' to quit: ")
-
-    if user_input == 'q':
-        break  # Exit the loop if the user enters 'q'
-    elif user_input in {'1', '2', '3', '4', '6', '7', '8', '9'}:
-        # Move the agent based on user input
-        if user_input == '1':
-            m.moveSW()
-        elif user_input == '2':
-            m.moveS()
-        elif user_input == '3':
-            m.moveSE()
-        elif user_input == '4':
-            m.moveW()
-        elif user_input == '6':
-            m.moveE()
-        elif user_input == '7':
-            m.moveNW()
-        elif user_input == '8':
-            m.moveN()
-        elif user_input == '9':
-            m.moveNE()
-    else:
-        print("Invalid input. Please enter 1, 2, 3, 4, 6, 7, 8, 9, or 'q'.")
+m.floor.removeFromCell(0,0,"0")
+m.floor.appendToCell(0,0,"-1")
+root = cell_node.CellNode(m.floor.getCell(0,0))
+aChild = cell_node.CellNode(m.floor.getCell(0,1))
+root.addChild(aChild)
+m.printSelf()
 
