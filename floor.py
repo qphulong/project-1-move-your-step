@@ -1,7 +1,5 @@
 import tkinter as tk
-
 from graphical import root
-
 
 class Floor:
     def __init__(self, rows, cols):

@@ -210,7 +210,7 @@ class Level1:
 
     def solve(self):
         path = self.bfs.BFS(self)
-        self.bfs.visualize_path(self,path,8,50)
+        self.bfs.visualize_path(path,8,50)
 
 
 

@@ -1,4 +1,5 @@
 import tkinter as tk
+from graphical import root
 
 class BFS:
     def BFS(self, start):
@@ -36,7 +37,7 @@ class BFS:
         return current_path
 
 
-    def visualize_path(self, root, path, board_size, cell_size):
+    def visualize_path(self, path, board_size, cell_size):
         canvas = tk.Canvas(root, width=board_size * cell_size, height=board_size * cell_size)
         canvas.pack()
 
