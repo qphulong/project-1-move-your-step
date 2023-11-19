@@ -76,10 +76,13 @@ class BFS:
                 text_y = y1 + cell_size // 2
 
                 canvas.create_text(text_x, text_y,
-                                   text=(floor.table[i][j].getValue() if floor.table[i][j].checkValue("A1") or floor.table[i][
-                                       j].checkValue("T1") else "")
+                                   text=(floor.table[i][j].getValue() if floor.table[i][j].isAgent() or floor.table[i][
+                                       j].isGoal() or floor.table[i][j].isKey() or floor.table[i][j].isDoor() else "")
                                    , fill=(
-                        "blue" if floor.table[i][j].checkValue("T1") else "red" if floor.table[i][j].checkValue("A1") else "white")
+                        "blue" if floor.table[i][j].isGoal() else "red" if floor.table[i][j].isAgent()
+                        else "yellow" if floor.table[i][j].isKey()
+                        else "orange" if floor.table[i][j].isDoor()
+                        else "white")
                                    , font=("Arial", 25))
 
         root.mainloop()

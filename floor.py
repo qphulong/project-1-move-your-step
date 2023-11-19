@@ -26,6 +26,18 @@ class Cell:
     def isWall(self):
         return "-1" in self.values
 
+    def isAgent(self):
+        return any('A' in value for value in self.values)
+
+    def isGoal(self):
+        return "T1" in self.values
+
+    def isKey(self):
+        return any('K' in value for value in self.values)
+
+    def isDoor(self):
+        return any('D' in value for value in self.values)
+
     def __del__(self):
         pass
 
