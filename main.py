@@ -5,4 +5,5 @@ m = Level1()
 m.getInputFile("input//input1-level1.txt")
 
 while True:
-    m.solve()
+    if m.solve() == False:
+        break

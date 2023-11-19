@@ -15,10 +15,11 @@ class Level1:
         self.previous = None
 
     def __hash__(self):
-        tuple_array = [tuple(inner_list) for inner_list in self.floor.table]
+        return hash(self.floor_rep())
 
-        hashed = tuple(set(tuple_array))
-        return hash(hashed)
+    def floor_rep(self):
+        rep = (self.agent_Xposition, self.agent_Yposition)
+        return rep
         
     def getInputFile(self,filePath):
         with open (filePath, "r") as file:
@@ -210,9 +211,13 @@ class Level1:
         pass
 
     def solve(self):
-        path = self.bfs.BFS(self)
+        path = self.bfs.BFS_Level1(self)[1]
+        if path is None:
+            print("No solutions found")
+            return False
         print(f"Path: {path}")
         self.bfs.visualize_path(self.floor,path)
+        return True
 
 
 
