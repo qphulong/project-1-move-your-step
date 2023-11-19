@@ -1,8 +1,8 @@
 from level1 import Level1
 
 #Duoi nay la test code
-m = Level1()
-m.getInputFile("input//input1-level1.txt")
+myLevel1 = Level1()
+myLevel1.getInputFile("input//input1-level1.txt")
 
 while True:
-    m.solve()
+    myLevel1.solve()

@@ -2,22 +2,6 @@
 import tkinter as tk
 from graphical import root
 
-class Floor:
-    def __init__(self, rows, cols):
-        self.rows = rows
-        self.cols = cols
-        self.table = [[[] for _ in range(cols)] for _ in range(rows)]
-
-    def appendToCell(self, row, col, value): #save values on the map
-        self.table[row][col] = value
-
-    def removeFromCell(self, row, col, value):
-        if self.table[row][col] == value:
-            self.table[row][col] = ''
-
-    def checkValueInCell(self, row, col, value):
-        return value == self.table[row][col]
-
 class Cell:
     def __init__(self, y, x):
         self.y = y
@@ -52,7 +36,7 @@ class Floor:
         self.table[row][col].appendValue(value)
 
     def removeFromCell(self, row, col, value):
-        if self.table[row][col].checkValue(value):
+        if self.checkValueInCell(row, col, value):
             self.table[row][col].removeValue(value)
 
     def checkValueInCell(self, row, col, value):
@@ -60,6 +44,13 @@ class Floor:
     
     def getCell(self, row, col):
         return self.table[row][col]
+    
+    #console
+    def printTable(self):
+        for i in range(self.rows):
+            for j in range(self.cols):
+                print(self.table[i][j].values, end=" ")
+            print()
 
 
     # cai function nay de debug trong console thoi
