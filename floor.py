@@ -2,22 +2,6 @@
 import tkinter as tk
 from graphical import root
 
-class Floor:
-    def __init__(self, rows, cols):
-        self.rows = rows
-        self.cols = cols
-        self.table = [[[] for _ in range(cols)] for _ in range(rows)]
-
-    def appendToCell(self, row, col, value): #save values on the map
-        self.table[row][col] = value
-
-    def removeFromCell(self, row, col, value):
-        if self.table[row][col] == value:
-            self.table[row][col] = ''
-
-    def checkValueInCell(self, row, col, value):
-        return value == self.table[row][col]
-
 class Cell:
     def __init__(self, y, x):
         self.y = y
@@ -32,9 +16,12 @@ class Cell:
         
     def checkValue(self, value):
         return value in self.values
-    
+
     def calculateManhattanFrom(self, Cell):
         return abs(self.x - Cell.x) + abs(self.y - Cell.y)
+
+    def getValue(self):
+        return self.values[len(self.values)-1]
     
     def isWall(self):
         return "-1" in self.values
@@ -88,7 +75,7 @@ class Floor:
                 text_y = y1 + cell_size // 2
 
                 canvas.create_text(text_x, text_y,
-                                   text=(self.table[i][j] if self.table[i][j].__contains__("A") or self.table[i][j] == "T1" else "")
+                                   text=(self.table[i][j] if self.table[i][j].checkValue() or self.table[i][j] == "T1" else "")
                                    , fill=(
                         "blue" if self.table[i][j] == "T1" else "red" if self.table[i][j].__contains__("A") else "white")
                                    , font=("Arial", 25))

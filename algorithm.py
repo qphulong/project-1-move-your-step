@@ -53,19 +53,20 @@ class BFS:
 
                 canvas.create_rectangle(
                     x1, y1, x2, y2,
-                    fill=("black" if floor.table[i][j] == "-1" else "green" if (i,j) in path else "white"),
+                    fill=("black" if floor.table[i][j].checkValue("-1") else "green" if (i,j) in path else "white"),
                     outline="grey"  # Specify the color of the border (here, "grey")
                 )
 
                 text_x = x1 + cell_size // 2
                 text_y = y1 + cell_size // 2
 
+                print(floor.table[i][j])
+
                 canvas.create_text(text_x, text_y,
-                                   text=(floor.table[i][j] if floor.table[i][j].__contains__("A") or floor.table[i][
-                                       j] == "T1" else "")
+                                   text=(floor.table[i][j].getValue() if floor.table[i][j].checkValue("A1") or floor.table[i][
+                                       j].checkValue("T1") else "")
                                    , fill=(
-                        "blue" if floor.table[i][j] == "T1" else "red" if floor.table[i][j].__contains__(
-                            "A") else "white")
+                        "blue" if floor.table[i][j].checkValue("T1") else "red" if floor.table[i][j].checkValue("A1") else "white")
                                    , font=("Arial", 25))
 
         root.mainloop()
