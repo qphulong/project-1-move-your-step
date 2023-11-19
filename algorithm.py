@@ -41,12 +41,13 @@ class BFS:
 
         return (found,current_path)
 
-    #ở level 2 kh đảm bảo sẽ tìm được goal ở những nơi có thể đến (những nơi không nằm ở trong các phòng phải dùng chìa khoá để mở vào)
-    #bfs ở level này sẽ với mục đích đầu tiên là thu thập chìa khoá và khám phá thế giới
+    # ở level 2 kh đảm bảo sẽ tìm được goal ở những nơi có thể đến (những nơi không nằm ở trong các phòng phải dùng chìa khoá để mở vào)
+    # bfs ở level này sẽ với mục đích đầu tiên là thu thập chìa khoá và khám phá thế giới
     def BFS_Level2(self, start):
         level1 = self.BFS_Level1(start)
         if level1[0] == True: #nếu không cần vào các phòng mà đã tìm được level1
             return level1
+
 
 
 
