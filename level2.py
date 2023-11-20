@@ -66,6 +66,39 @@ class Spread:
         if value in self.tags:
             self.tags.remove(value)
 
+    # def mergeSpread(self, otherSpread):
+    #     for eachVisitedCell in self.visited:
+    #         if eachVisitedCell in otherSpread.frontier:
+    #             #merge tag
+    #             for otherSpreadTag in otherSpread.tags:
+    #                 self.appendToTags(otherSpreadTag)
+    #             #merge visited
+    #             for otherSpreadVisited in otherSpread.visited:
+    #                 self.visited.append(otherSpreadVisited)
+    #                 if otherSpreadVisited in self.frontier:
+    #                     self.frontier.remove(otherSpreadVisited)
+    #             #merge frontier
+    #             for otherSpreadFrontier in otherSpread.frontier:
+    #                 if otherSpreadFrontier not in self.frontier and otherSpreadFrontier not in self.visited:
+    #                     self.frontier.append(otherSpreadFrontier)
+    #             break
+    #     self.belongTo.removeSpread(otherSpread)
+    def mergeSpread(self, otherSpread):
+        common_visited = set(self.visited) & set(otherSpread.frontier)
+
+        # Merge tags
+        self.tags.extend(otherSpread.tags)
+
+        # Merge visited
+        self.visited.extend(otherSpread.visited)
+        self.frontier = [cell for cell in self.frontier if cell not in self.visited]
+
+        # Merge frontier
+        self.frontier.extend(cell for cell in otherSpread.frontier if cell not in common_visited)
+
+        self.belongTo.removeSpread(otherSpread)
+
+
     def expandToward(self,goalCell):
          # Calculate heuristics for each cell in the frontier
         heuristics = [cell.getManhattanFrom(goalCell) for cell in self.frontier]
@@ -208,6 +241,9 @@ class Floor2:
             for j in range(self.cols):
                 self.table[i][j].setBelongTo(self)     
 
+    def getSpread(self, tag):
+        return next((spread for spread in self.listOfSpreads if tag in spread.tags), None)
+
     def appendToCell(self, row, col, value):
         self.table[row][col].appendValue(value)
 
@@ -272,6 +308,7 @@ class Level2:
                     self.floor.appendToCell(i-2, j, "0")
                 elif str(row_values[j])=="K1":
                     self.floor.appendToCell(i-2, j, "0")
+                    self.floor.appendSpread(Spread("K1",self.floor,self.floor.getCell(i-2, j)))
                 elif str(row_values[j])=="D1":
                     self.floor.appendToCell(i-2, j, "0")
                 self.floor.appendToCell(i-2, j, row_values[j])
@@ -279,14 +316,22 @@ class Level2:
 myLevel2 = Level2()
 myLevel2.getInputFile("input//input1-level2.txt")
 
+A1=myLevel2.floor.getSpread("A1")
+K1=myLevel2.floor.getSpread("K1")
+A1.expandToward(myLevel2.floor.getCell(0,0))
+A1.expandToward(myLevel2.floor.getCell(0,0))
+A1.expandToward(myLevel2.floor.getCell(0,0))
+K1.expandToward(myLevel2.floor.getCell(7,0))
+A1.mergeSpread(K1)
 
-myLevel2.floor.listOfSpreads[0].expandToward(myLevel2.floor.getCell(0,0))
-myLevel2.floor.listOfSpreads[0].expandToward(myLevel2.floor.getCell(0,0))
 cell70=myLevel2.floor.getCell(7,0)
 cell71=myLevel2.floor.getCell(7,1)
 cell60=myLevel2.floor.getCell(6,0)
 cell61=myLevel2.floor.getCell(6,1)
 cell50=myLevel2.floor.getCell(5,0)
 cell51=myLevel2.floor.getCell(5,1)
-
+cell40=myLevel2.floor.getCell(4,0)
+cell41=myLevel2.floor.getCell(4,1)
+cell31=myLevel2.floor.getCell(3,1)
+cell30=myLevel2.floor.getCell(3,0)
 myLevel2.floor.printTable()
