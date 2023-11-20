@@ -17,7 +17,7 @@ class Cell:
     def checkValue(self, value):
         return value in self.values
     
-    def calculateManhattanFrom(self, Cell):
+    def getManhattanFrom(self, Cell):
         return abs(self.x - Cell.x) + abs(self.y - Cell.y)
     
     def isWall(self):

@@ -20,7 +20,7 @@ class Cell2:
     def checkValue(self, value):
         return value in self.values
     
-    def calculateManhattanFrom(self, Cell):
+    def getManhattanFrom(self, Cell):
         return abs(self.x - Cell.x) + abs(self.y - Cell.y)
     
     def isWall(self):
@@ -65,65 +65,133 @@ class Spread:
     def removeFromTags(self, value):
         if value in self.tags:
             self.tags.remove(value)
-    
-    def expandCell(self, Cell):
-        if Cell in self.frontier:
-            self.frontier.remove(Cell)
-            self.visited.append(Cell)
-            cell_y= Cell.getY()
-            cell_x= Cell.getX()
-            #try to connect N
-            if cell_y > 0 and not self.belongTo.getCell(cell_y - 1, cell_x).isWall():
-                Cell.connectToCell(self.belongTo.getCell(cell_y - 1, cell_x))
-            # Try to connect S
-            if cell_y < self.belongTo.rows - 1 and not self.belongTo.getCell(cell_y + 1, cell_x).isWall():
-                Cell.connectToCell(self.belongTo.getCell(cell_y + 1, cell_x))
 
-            # Try to connect E
-            if cell_x < self.belongTo.cols - 1 and not self.belongTo.getCell(cell_y, cell_x + 1).isWall():
-                Cell.connectToCell(self.belongTo.getCell(cell_y, cell_x + 1))
+    def expandToward(self,goalCell):
+         # Calculate heuristics for each cell in the frontier
+        heuristics = [cell.getManhattanFrom(goalCell) for cell in self.frontier]
 
-            # Try to connect W
-            if cell_x > 0 and not self.belongTo.getCell(cell_y, cell_x - 1).isWall():
-                Cell.connectToCell(self.belongTo.getCell(cell_y, cell_x - 1))
+        # Find the index of the cell with the minimum heuristic value
+        min_index = min(range(len(heuristics)), key=heuristics.__getitem__)
 
-            # Try to connect NE
-            if (
-                cell_y > 0 and cell_x < self.belongTo.cols - 1 and
-                not self.belongTo.getCell(cell_y - 1, cell_x + 1).isWall() and
-                not self.belongTo.getCell(cell_y, cell_x + 1).isWall() and
-                not self.belongTo.getCell(cell_y - 1, cell_x).isWall()
-            ):
-                Cell.connectToCell(self.belongTo.getCell(cell_y - 1, cell_x + 1))
+        # Retrieve the cell with the minimum heuristic value
+        chosenCell = self.frontier[min_index]
+        
+        chosenCellY= chosenCell.getY()
+        chosenCellX= chosenCell.getX()
 
-            # Try to connect NW
-            if (
-                cell_y > 0 and cell_x > 0 and
-                not self.belongTo.getCell(cell_y - 1, cell_x - 1).isWall() and
-                not self.belongTo.getCell(cell_y, cell_x - 1).isWall() and
-                not self.belongTo.getCell(cell_y - 1, cell_x).isWall()
-            ):
-                Cell.connectToCell(self.belongTo.getCell(cell_y - 1, cell_x - 1))
+        #try to connect N
+        if (
+            chosenCellY > 0 and
+            not self.belongTo.getCell(chosenCellY - 1, chosenCellX).isWall() and
+            self.belongTo.getCell(chosenCellY - 1, chosenCellX) not in self.visited and
+            self.belongTo.getCell(chosenCellY - 1, chosenCellX) not in self.frontier
+        ):
+            northCell = self.belongTo.getCell(chosenCellY - 1, chosenCellX)
+            chosenCell.connectToCell(northCell)
+            if northCell not in self.frontier:
+                self.appendToFrontier(northCell)
 
-            # Try to connect SE
-            if (
-                cell_y < self.belongTo.rows - 1 and cell_x < self.belongTo.cols - 1 and
-                not self.belongTo.getCell(cell_y + 1, cell_x + 1).isWall() and
-                not self.belongTo.getCell(cell_y, cell_x + 1).isWall() and
-                not self.belongTo.getCell(cell_y + 1, cell_x).isWall()
-            ):
-                Cell.connectToCell(self.belongTo.getCell(cell_y + 1, cell_x + 1))
 
-            # Try to connect SW
-            if (
-                cell_y < self.belongTo.rows - 1 and cell_x > 0 and
-                not self.belongTo.getCell(cell_y + 1, cell_x - 1).isWall() and
-                not self.belongTo.getCell(cell_y, cell_x - 1).isWall() and
-                not self.belongTo.getCell(cell_y + 1, cell_x).isWall()
-            ):
-                Cell.connectToCell(self.belongTo.getCell(cell_y + 1, cell_x - 1))
-        else:
-            return
+        # Try to connect S
+        if (
+            chosenCellY < self.belongTo.rows - 1 and
+            not self.belongTo.getCell(chosenCellY + 1, chosenCellX).isWall() and
+            self.belongTo.getCell(chosenCellY + 1, chosenCellX) not in self.visited and
+            self.belongTo.getCell(chosenCellY + 1, chosenCellX) not in self.frontier
+        ):
+            southCell = self.belongTo.getCell(chosenCellY + 1, chosenCellX)
+            chosenCell.connectToCell(southCell)
+            if southCell not in self.frontier:
+                self.appendToFrontier(southCell)
+
+
+        # Try to connect E
+        if (
+            chosenCellX < self.belongTo.cols - 1 and
+            not self.belongTo.getCell(chosenCellY, chosenCellX + 1).isWall() and
+            self.belongTo.getCell(chosenCellY, chosenCellX + 1) not in self.visited and
+            self.belongTo.getCell(chosenCellY, chosenCellX + 1) not in self.frontier
+        ):
+            eastCell = self.belongTo.getCell(chosenCellY, chosenCellX + 1)
+            chosenCell.connectToCell(eastCell)
+            if eastCell not in self.frontier:
+                self.appendToFrontier(eastCell)
+
+
+        # Try to connect W
+        if (
+            chosenCellX > 0 and
+            not self.belongTo.getCell(chosenCellY, chosenCellX - 1).isWall() and
+            self.belongTo.getCell(chosenCellY, chosenCellX - 1) not in self.visited and
+            self.belongTo.getCell(chosenCellY, chosenCellX - 1) not in self.frontier
+        ):
+            westCell = self.belongTo.getCell(chosenCellY, chosenCellX - 1)
+            chosenCell.connectToCell(westCell)
+            if westCell not in self.frontier:
+                self.appendToFrontier(westCell)
+
+
+        # Try to connect NE
+        if (
+            chosenCellY > 0 and chosenCellX < self.belongTo.cols - 1 and
+            not self.belongTo.getCell(chosenCellY - 1, chosenCellX).isWall() and
+            not self.belongTo.getCell(chosenCellY, chosenCellX + 1).isWall() and
+            not self.belongTo.getCell(chosenCellY - 1, chosenCellX + 1).isWall() and
+            self.belongTo.getCell(chosenCellY - 1, chosenCellX + 1) not in self.visited and
+            self.belongTo.getCell(chosenCellY - 1, chosenCellX + 1) not in self.frontier
+        ):
+            neCell = self.belongTo.getCell(chosenCellY - 1, chosenCellX + 1)
+            chosenCell.connectToCell(neCell)
+            if neCell not in self.frontier:
+                self.appendToFrontier(neCell)
+
+
+        # Try to connect NW
+        if (
+            chosenCellY > 0 and chosenCellX > 0 and
+            not self.belongTo.getCell(chosenCellY - 1, chosenCellX).isWall() and
+            not self.belongTo.getCell(chosenCellY, chosenCellX - 1).isWall() and
+            not self.belongTo.getCell(chosenCellY - 1, chosenCellX - 1).isWall() and
+            self.belongTo.getCell(chosenCellY - 1, chosenCellX - 1) not in self.visited and
+            self.belongTo.getCell(chosenCellY - 1, chosenCellX - 1) not in self.frontier
+        ):
+            nwCell = self.belongTo.getCell(chosenCellY - 1, chosenCellX - 1)
+            chosenCell.connectToCell(nwCell)
+            if nwCell not in self.frontier:
+                self.appendToFrontier(nwCell)
+
+
+        # Try to connect SW
+        if (
+            chosenCellY < self.belongTo.rows - 1 and chosenCellX > 0 and
+            not self.belongTo.getCell(chosenCellY + 1, chosenCellX).isWall() and
+            not self.belongTo.getCell(chosenCellY, chosenCellX - 1).isWall() and
+            not self.belongTo.getCell(chosenCellY + 1, chosenCellX - 1).isWall() and
+            self.belongTo.getCell(chosenCellY + 1, chosenCellX - 1) not in self.visited and
+            self.belongTo.getCell(chosenCellY + 1, chosenCellX - 1) not in self.frontier
+        ):
+            swCell = self.belongTo.getCell(chosenCellY + 1, chosenCellX - 1)
+            chosenCell.connectToCell(swCell)
+            if swCell not in self.frontier:
+                self.appendToFrontier(swCell)
+
+
+        # Try to connect SE
+        if (
+            chosenCellY < self.belongTo.rows - 1 and chosenCellX < self.belongTo.cols - 1 and
+            not self.belongTo.getCell(chosenCellY + 1, chosenCellX).isWall() and
+            not self.belongTo.getCell(chosenCellY, chosenCellX + 1).isWall() and
+            not self.belongTo.getCell(chosenCellY + 1, chosenCellX + 1).isWall() and
+            self.belongTo.getCell(chosenCellY + 1, chosenCellX + 1) not in self.visited and
+            self.belongTo.getCell(chosenCellY + 1, chosenCellX + 1) not in self.frontier
+        ):
+            seCell = self.belongTo.getCell(chosenCellY + 1, chosenCellX + 1)
+            chosenCell.connectToCell(seCell)
+            if seCell not in self.frontier:
+                self.appendToFrontier(seCell)
+
+        self.visited.append(chosenCell)
+        self.removeFromFrontier(chosenCell)
 
     def __del__(self):
         pass
@@ -134,6 +202,7 @@ class Floor2:
         self.cols=cols
         self.table = [[Cell2(i, j) for j in range(cols)] for i in range(rows)]
         self.listOfSpreads = []
+        self.visited= []
 
         for i in range(self.rows):
             for j in range(self.cols):
@@ -163,8 +232,23 @@ class Floor2:
     def printTable(self):
         for i in range(self.rows):
             for j in range(self.cols):
-                print(self.table[i][j].values, end=" ")
-            print()
+                cell_values = self.table[i][j].values
+
+                # Check if specific values are present
+                specific_values = {"A1", "K1", "D1", "T1"}
+                if any(value in specific_values for value in cell_values):
+                    # Print specific values
+                    print("[", end="")
+                    for value in cell_values:
+                        if value in specific_values:
+                            print("'" + value + "'", end=" ")
+                    print("]", end=" ")
+                else:
+                    # Print the entire values array
+                    print(cell_values, end=" ")
+            print()  # Move to the next row
+
+
 
 class Level2:
     def __init__(self):
@@ -196,14 +280,13 @@ myLevel2 = Level2()
 myLevel2.getInputFile("input//input1-level2.txt")
 
 
-myLevel2.floor.listOfSpreads[0].expandCell(myLevel2.floor.getCell(2,3))
-cell23=myLevel2.floor.getCell(2,3)
-cell13=myLevel2.floor.getCell(1,3)
-cell33=myLevel2.floor.getCell(3,3)
-cell22=myLevel2.floor.getCell(2,2)
-cell24=myLevel2.floor.getCell(2,4)
-cell14=myLevel2.floor.getCell(1,4)
-cell34=myLevel2.floor.getCell(3,4)
-cell32=myLevel2.floor.getCell(3,2)
-cell12=myLevel2.floor.getCell(1,2)
+myLevel2.floor.listOfSpreads[0].expandToward(myLevel2.floor.getCell(0,0))
+myLevel2.floor.listOfSpreads[0].expandToward(myLevel2.floor.getCell(0,0))
+cell70=myLevel2.floor.getCell(7,0)
+cell71=myLevel2.floor.getCell(7,1)
+cell60=myLevel2.floor.getCell(6,0)
+cell61=myLevel2.floor.getCell(6,1)
+cell50=myLevel2.floor.getCell(5,0)
+cell51=myLevel2.floor.getCell(5,1)
+
 myLevel2.floor.printTable()
