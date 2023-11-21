@@ -275,7 +275,7 @@ class Floor2:
             print()  # Move to the next row
 
 
-
+import re
 class Level2:
     def __init__(self):
         self.floor = None
@@ -289,19 +289,23 @@ class Level2:
         
         for i in range(2, len(lines)):
             row_values = list(map(str, lines[i].strip().split(',')))
-            #khuc input nay dang test, se hoan thien sau
+
             for j in range(cols):
-                if str(row_values[j])=="A1":
-                    self.floor.appendToCell(i-2, j, "0")
-                    self.floor.appendSpread(Spread("A1",self.floor,self.floor.getCell(i-2, j)))
-                elif str(row_values[j])=="T1":
-                    self.floor.appendToCell(i-2, j, "0")
-                elif str(row_values[j])=="K1":
-                    self.floor.appendToCell(i-2, j, "0")
-                    self.floor.appendSpread(Spread("K1",self.floor,self.floor.getCell(i-2, j)))
-                elif str(row_values[j])=="D1":
-                    self.floor.appendToCell(i-2, j, "0")
-                self.floor.appendToCell(i-2, j, row_values[j])
+                cell_value = row_values[j]
+
+                # Check if the cell value has the format "Ai", "Ki", "Ti", "Di"
+                if re.match(r'[AKTD]\d+', cell_value):
+                    self.floor.appendToCell(i - 2, j, "0")
+
+                    # Extract the character and integer parts from the cell value
+                    char_part, num_part = re.match(r'([AKTD])(\d+)', cell_value).groups()
+
+                    # Create a Spread with the extracted values
+                    self.floor.appendSpread(Spread(char_part + num_part, self.floor, self.floor.getCell(i - 2, j)))
+
+                # Regardless of the condition, add the original cell value to the cell
+                self.floor.appendToCell(i - 2, j, cell_value)
+        
 
 
     def tryToSpread(self):
