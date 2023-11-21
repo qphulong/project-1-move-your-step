@@ -50,3 +50,16 @@ class Level4(Level1):
         print(f"Path: {path}")
         self.bfs.visualize_path(self.floor, path)
         return True
+
+class Task:
+    def __init__(self,x,y,floor):
+        self.floor = floor
+        self.destinationX = x
+        self.destinationY = y
+
+    def set_task(self,x,y):
+        if floor[x][y].isWall == False:
+            self.destinationX = x
+            self.destinationY = y
+        else:
+            print("Cannot set a task destination at a wall or an obstacle")
