@@ -326,23 +326,4 @@ class Level2:
 
 myLevel2 = Level2()
 myLevel2.getInputFile("input//input1-level2.txt")
-
-A1=myLevel2.floor.getSpread("A1")
-K1=myLevel2.floor.getSpread("K1")
-A1.expandToward(myLevel2.floor.getCell(0,0))
-A1.expandToward(myLevel2.floor.getCell(0,0))
-A1.expandToward(myLevel2.floor.getCell(0,0))
-K1.expandToward(myLevel2.floor.getCell(7,0))
-A1.mergeSpread(K1)
-
-cell70=myLevel2.floor.getCell(7,0)
-cell71=myLevel2.floor.getCell(7,1)
-cell60=myLevel2.floor.getCell(6,0)
-cell61=myLevel2.floor.getCell(6,1)
-cell50=myLevel2.floor.getCell(5,0)
-cell51=myLevel2.floor.getCell(5,1)
-cell40=myLevel2.floor.getCell(4,0)
-cell41=myLevel2.floor.getCell(4,1)
-cell31=myLevel2.floor.getCell(3,1)
-cell30=myLevel2.floor.getCell(3,0)
 myLevel2.floor.printTable()
