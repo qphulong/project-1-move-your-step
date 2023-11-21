@@ -307,15 +307,14 @@ class Level2:
                 self.floor.appendToCell(i - 2, j, cell_value)
         
 
-
+    #TODO generalize this function
     def tryToSpread(self):
         # while none spread has both value "T1" and "A1"
         while not any(spread.hasValues("T1", "A1") for spread in self.floor.listOfSpreads):
             numberOfVisitedCells = self.floor.visited.__len__()
             for eachSpread in self.floor.listOfSpreads:
                 for eachTag in eachSpread.tags:
-                    #handle spread hierachy logic
-                    #DO THIS
+                    #TODO handle spread hierachy logic
                     break
             # if after a spread but no cell is added to visited means no path found
             if numberOfVisitedCells == self.floor.visited.__len__():
