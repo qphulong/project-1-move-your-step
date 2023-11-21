@@ -48,8 +48,10 @@ class BFS:
         if level1[0] == True: #nếu không cần vào các phòng mà đã tìm được level1
             return level1
 
-
-
+    def BFS_Level4(self, start):
+        level1 = self.BFS_Level1(start)
+        if level1[0] == True:  # nếu không cần vào các phòng mà đã tìm được level1
+            return level1
 
     def visualize_path(self, floor, path):
         board_size = 8  # Define the size of the board
