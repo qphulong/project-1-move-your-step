@@ -52,6 +52,9 @@ class Spread:
         self.belongTo = floor
         self.frontier.append(firstCell)
 
+    def checkTagValue(self, value):
+        return value in self.tags
+
     def appendToFrontier(self, Cell):
         self.frontier.append(Cell)
 
@@ -226,7 +229,8 @@ class Floor2:
         for i in range(self.rows):
             for j in range(self.cols):
                 self.table[i][j].setBelongTo(self)     
-
+    
+    #function return a spread that has at least 1 tag that has same value
     def getSpread(self, tag):
         return next((spread for spread in self.listOfSpreads if tag in spread.tags), None)
 
@@ -298,6 +302,23 @@ class Level2:
                 elif str(row_values[j])=="D1":
                     self.floor.appendToCell(i-2, j, "0")
                 self.floor.appendToCell(i-2, j, row_values[j])
+
+
+    def tryToSpread(self):
+        # while none spread has both value "T1" and "A1"
+        while not any(spread.hasValues("T1", "A1") for spread in self.floor.listOfSpreads):
+            numberOfVisitedCells = self.floor.visited.__len__()
+            for eachSpread in self.floor.listOfSpreads:
+                for eachTag in eachSpread.tags:
+                    #handle spread hierachy logic
+                    #DO THIS
+                    break
+            # if after a spread but no cell is added to visited means no path found
+            if numberOfVisitedCells == self.floor.visited.__len__():
+                print("No Path Found")
+                return
+        return
+
 
 myLevel2 = Level2()
 myLevel2.getInputFile("input//input1-level2.txt")
