@@ -66,36 +66,22 @@ class Spread:
         if value in self.tags:
             self.tags.remove(value)
 
-    # def mergeSpread(self, otherSpread):
-    #     for eachVisitedCell in self.visited:
-    #         if eachVisitedCell in otherSpread.frontier:
-    #             #merge tag
-    #             for otherSpreadTag in otherSpread.tags:
-    #                 self.appendToTags(otherSpreadTag)
-    #             #merge visited
-    #             for otherSpreadVisited in otherSpread.visited:
-    #                 self.visited.append(otherSpreadVisited)
-    #                 if otherSpreadVisited in self.frontier:
-    #                     self.frontier.remove(otherSpreadVisited)
-    #             #merge frontier
-    #             for otherSpreadFrontier in otherSpread.frontier:
-    #                 if otherSpreadFrontier not in self.frontier and otherSpreadFrontier not in self.visited:
-    #                     self.frontier.append(otherSpreadFrontier)
-    #             break
-    #     self.belongTo.removeSpread(otherSpread)
     def mergeSpread(self, otherSpread):
-        common_visited = set(self.visited) & set(otherSpread.frontier)
-
-        # Merge tags
-        self.tags.extend(otherSpread.tags)
-
-        # Merge visited
-        self.visited.extend(otherSpread.visited)
-        self.frontier = [cell for cell in self.frontier if cell not in self.visited]
-
-        # Merge frontier
-        self.frontier.extend(cell for cell in otherSpread.frontier if cell not in common_visited)
-
+        for eachVisitedCell in self.visited:
+            if eachVisitedCell in otherSpread.frontier:
+                #merge tag
+                for otherSpreadTag in otherSpread.tags:
+                     self.appendToTags(otherSpreadTag)
+                #merge visited
+                for otherSpreadVisited in otherSpread.visited:
+                    self.visited.append(otherSpreadVisited)
+                    if otherSpreadVisited in self.frontier:
+                        self.frontier.remove(otherSpreadVisited)
+                #merge frontier
+                for otherSpreadFrontier in otherSpread.frontier:
+                    if otherSpreadFrontier not in self.frontier and otherSpreadFrontier not in self.visited:
+                        self.frontier.append(otherSpreadFrontier)
+                break
         self.belongTo.removeSpread(otherSpread)
 
 
