@@ -224,6 +224,9 @@ class Spread:
         self.visited.append(chosenCell)
         self.removeFromFrontier(chosenCell)
 
+        #append chosen cell to floor.visited
+        self.belongTo.visited.append(chosenCell)
+
         if needToMerge:
             self.mergeSpread(otherSpread)
 
@@ -248,6 +251,9 @@ class Floor2:
     
     def getSpread(self, stringTag):
         return next((spread for spread in self.listOfSpreads if any(stringTag in cell.values for cell in spread.tags)), None)
+    
+    def getTagCell(self, stringTag):
+        return next((cell for spread in self.listOfSpreads for cell in spread.tags if cell.checkValue(stringTag)), None)
 
     def appendToCell(self, row, col, value):
         self.table[row][col].appendValue(value)
@@ -326,11 +332,21 @@ class Level2:
     def tryToSpread(self):
         # while none spread has both value "T1" and "A1"
         while not any(spread.checkTagString("T1") and spread.checkTagString("A1") for spread in self.floor.listOfSpreads):
+            nothing = input("Nothing to spread, press enter to continue")
             numberOfVisitedCells = self.floor.visited.__len__()
             for eachSpread in self.floor.listOfSpreads:
-                for eachTag in eachSpread.tags:
+                for eachCellTag in eachSpread.tags:
                     #TODO handle spread hierachy logic
-                    break
+                    if eachCellTag.checkValue("A1"):
+                        eachSpread.expandToward(self.floor.getTagCell("T1"))
+                        for i in eachSpread.visited:
+                            print(str(i.y)+","+str(i.x))
+                    # if eachCellTag.checkValue("T1"):
+                    #     print("T1")
+                    # if eachCellTag.checkValue("K1"):
+                    #     print("K1")
+                    # if eachCellTag.checkValue("D1"):
+                    #     print("D1")
             # if after a spread but no cell is added to visited means no path found
             if numberOfVisitedCells == self.floor.visited.__len__():
                 print("No Path Found")
@@ -339,10 +355,6 @@ class Level2:
 
 myLevel2 = Level2()
 myLevel2.getInputFile("input//input1-level2.txt")
-A1 = myLevel2.floor.getSpread("A1")
-K1 = myLevel2.floor.getSpread("K1")
-K1.expandToward(myLevel2.floor.getCell(0, 0))
-A1.expandToward(myLevel2.floor.getCell(0, 0))
-A1.expandToward(myLevel2.floor.getCell(0, 0))
-A1.expandToward(myLevel2.floor.getCell(0, 0))
+
+myLevel2.tryToSpread()
 myLevel2.floor.printTable()
