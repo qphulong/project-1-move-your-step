@@ -97,6 +97,14 @@ class Spread:
 
         # Retrieve the cell with the minimum heuristic value
         chosenCell = self.frontier[min_index]
+
+        # if chosen cell is in frontier of another spread, mergeThem = True
+        needToMerge = chosenCell.connectedCells.__len__() > 1
+        if needToMerge:
+            for eachSpread in self.belongTo.listOfSpreads:
+                if eachSpread!=self and chosenCell in eachSpread.frontier:
+                    otherSpread = eachSpread
+                    break
         
         chosenCellY= chosenCell.getY()
         chosenCellX= chosenCell.getX()
@@ -215,6 +223,9 @@ class Spread:
         self.visited.append(chosenCell)
         self.removeFromFrontier(chosenCell)
 
+        if needToMerge:
+            self.mergeSpread(otherSpread)
+
     def __del__(self):
         pass
 
@@ -320,9 +331,14 @@ class Level2:
             if numberOfVisitedCells == self.floor.visited.__len__():
                 print("No Path Found")
                 return
-        return
 
 
 myLevel2 = Level2()
 myLevel2.getInputFile("input//input1-level2.txt")
+A1 = myLevel2.floor.getSpread("A1")
+K1 = myLevel2.floor.getSpread("K1")
+K1.expandToward(myLevel2.floor.getCell(0, 0))
+A1.expandToward(myLevel2.floor.getCell(0, 0))
+A1.expandToward(myLevel2.floor.getCell(0, 0))
+A1.expandToward(myLevel2.floor.getCell(0, 0))
 myLevel2.floor.printTable()
