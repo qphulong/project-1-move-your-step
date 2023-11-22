@@ -1,5 +1,4 @@
-#pls dont touch
-#làm hierachy heuristic cho spread
+import re
 class Cell2:
     def __init__(self, y, x):
         self.y = y
@@ -43,17 +42,17 @@ class Cell2:
         pass
 
 class Spread:
-    def __init__(self,newTag,floor,firstCell):
+    def __init__(self,floor,firstCell):
         self.frontier = []
         self.visited = []
         self.tags = []
         self.belongTo = None
-        self.tags.append(newTag)
+        self.tags.append(firstCell)
         self.belongTo = floor
         self.frontier.append(firstCell)
 
-    def checkTagValue(self, value):
-        return value in self.tags
+    def checkTagCell(self, Cell):
+        return Cell in self.tags
 
     def appendToFrontier(self, Cell):
         self.frontier.append(Cell)
@@ -62,12 +61,12 @@ class Spread:
         if Cell in self.frontier:
             self.frontier.remove(Cell)
 
-    def appendToTags(self, value):
-        self.tags.append(value)
+    def appendToTags(self, Cell):
+        self.tags.append(Cell)
 
-    def removeFromTags(self, value):
-        if value in self.tags:
-            self.tags.remove(value)
+    def removeFromTags(self, cell):
+        if cell in self.tags:
+            self.tags.remove(cell)
 
     def mergeSpread(self, otherSpread):
         for eachVisitedCell in self.visited:
@@ -86,8 +85,7 @@ class Spread:
                         self.frontier.append(otherSpreadFrontier)
                 break
         self.belongTo.removeSpread(otherSpread)
-
-
+        
     def expandToward(self,goalCell):
          # Calculate heuristics for each cell in the frontier
         heuristics = [cell.getManhattanFrom(goalCell) for cell in self.frontier]
@@ -242,8 +240,11 @@ class Floor2:
                 self.table[i][j].setBelongTo(self)     
     
     #function return a spread that has at least 1 tag that has same value
-    def getSpread(self, tag):
-        return next((spread for spread in self.listOfSpreads if tag in spread.tags), None)
+    def getSpread(self, tagCell):
+        return next((spread for spread in self.listOfSpreads if tagCell in spread.tags), None)
+    
+    def getSpread(self, stringTag):
+        return next((spread for spread in self.listOfSpreads if any(stringTag in cell.values for cell in spread.tags)), None)
 
     def appendToCell(self, row, col, value):
         self.table[row][col].appendValue(value)
@@ -286,7 +287,7 @@ class Floor2:
             print()  # Move to the next row
 
 
-import re
+
 class Level2:
     def __init__(self):
         self.floor = None
@@ -312,7 +313,7 @@ class Level2:
                     char_part, num_part = re.match(r'([AKTD])(\d+)', cell_value).groups()
 
                     # Create a Spread with the extracted values
-                    self.floor.appendSpread(Spread(char_part + num_part, self.floor, self.floor.getCell(i - 2, j)))
+                    self.floor.appendSpread(Spread(self.floor, self.floor.getCell(i - 2, j)))
 
                 # Regardless of the condition, add the original cell value to the cell
                 self.floor.appendToCell(i - 2, j, cell_value)
