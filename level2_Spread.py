@@ -50,9 +50,12 @@ class Spread:
         self.tags.append(firstCell)
         self.belongTo = floor
         self.frontier.append(firstCell)
-
+    
     def checkTagCell(self, Cell):
         return Cell in self.tags
+    
+    def checkTagString(self, stringTag):
+        return any(eachCell.checkValue(stringTag) for eachCell in self.tags)
 
     def appendToFrontier(self, Cell):
         self.frontier.append(Cell)
@@ -322,7 +325,7 @@ class Level2:
     #TODO generalize this function
     def tryToSpread(self):
         # while none spread has both value "T1" and "A1"
-        while not any(spread.hasValues("T1", "A1") for spread in self.floor.listOfSpreads):
+        while not any(spread.checkTagString("T1") and spread.checkTagString("A1") for spread in self.floor.listOfSpreads):
             numberOfVisitedCells = self.floor.visited.__len__()
             for eachSpread in self.floor.listOfSpreads:
                 for eachTag in eachSpread.tags:
