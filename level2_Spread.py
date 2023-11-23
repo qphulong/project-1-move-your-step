@@ -1,4 +1,7 @@
 import re
+import tkinter as tk
+import time
+
 class Cell2:
     def __init__(self, y, x):
         self.y = y
@@ -303,7 +306,7 @@ class Floor2:
 
 class Level2:
     def __init__(self):
-        self.floor = None
+        self.floor = None      
         
     def getInputFile(self,filePath):
         with open (filePath, "r") as file:
@@ -331,12 +334,47 @@ class Level2:
                 # Regardless of the condition, add the original cell value to the cell
                 self.floor.appendToCell(i - 2, j, cell_value)
         
+    def visualizeSpread(self):
+        floor = self.floor
+        rows, cols = floor.rows, floor.cols
+
+        # Create the main window
+        root = tk.Tk()
+        root.title("Spread Visualization")
+
+        # Create a canvas to draw on
+        canvas = tk.Canvas(root, width=cols*30, height=rows*30)
+        canvas.pack()
+
+        # Draw rectangles for each cell
+        for i in range(rows):
+            for j in range(cols):
+                x0, y0 = j * 30, i * 30
+                x1, y1 = (j + 1) * 30, (i + 1) * 30
+
+                # Set color for cells with value "-1" to black
+                if floor.table[i][j].checkValue("-1"):
+                    canvas.create_rectangle(x0, y0, x1, y1, fill="black")
+                # Set color for cells in each spread's tags to red
+                elif any(floor.table[i][j] in spread.tags for spread in floor.listOfSpreads):
+                    canvas.create_rectangle(x0, y0, x1, y1, fill="red")
+                # Set color for cells in each spread's frontier to yellow
+                elif any(floor.table[i][j] in spread.visited for spread in floor.listOfSpreads):
+                    canvas.create_rectangle(x0, y0, x1, y1, fill="green")
+                elif any(floor.table[i][j] in spread.frontier for spread in floor.listOfSpreads):
+                    canvas.create_rectangle(x0, y0, x1, y1, fill="yellow")
+                # Set color for other cells to white
+                else:
+                    canvas.create_rectangle(x0, y0, x1, y1, fill="white")
+
+        # Run the GUI
+        root.mainloop()
 
     #TODO generalize this function
     def tryToSpread(self):
         # while none spread has both value "T1" and "A1"
         while not any(spread.checkTagString("T1") and spread.checkTagString("A1") for spread in self.floor.listOfSpreads):
-            #nothing = input("Nothing, press enter to continue")
+            self.visualizeSpread()           
             numberOfVisitedCells = self.floor.visited.__len__()
             for eachSpread in self.floor.listOfSpreads:
                 for eachCellTag in eachSpread.tags:
@@ -360,4 +398,4 @@ myLevel2 = Level2()
 myLevel2.getInputFile("input//input1-level2.txt")
 
 myLevel2.tryToSpread()
-myLevel2.floor.printTable()
+myLevel2.visualizeSpread()
