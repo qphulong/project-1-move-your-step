@@ -1,5 +1,5 @@
 import floor
-from algorithm import BFS
+from algorithm import Algorithm
 import copy
 
 class Level1:
@@ -10,7 +10,7 @@ class Level1:
         self.goal_Xposition = None
         self.goal_Yposition = None
 
-        self.bfs = BFS()
+        self.algo = Algorithm()
 
         self.previous = None
 
@@ -211,12 +211,12 @@ class Level1:
         pass
 
     def solve(self):
-        path = self.bfs.BFS_Level1(self)[1]
+        path = self.algo.BFS_Level1(self)[1]
         if path is None:
             print("No solutions found")
             return False
         print(f"Path: {path}")
-        self.bfs.visualize_path(self.floor,path)
+        self.algo.visualize_path(self.floor,path)
         return True
 
 

@@ -1,11 +1,12 @@
 import tkinter as tk
 from graphical import root
 
-class BFS:
+
+class Algorithm:
     def BFS_Level1(self, start):
         visited = set()
         current_path = []
-        frontier = [start] #queue
+        frontier = [start]  # queue
 
         found = False
 
@@ -15,7 +16,7 @@ class BFS:
             if current_state is None:
                 continue
 
-            #check goal
+            # check goal
             if current_state.checkGoal():
                 current_path.append((current_state.agent_Xposition, current_state.agent_Yposition))
                 previous = current_state.previous
@@ -39,19 +40,26 @@ class BFS:
         if found == False:
             current_path = None
 
-        return (found,current_path)
+        return (found, current_path)
 
     # ở level 2 kh đảm bảo sẽ tìm được goal ở những nơi có thể đến (những nơi không nằm ở trong các phòng phải dùng chìa khoá để mở vào)
     # bfs ở level này sẽ với mục đích đầu tiên là thu thập chìa khoá và khám phá thế giới
     def BFS_Level2(self, start):
         level1 = self.BFS_Level1(start)
-        if level1[0] == True: #nếu không cần vào các phòng mà đã tìm được level1
+        if level1[0] == True:  # nếu không cần vào các phòng mà đã tìm được level1
             return level1
 
     def BFS_Level4(self, start):
         level1 = self.BFS_Level1(start)
         if level1[0] == True:  # nếu không cần vào các phòng mà đã tìm được level1
             return level1
+
+    def discover_floor(self, start):
+        path = None
+        # path = UCS
+        if path is None:
+            # path = UCS(next_floor)
+
 
     def visualize_path(self, floor, path):
         board_size = 8  # Define the size of the board
@@ -70,7 +78,8 @@ class BFS:
 
                 canvas.create_rectangle(
                     x1, y1, x2, y2,
-                    fill=("black" if floor.table[i][j].checkValue("-1") else "green" if (i,j) in path else "white"),
+                    fill=(
+                        "black" if floor.table[i][j].checkValue("-1") else "green" if (i, j) in path else "white"),
                     outline="grey"  # Specify the color of the border (here, "grey")
                 )
 
@@ -78,8 +87,11 @@ class BFS:
                 text_y = y1 + cell_size // 2
 
                 canvas.create_text(text_x, text_y,
-                                   text=(floor.table[i][j].getValue() if floor.table[i][j].isAgent() or floor.table[i][
-                                       j].isGoal() or floor.table[i][j].isKey() or floor.table[i][j].isDoor() else "")
+                                   text=(floor.table[i][j].getValue() if floor.table[i][j].isAgent() or
+                                                                         floor.table[i][
+                                                                             j].isGoal() or floor.table[i][
+                                                                             j].isKey() or floor.table[i][
+                                                                             j].isDoor() else "")
                                    , fill=(
                         "blue" if floor.table[i][j].isGoal() else "red" if floor.table[i][j].isAgent()
                         else "yellow" if floor.table[i][j].isKey()
@@ -88,4 +100,3 @@ class BFS:
                                    , font=("Arial", 25))
 
         root.mainloop()
-

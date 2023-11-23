@@ -11,10 +11,11 @@ class Level4(Level1):
         self.keys = {}  # save position of keys for each rooms with a dictionary
         self.doors = {} # save positions of room doors
         self.agents = {} # initial positions of agents
+        self.floors = [] # list of floors
         self.rooms = 0
 
     def floor_rep(self):
-        rep = (tuple(self.agents), tuple(self.keys))
+        rep = tuple([tuple(self.agents), tuple(self.keys), tuple(self.agents)])
         return rep
 
     def getInputFile(self, filePath):
@@ -22,25 +23,42 @@ class Level4(Level1):
             lines = file.readlines()
 
         rows, cols = map(int, lines[0].strip().split(','))
-        self.floor = floor.Floor(rows, cols)
+        current_floor = 0
 
-        for i in range(2, len(lines)):
-            row_values = list(map(str, lines[i].strip().split(',')))
-            for j in range(cols):
-                if str(row_values[j]).__contains__("A"): # agent
-                    agent_no = row_values[j][1]
-                    self.agents[agent_no] = (i - 2, j)
-                elif str(row_values[j]) == "T1":
-                    self.goal_Xposition = i - 2
-                    self.goal_Yposition = j
-                elif str(row_values[j].__contains__("K")): # key
-                    key_no = row_values[j][1]
-                    self.keys[key_no] = (i - 2, j)
-                elif str(row_values[j].__contains__("D")): # door
-                    door_no = row_values[j][1]
-                    self.doors[door_no] = (i - 2, j)
-                    self.rooms+=1
-                self.floor.appendToCell(i - 2, j, row_values[j])  # set value for the board cell
+        for i in range(1, len(lines)):
+            self.floor = floor.Floor(rows, cols)
+            if lines[i].__contains__("floor"):
+                current_floor+=1
+                self.floors.append(floor.Floor(rows,cols))
+            else:
+                row_values = list(map(str, lines[i].strip().split(',')))
+                for j in range(cols):
+                    pos = (current_floor, i - 2, j)
+                    if str(row_values[j]).__contains__("A"):  # agent
+                        agent_no = row_values[j][1]
+                        self.agents[agent_no] = pos
+                    elif str(row_values[j]) == "T1":
+                        self.goal_Xposition = i - 2
+                        self.goal_Yposition = j
+                    elif str(row_values[j].__contains__("K")):  # key
+                        key_no = row_values[j][1]
+                        self.keys[key_no] = pos
+                    elif str(row_values[j].__contains__("D")):  # door
+                        door_no = row_values[j][1]
+                        self.doors[door_no] = pos
+                        self.rooms += 1
+                    self.floor.appendToCell(i - 2, j, row_values[j])  # set value for the board cell
+
+    def move(self):
+        _current_floor = 1
+
+        def goUp(_current_floor):
+            _current_floor += 1
+        def goDown(_current_floor):
+            _current_floor -= 1
+
+
+
 
     def solve(self):
         path = self.bfs.BFS_Level2(self)[1]
