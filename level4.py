@@ -16,11 +16,10 @@ class Level4(Level1):
 
         self.subgoal_stack = [] # subgoals before achieving the ultimate goal
 
-        self.goal_pos = None # pos of T1
-
         self.keys = {}  # save position of keys for each rooms with a dictionary
         self.doors = {} # save positions of room doors
         self.agents = {} # initial positions of agents
+        self.goals = {} # pos of goals
         self.stairs = {}
 
         self.floors = [] # list of floors
@@ -51,8 +50,9 @@ class Level4(Level1):
                     if str(row_values[j]).__contains__("A"):  # agent
                         agent_no = row_values[j][1]
                         self.agents[agent_no] = pos
-                    elif str(row_values[j]) == "T1":
-                        self.goal_pos = pos
+                    elif str(row_values[j]).__contains__("T"):
+                        goal_no = row_values[j][1]
+                        self.goals[goal_no] = pos
                     elif str(row_values[j].__contains__("K")):  # key
                         key_no = row_values[j][1]
                         self.keys[key_no] = pos

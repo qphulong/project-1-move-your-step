@@ -75,7 +75,7 @@ class Algorithm:
         path = None
         # path = UCS
         if path is None:
-            # path = UCS(next_floor)
+            # path = BFS với goal mới
 
 
     def visualize_path(self, floor, path):
