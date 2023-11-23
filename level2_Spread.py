@@ -90,6 +90,10 @@ class Spread:
         self.belongTo.removeSpread(otherSpread)
         
     def expandToward(self,goalCell):
+        # do nothing if goalCell already in Spread
+        if goalCell in self.visited:
+            return
+
          # Calculate heuristics for each cell in the frontier
         heuristics = [cell.getManhattanFrom(goalCell) for cell in self.frontier]
 
@@ -332,21 +336,20 @@ class Level2:
     def tryToSpread(self):
         # while none spread has both value "T1" and "A1"
         while not any(spread.checkTagString("T1") and spread.checkTagString("A1") for spread in self.floor.listOfSpreads):
-            nothing = input("Nothing to spread, press enter to continue")
+            #nothing = input("Nothing, press enter to continue")
             numberOfVisitedCells = self.floor.visited.__len__()
             for eachSpread in self.floor.listOfSpreads:
                 for eachCellTag in eachSpread.tags:
-                    #TODO handle spread hierachy logic
                     if eachCellTag.checkValue("A1"):
                         eachSpread.expandToward(self.floor.getTagCell("T1"))
-                        for i in eachSpread.visited:
-                            print(str(i.y)+","+str(i.x))
-                    # if eachCellTag.checkValue("T1"):
-                    #     print("T1")
-                    # if eachCellTag.checkValue("K1"):
-                    #     print("K1")
-                    # if eachCellTag.checkValue("D1"):
-                    #     print("D1")
+                        eachSpread.expandToward(self.floor.getTagCell("K1"))
+                    if eachCellTag.checkValue("T1"):
+                        eachSpread.expandToward(self.floor.getTagCell("A1"))
+                        eachSpread.expandToward(self.floor.getTagCell("D1"))
+                    if eachCellTag.checkValue("K1"):
+                        eachSpread.expandToward(self.floor.getTagCell("D1"))
+                    if eachCellTag.checkValue("D1"):
+                        eachSpread.expandToward(self.floor.getTagCell("K1"))
             # if after a spread but no cell is added to visited means no path found
             if numberOfVisitedCells == self.floor.visited.__len__():
                 print("No Path Found")
