@@ -1,18 +1,32 @@
+from enum import Enum, auto
 import floor
 from level1 import Level1
+
+class GOAL(Enum):
+    KEY = 1
+    ROOM = 2
+    FLOOR = 3
+    FINAL_GOAL = 4
+    UNDEFINED = 5
+
 
 class Level4(Level1):
     def __init__(self):
         super.__init__()
 
-        self.goal_floor = None
+        self.subgoal_stack = [] # subgoals before achieving the ultimate goal
+
+        self.goal_floor = None #floor with final goals
 
         self.keys = {}  # save position of keys for each rooms with a dictionary
         self.doors = {} # save positions of room doors
         self.agents = {} # initial positions of agents
+        self.stairs = {}
+
         self.floors = [] # list of floors
-        self.stairs = []
         self.rooms = 0
+
+        self.currentGoal = None # there are many goals, from smaller to the biggest (T1)
 
     def floor_rep(self):
         rep = tuple([tuple(self.agents), tuple(self.keys), tuple(self.agents)])
@@ -48,8 +62,11 @@ class Level4(Level1):
                         door_no = row_values[j][1]
                         self.doors[door_no] = pos
                         self.rooms += 1
-                    elif str(row_values[j]=="UP" or row_values[j]=="DOWN"):
-                        self.floors.append(pos)
+                    elif str(row_values[j])=="UP" or str(row_values[j])=="DOWN":
+                        if str(row_values[j])=="UP":
+                            self.stairs[current_floor+1] = pos
+                        else:
+                            self.stairs[current_floor-1] = pos
 
                     self.floor.appendToCell(i - 2, j, row_values[j])  # set value for the board cell
 
@@ -62,8 +79,6 @@ class Level4(Level1):
             _current_floor -= 1
 
 
-
-
     def solve(self):
         path = self.bfs.BFS_Level2(self)[1]
         if path is None:
@@ -72,6 +87,8 @@ class Level4(Level1):
         print(f"Path: {path}")
         self.bfs.visualize_path(self.floor, path)
         return True
+
+
 
 class Task:
     def __init__(self,x,y,floor):
