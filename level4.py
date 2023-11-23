@@ -80,12 +80,12 @@ class Level4(Level1):
 
 
     def solve(self):
-        path = self.bfs.BFS_Level2(self)[1]
+        path = self.algo.BFS_Level4(self)[1]
         if path is None:
             print("No solutions found")
             return False
         print(f"Path: {path}")
-        self.bfs.visualize_path(self.floor, path)
+        self.algo.visualize_path(self.floor, path)
         return True
 
 

@@ -54,7 +54,24 @@ class Algorithm:
         if level1[0] == True:  # nếu không cần vào các phòng mà đã tìm được level1
             return level1
 
-    def discover_floor(self, start):
+    # nếu không phải floor chứa goal thì đi tìm đường lên (hoặc xuống)
+    # nếu floor chứa goal thì làm giống level 2
+    def discover_floor(self, start, floor, level4):
+        current_subgoal = None
+
+        if floor == level4.goal_floor:
+            current_subgoal = (level4.goal_Xposition,level4.goal_Yposition)
+        else:
+            next_floor = None
+
+            if floor > level4.goal_floor:
+                next_floor = floor + 1
+            else:
+                next_floor = floor - 1
+
+            current_subgoal = (level4.stairs[next_floor].first, level4.stairs[next_floor].second)
+
+
         path = None
         # path = UCS
         if path is None:

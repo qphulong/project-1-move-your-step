@@ -39,10 +39,10 @@ class Level2(Level1):
                 self.floor.appendToCell(i - 2, j, row_values[j])  # set value for the board cell
 
     def solve(self):
-        path = self.bfs.BFS_Level2(self)[1]
+        path = self.algo.BFS_Level2(self)[1]
         if path is None:
             print("No solutions found")
             return False
         print(f"Path: {path}")
-        self.bfs.visualize_path(self.floor, path)
+        self.algo.visualize_path(self.floor, path)
         return True
