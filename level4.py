@@ -5,13 +5,13 @@ class Level4(Level1):
     def __init__(self):
         super.__init__()
 
-        self.agent_Xposition = None
-        self.agent_Yposition = None
+        self.goal_floor = None
 
         self.keys = {}  # save position of keys for each rooms with a dictionary
         self.doors = {} # save positions of room doors
         self.agents = {} # initial positions of agents
         self.floors = [] # list of floors
+        self.stairs = []
         self.rooms = 0
 
     def floor_rep(self):
@@ -38,6 +38,7 @@ class Level4(Level1):
                         agent_no = row_values[j][1]
                         self.agents[agent_no] = pos
                     elif str(row_values[j]) == "T1":
+                        self.goal_floor = current_floor
                         self.goal_Xposition = i - 2
                         self.goal_Yposition = j
                     elif str(row_values[j].__contains__("K")):  # key
@@ -47,6 +48,9 @@ class Level4(Level1):
                         door_no = row_values[j][1]
                         self.doors[door_no] = pos
                         self.rooms += 1
+                    elif str(row_values[j]=="UP" or row_values[j]=="DOWN"):
+                        self.floors.append(pos)
+
                     self.floor.appendToCell(i - 2, j, row_values[j])  # set value for the board cell
 
     def move(self):
