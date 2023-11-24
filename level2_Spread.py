@@ -39,8 +39,13 @@ class Cell2:
     
     def getBelongTo(self):
         return self.belongTo
+    
+    def isAlreadyConnected(self,Cell):
+        return Cell in self.connectedCells
 
     def connectToCell(self, Cell):
+        if self.isAlreadyConnected(Cell):
+            return
         self.connectedCells.append(Cell)
         Cell.connectedCells.append(self)
 
@@ -77,6 +82,7 @@ class Spread:
         if cell in self.tags:
             self.tags.remove(cell)
 
+    #TODO coi lai cai ham nay
     def mergeSpread(self, otherSpread):
         for eachVisitedCell in self.visited:
             if eachVisitedCell in otherSpread.frontier:
@@ -94,14 +100,16 @@ class Spread:
                         self.frontier.append(otherSpreadFrontier)
                 break
         self.belongTo.removeSpread(otherSpread)
-        
+
+    
+    #TODO coi lai cai merge trong cai ham nay    
     def expandToward(self,goalCell):
         # do nothing if goalCell already in Spread
         if goalCell in self.visited:
             return
 
          # Calculate heuristics for each cell in the frontier
-        heuristics = [cell.getManhattanFrom(goalCell) for cell in self.frontier]
+        heuristics = [cell.getPhanTrungDucDistance(goalCell) for cell in self.frontier]
 
         # Find the index of the cell with the minimum heuristic value
         min_index = min(range(len(heuristics)), key=heuristics.__getitem__)
@@ -109,7 +117,7 @@ class Spread:
         # Retrieve the cell with the minimum heuristic value
         chosenCell = self.frontier[min_index]
 
-        # if chosen cell is in frontier of another spread, mergeThem = True
+        #if chosen cell is in frontier of another spread, mergeThem = True
         needToMerge = chosenCell.connectedCells.__len__() > 1
         if needToMerge:
             for eachSpread in self.belongTo.listOfSpreads:
@@ -352,8 +360,8 @@ class Level2:
         # Draw rectangles for each cell
         for i in range(rows):
             for j in range(cols):
-                x0, y0 = j * 30, i * 30
-                x1, y1 = (j + 1) * 30, (i + 1) * 30
+                x0, y0 = j * 20, i * 20
+                x1, y1 = (j + 1) * 20, (i + 1) * 20
 
                 # Set color for cells with value "-1" to black
                 if floor.table[i][j].checkValue("-1"):
@@ -398,7 +406,6 @@ class Level2:
 
 
 myLevel2 = Level2()
-myLevel2.getInputFile("input//input1-level2.txt")
+myLevel2.getInputFile("input//input2-level2.txt")
 
 myLevel2.tryToSpread()
-myLevel2.visualizeSpread()
