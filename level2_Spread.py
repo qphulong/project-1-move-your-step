@@ -25,6 +25,9 @@ class Cell2:
     def getManhattanFrom(self, Cell):
         return abs(self.x - Cell.x) + abs(self.y - Cell.y)
     
+    def getPhanTrungDucDistance(self,Cell):
+        return max(abs(self.x - Cell.x), abs(self.y - Cell.y))
+    
     def isWall(self):
         return "-1" in self.values
 
