@@ -1,6 +1,6 @@
 import tkinter as tk
 from graphical import root
-
+import numpy as np
 
 class Algorithm:
     def BFS_Level1(self, start):
@@ -54,6 +54,16 @@ class Algorithm:
         if level1[0] == True:  # nếu không cần vào các phòng mà đã tìm được level1
             return level1
 
+
+    def heuristic_lvl4(self,current_pos,goal_pos):
+        point1 = np.array(current_pos.x, current_pos.y)
+        point2 = np.array(goal_pos.x, goal_pos.y)
+
+        floor_diff = abs(current_pos.floor-goal_pos.floor)
+
+        dist = np.linalg.norm(point1 - point2)
+
+        return floor_diff * dist
 
     # nếu không phải floor chứa goal (T1 hoặc tìm key) thì đi tìm đường lên (hoặc xuống)
     # nếu floor chứa goal thì làm giống level 2

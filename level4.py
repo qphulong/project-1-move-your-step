@@ -32,6 +32,12 @@ class Level4(Level1):
         rep = tuple([tuple(self.agents), tuple(self.keys), tuple(self.agents)])
         return rep
 
+    class Pos():
+        def __init__(self,floor,x,y):
+            self.floor = floor
+            self.x = x
+            self.y = y
+
     def getInputFile(self, filePath):
         with open(filePath, "r") as file:
             lines = file.readlines()
@@ -47,7 +53,9 @@ class Level4(Level1):
             else:
                 row_values = list(map(str, lines[i].strip().split(',')))
                 for j in range(cols):
-                    pos = (current_floor, i - 2, j)
+
+                    pos = self.Pos(current_floor, i - 2, j)
+
                     if str(row_values[j]).__contains__("A"):  # agent
                         agent_no = row_values[j][1]
                         self.agents[agent_no] = pos
