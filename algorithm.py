@@ -58,24 +58,24 @@ class Algorithm:
     # nếu không phải floor chứa goal (T1 hoặc tìm key) thì đi tìm đường lên (hoặc xuống)
     # nếu floor chứa goal thì làm giống level 2
     def discover_floor(self, start, floor, level4, goal_floor, goal_pos):
-        current_subgoal = None
-
-        if floor == goal_floor:
-            current_subgoal = goal_pos
-        else:
-            next_floor = None
-
-            if floor > goal_floor:
-                next_floor = floor + 1
-            else:
-                next_floor = floor - 1
-
-            current_subgoal = (floor, level4.stairs[next_floor].first, level4.stairs[next_floor].second)
 
         path = None
         # path = UCS
+        # kiếm trong những đường có thể đi không có
         if path is None:
+            if goal_floor == floor: # đang ở cùng tang voi goal hien tai, nghia la dang thieu chia khoa phong
+                # tim key
+            else: # khac tang thi phai tim duong len (xuong tang do)
+                next_floor = None
+
+                if floor > goal_floor:
+                    next_floor = floor + 1
+                else:
+                    next_floor = floor - 1
+            path = self.discover_floor(start, floor, level4, goal_floor, goal_pos)
             # path = BFS với goal mới
+        else:
+            return path # tim duoc duong di
 
 
     def visualize_path(self, floor, path):

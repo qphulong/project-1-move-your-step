@@ -23,6 +23,7 @@ class Level4(Level1):
         self.stairs = {}
 
         self.floors = [] # list of floors
+        self.obtained_keys = [] # list of obtained keys (Save room no)
         self.rooms = 0
 
         self.currentGoal = None # there are many goals, from smaller to the biggest (T1)
