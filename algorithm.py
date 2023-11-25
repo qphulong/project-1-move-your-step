@@ -47,16 +47,18 @@ class Algorithm:
     def AStar_Level4(self, start):
         visited = set()
         current_path = []
-        frontier = []
-        heapq.heappush(frontier, (0, start))  # priority queue based on moves and heuristics
+        frontier = []  # queue
+        heapq.heappush(frontier, (0, start))  # priority queue based on moves
 
         found = False
 
         while frontier:
-            current_state = frontier.pop(0)
+            current_state = heapq.heappop(frontier)[1] # get starts
 
             if current_state is None:
                 continue
+
+            visited.add(current_state.floor_rep())
 
             # check goal
             if current_state.checkGoal():
@@ -69,14 +71,17 @@ class Algorithm:
                 found = True
                 break
 
-            if current_state.floor_rep() not in visited:
-                visited.add(current_state.floor_rep())
+            successors = current_state.successors()
 
-                successors = current_state.successors()
+            for successor in successors:
+                total_cost = successor.moves + successor.heuristic_lvl4()
 
-                for successor in successors:
-                    if successor is not None and successor.floor_rep() not in visited:
-                        frontier.append(successor)
+                if successor.floor_rep not in visited and not any(successor == s for _, s in frontier):
+                    heapq.heappush(frontier, (total_cost, successor))
+                elif any(total_cost < cost for cost, s in frontier if tuple(s.puzzle) == tuple(successor.puzzle)):
+                    # if in frontier already but higher path cost
+                    frontier.remove(successor)
+                    heapq.heappush(frontier, (total_cost, successor))  # replace with lower path cost
 
         if found == False:
             current_path = None
@@ -84,16 +89,6 @@ class Algorithm:
         return (found, current_path)
 
 
-
-    def heuristic_lvl4(self,current_pos,goal_pos):
-        point1 = np.array(current_pos.x, current_pos.y)
-        point2 = np.array(goal_pos.x, goal_pos.y)
-
-        floor_diff = abs(current_pos.floor-goal_pos.floor)
-
-        dist = np.linalg.norm(point1 - point2)
-
-        return floor_diff * dist
 
     # # nếu không phải floor chứa goal (T1 hoặc tìm key) thì đi tìm đường lên (hoặc xuống)
     # # nếu floor chứa goal thì làm giống level 2

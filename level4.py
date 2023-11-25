@@ -1,4 +1,8 @@
+import copy
 from enum import Enum, auto
+
+import numpy as np
+
 import floor
 from level1 import Level1
 
@@ -27,6 +31,22 @@ class Level4(Level1):
         self.rooms = 0
 
         self.currentGoal = None # there are many goals, from smaller to the biggest (T1)
+
+        self.moves = {} # number of moves for each agent
+
+    def setPrevious(self,prev):
+        self.previous = prev
+
+
+    def heuristic_lvl4(self,current_agent):
+        point1 = np.array(current_pos.x, current_pos.y)
+        point2 = np.array(goal_pos.x, goal_pos.y)
+
+        floor_diff = abs(current_pos.floor - goal_pos.floor)
+
+        dist = np.linalg.norm(point1 - point2)
+
+        return floor_diff * dist
 
     def floor_rep(self):
         rep = tuple([tuple(self.agents), tuple(self.keys), tuple(self.agents)])
@@ -95,6 +115,158 @@ class Level4(Level1):
         self.algo.visualize_path(self.floor, path)
         return True
 
+    def moveN(self,current_agent):
+        copyState = copy.deepcopy(self)
+        copyState.setPrevious(self)
+
+        if copyState.agent_Xposition > 0 and copyState.floor.checkValueInCell(copyState.agent_Xposition - 1,
+                                                                              copyState.agent_Yposition, "-1") == False:
+            old_x, old_y = copyState.agent_Xposition, copyState.agent_Yposition
+            copyState.agent_Xposition -= 1
+            copyState.floor.removeFromCell(old_x, old_y, "A1")
+            copyState.floor.appendToCell(copyState.agent_Xposition, copyState.agent_Yposition, "A1")
+            return copyState
+        return None
+
+    def moveS(self,current_agent):
+        copyState = copy.deepcopy(self)
+        copyState.setPrevious(self)
+
+        if copyState.agent_Xposition < copyState.floor.rows - 1 and copyState.floor.checkValueInCell(
+                copyState.agent_Xposition + 1, copyState.agent_Yposition, "-1") == False:
+            old_x, old_y = copyState.agent_Xposition, copyState.agent_Yposition
+            copyState.agent_Xposition += 1
+            copyState.floor.removeFromCell(old_x, old_y, "A1")
+            copyState.floor.appendToCell(copyState.agent_Xposition, copyState.agent_Yposition, "A1")
+            return copyState
+        return None
+
+    def moveE(self,current_agent):
+        copyState = copy.deepcopy(self)
+        copyState.setPrevious(self)
+
+        if copyState.agent_Yposition < copyState.floor.cols - 1 and copyState.floor.checkValueInCell(
+                copyState.agent_Xposition, copyState.agent_Yposition + 1, "-1") == False:
+            old_x, old_y = copyState.agent_Xposition, copyState.agent_Yposition
+            copyState.agent_Yposition += 1
+            copyState.floor.removeFromCell(old_x, old_y, "A1")
+            copyState.floor.appendToCell(copyState.agent_Xposition, copyState.agent_Yposition, "A1")
+            return copyState
+        return None
+
+    def moveW(self,current_agent):
+        copyState = copy.deepcopy(self)
+        copyState.setPrevious(self)
+
+        if copyState.agent_Yposition > 0 and copyState.floor.checkValueInCell(copyState.agent_Xposition,
+                                                                              copyState.agent_Yposition - 1,
+                                                                              "-1") == False:
+            old_x, old_y = copyState.agent_Xposition, copyState.agent_Yposition
+            copyState.agent_Yposition -= 1
+            copyState.floor.removeFromCell(old_x, old_y, "A1")
+            copyState.floor.appendToCell(copyState.agent_Xposition, copyState.agent_Yposition, "A1")
+            return copyState
+        return None
+
+    def moveNE(self,current_agent):
+        copyState = copy.deepcopy(self)
+        copyState.setPrevious(self)
+
+        destination_x = copyState.agent_Xposition - 1
+        destination_y = copyState.agent_Yposition + 1
+
+        # Check if the destination cell is within bounds and available
+        if (
+                destination_x >= 0 and destination_y < copyState.floor.cols and
+                copyState.floor.checkValueInCell(destination_x, copyState.agent_Yposition, "-1") == False and
+                copyState.floor.checkValueInCell(copyState.agent_Xposition, destination_y, "-1") == False and
+                copyState.floor.checkValueInCell(destination_x, destination_y, "-1") == False
+        ):
+            old_x, old_y = copyState.agent_Xposition, copyState.agent_Yposition
+            copyState.agent_Xposition, copyState.agent_Yposition = destination_x, destination_y
+
+            # Remove value "A1" from the old cell
+            copyState.floor.removeFromCell(old_x, old_y, "A1")
+
+            # Add value "A1" to the new cell
+            copyState.floor.appendToCell(copyState.agent_Xposition, copyState.agent_Yposition, "A1")
+            return copyState
+        return None
+
+    def moveSE(self,current_agent):
+        copyState = copy.deepcopy(self)
+        copyState.setPrevious(self)
+
+        destination_y = copyState.agent_Yposition + 1
+        destination_x = copyState.agent_Xposition + 1
+
+        # Check if the destination cell is within bounds and available
+        if (
+                destination_x < copyState.floor.rows and destination_y < copyState.floor.cols and
+                copyState.floor.checkValueInCell(destination_x, copyState.agent_Yposition, "-1") == False and
+                copyState.floor.checkValueInCell(copyState.agent_Xposition, destination_y, "-1") == False and
+                copyState.floor.checkValueInCell(destination_x, destination_y, "-1") == False
+        ):
+            old_x, old_y = copyState.agent_Xposition, copyState.agent_Yposition
+            copyState.agent_Xposition, copyState.agent_Yposition = destination_x, destination_y
+
+            # Remove value "A1" from the old cell
+            copyState.floor.removeFromCell(old_x, old_y, "A1")
+
+            # Add value "A1" to the new cell
+            copyState.floor.appendToCell(copyState.agent_Xposition, copyState.agent_Yposition, "A1")
+            return copyState
+        return None
+
+    def moveSW(self,current_agent):
+        copyState = copy.deepcopy(self)
+        copyState.setPrevious(self)
+
+        destination_x = copyState.agent_Xposition + 1
+        destination_y = copyState.agent_Yposition - 1
+
+        # Check if the destination cell is within bounds and available
+        if (
+                destination_x < copyState.floor.rows and destination_y >= 0 and
+                copyState.floor.checkValueInCell(destination_x, copyState.agent_Yposition, "-1") == False and
+                copyState.floor.checkValueInCell(copyState.agent_Xposition, destination_y, "-1") == False and
+                copyState.floor.checkValueInCell(destination_x, destination_y, "-1") == False
+        ):
+            old_x, old_y = copyState.agent_Xposition, copyState.agent_Yposition
+            copyState.agent_Xposition, copyState.agent_Yposition = destination_x, destination_y
+
+            # Remove value "A1" from the old cell
+            copyState.floor.removeFromCell(old_x, old_y, "A1")
+
+            # Add value "A1" to the new cell
+            copyState.floor.appendToCell(copyState.agent_Xposition, copyState.agent_Yposition, "A1")
+            return copyState
+        return None
+
+    def moveNW(self,current_agent):
+        copyState = copy.deepcopy(self)
+        copyState.setPrevious(self)
+
+        destination_y = copyState.agent_Yposition - 1
+        destination_x = copyState.agent_Xposition - 1
+
+        # Check if the destination cell is within bounds and available
+        if (
+                destination_x >= 0 and destination_y >= 0 and
+                copyState.floor.checkValueInCell(destination_x, copyState.agent_Yposition, "-1") == False and
+                copyState.floor.checkValueInCell(copyState.agent_Xposition, destination_y, "-1") == False and
+                copyState.floor.checkValueInCell(destination_x, destination_y, "-1") == False
+        ):
+            old_x, old_y = copyState.agent_Xposition, copyState.agent_Yposition
+            copyState.agent_Xposition, copyState.agent_Yposition = destination_x, destination_y
+
+            # Remove value "A1" from the old cell
+            copyState.floor.removeFromCell(old_x, old_y, "A1")
+
+            # Add value "A1" to the new cell
+            copyState.floor.appendToCell(copyState.agent_Xposition, copyState.agent_Yposition, "A1")
+            return copyState
+        return None
 
 
 class Task:

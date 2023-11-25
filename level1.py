@@ -14,6 +14,8 @@ class Level1:
 
         self.previous = None
 
+        self.moves = 0
+
     def __hash__(self):
         return hash(self.floor_rep())
 
@@ -50,6 +52,10 @@ class Level1:
 
     def setPrevious(self,prev):
         self.previous = prev
+        self.moves = prev.moves + 1
+
+
+
 
     def moveN(self):
         copyState = copy.deepcopy(self)
