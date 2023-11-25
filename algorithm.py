@@ -92,8 +92,8 @@ class Algorithm:
         return (current_state,(found, current_path))
 
     # mở cửa phòng
-    def GoWithKey(self, start, room_no, level4):
-        res = self.AStar(start, level4.keys[room_no])
+    def open_door(self, room_no, level4):
+        res = self.AStar(level4, level4.keys[room_no])
         path = res[1] #tìm đường đến key
         last_state = res[0] #tìm state mới nhất
 
@@ -101,20 +101,28 @@ class Algorithm:
         last_state = res[0] # tìm state mới nhất
         path.__add__(res[1]) # tìm đường đến door
 
-        return (last_state, path)
+        # nhớ tính tới vụ chìa khoá ở trên lầu => phải cho nó đi xuống
+
+        final_path = self.AStar(last_state)[1]
+
+        return final_path
 
     # nếu không phải floor chứa goal (T1 hoặc tìm key) thì đi tìm đường lên (hoặc xuống)
     # nếu floor chứa goal thì làm giống level 2
-    def discover_floor(self, start, level4, floor, goal_floor, goal_pos):
-        path = None
-        # path = UCS
+    def discover_floor(self, level4, floor, goal_floor, goal_pos):
+        path = self.AStar(level4)
+
         # kiếm trong những đường có thể đi không có
         if path is None:
             if goal_floor == floor: # đang ở cùng tầng với goal hiện tại, nghĩa là đang thiếu chìa khoá phòng
                 for i in range(level4.obtained_keys): # duyệt tất cả mọi key đã lấy cho phòng ở tầng này
+                    room = heapq.heappop(level4.obtained_keys)
+                    path_door = self.open_door(room,level4)
+                    if path_door is not None: # tìm được goal khi vào phòng
+                        return path_door
 
-                # tìm được trong một căn phòng thì oke
-            # không thì buộc phải tìm goal mới
+                # không thì buộc phải tìm ở chỗ khác
+                return self.discover_floor(level4, floor + 1, goal_floor, goal_pos)
 
             else: # khác tầng thì phải đi lên mới tìm được goal
                 next_floor = None
@@ -123,7 +131,7 @@ class Algorithm:
                     next_floor = floor + 1
                 else:
                     next_floor = floor - 1
-            path = self.discover_floor(start, level4, floor, goal_floor, goal_pos)
+            path = self.discover_floor(level4, floor, goal_floor, goal_pos)
             # path = BFS với goal mới
         else:
             return path # tim duoc duong di
