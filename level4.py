@@ -14,7 +14,7 @@ class GOAL(Enum):
     UNDEFINED = 5
 
 
-class Level4(Level1):
+class Level4():
     def __init__(self):
         super.__init__()
 
@@ -22,7 +22,7 @@ class Level4(Level1):
 
         self.keys = {}  # save position of keys for each rooms with a dictionary
         self.doors = {} # save positions of room doors
-        self.agents = {} # initial positions of agents
+        self.agents = {} # positions of agents
         self.goals = {} # pos of goals
         self.stairs = {}
 
@@ -33,6 +33,8 @@ class Level4(Level1):
         self.currentGoal = None # there are many goals, from smaller to the biggest (T1)
 
         self.moves = {} # number of moves for each agent
+
+        self.algo = None
 
     def setPrevious(self,prev):
         self.previous = prev
@@ -119,12 +121,14 @@ class Level4(Level1):
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
-        if copyState.agent_Xposition > 0 and copyState.floor.checkValueInCell(copyState.agent_Xposition - 1,
-                                                                              copyState.agent_Yposition, "-1") == False:
-            old_x, old_y = copyState.agent_Xposition, copyState.agent_Yposition
-            copyState.agent_Xposition -= 1
+        x = copyState.agents[current_agent].x
+        y = copyState.agents[current_agent].y
+        if x > 0 and copyState.floor.checkValueInCell(x - 1,
+                                                                              y, "-1") == False:
+            old_x, old_y = x,y
+            x -= 1
             copyState.floor.removeFromCell(old_x, old_y, "A1")
-            copyState.floor.appendToCell(copyState.agent_Xposition, copyState.agent_Yposition, "A1")
+            copyState.floor.appendToCell(x, y, "A1")
             return copyState
         return None
 
@@ -132,12 +136,14 @@ class Level4(Level1):
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
-        if copyState.agent_Xposition < copyState.floor.rows - 1 and copyState.floor.checkValueInCell(
-                copyState.agent_Xposition + 1, copyState.agent_Yposition, "-1") == False:
-            old_x, old_y = copyState.agent_Xposition, copyState.agent_Yposition
-            copyState.agent_Xposition += 1
+        x = copyState.agents[current_agent].x
+        y = copyState.agents[current_agent].y
+        if y < copyState.floor.rows - 1 and copyState.floor.checkValueInCell(
+               x + 1, y, "-1") == False:
+            old_x, old_y = x,y
+            x += 1
             copyState.floor.removeFromCell(old_x, old_y, "A1")
-            copyState.floor.appendToCell(copyState.agent_Xposition, copyState.agent_Yposition, "A1")
+            copyState.floor.appendToCell(x, y, "A1")
             return copyState
         return None
 
@@ -145,26 +151,28 @@ class Level4(Level1):
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
-        if copyState.agent_Yposition < copyState.floor.cols - 1 and copyState.floor.checkValueInCell(
-                copyState.agent_Xposition, copyState.agent_Yposition + 1, "-1") == False:
-            old_x, old_y = copyState.agent_Xposition, copyState.agent_Yposition
-            copyState.agent_Yposition += 1
+        x = copyState.agents[current_agent].x
+        y = copyState.agents[current_agent].y
+        if y < copyState.floor.cols - 1 and copyState.floor.checkValueInCell(
+                x, y + 1, "-1") == False:
+            old_x, old_y = x, y
+            y += 1
             copyState.floor.removeFromCell(old_x, old_y, "A1")
-            copyState.floor.appendToCell(copyState.agent_Xposition, copyState.agent_Yposition, "A1")
+            copyState.floor.appendToCell(x, y, "A1")
             return copyState
         return None
 
     def moveW(self,current_agent):
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
+        x = copyState.agents[current_agent].x
 
-        if copyState.agent_Yposition > 0 and copyState.floor.checkValueInCell(copyState.agent_Xposition,
-                                                                              copyState.agent_Yposition - 1,
-                                                                              "-1") == False:
-            old_x, old_y = copyState.agent_Xposition, copyState.agent_Yposition
-            copyState.agent_Yposition -= 1
+        y = copyState.agents[current_agent].y
+        if y > 0 and copyState.floor.checkValueInCell(x,y - 1,"-1") == False:
+            old_x, old_y = x, y
+            y -= 1
             copyState.floor.removeFromCell(old_x, old_y, "A1")
-            copyState.floor.appendToCell(copyState.agent_Xposition, copyState.agent_Yposition, "A1")
+            copyState.floor.appendToCell(x, y, "A1")
             return copyState
         return None
 
@@ -172,24 +180,27 @@ class Level4(Level1):
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
-        destination_x = copyState.agent_Xposition - 1
-        destination_y = copyState.agent_Yposition + 1
+        x = copyState.agents[current_agent].x
+        y = copyState.agents[current_agent].y
+
+        destination_x = x - 1
+        destination_y = y + 1
 
         # Check if the destination cell is within bounds and available
         if (
                 destination_x >= 0 and destination_y < copyState.floor.cols and
-                copyState.floor.checkValueInCell(destination_x, copyState.agent_Yposition, "-1") == False and
-                copyState.floor.checkValueInCell(copyState.agent_Xposition, destination_y, "-1") == False and
+                copyState.floor.checkValueInCell(destination_x, y, "-1") == False and
+                copyState.floor.checkValueInCell(x, destination_y, "-1") == False and
                 copyState.floor.checkValueInCell(destination_x, destination_y, "-1") == False
         ):
-            old_x, old_y = copyState.agent_Xposition, copyState.agent_Yposition
-            copyState.agent_Xposition, copyState.agent_Yposition = destination_x, destination_y
+            old_x, old_y = x, y
+            x, y = destination_x, destination_y
 
             # Remove value "A1" from the old cell
             copyState.floor.removeFromCell(old_x, old_y, "A1")
 
             # Add value "A1" to the new cell
-            copyState.floor.appendToCell(copyState.agent_Xposition, copyState.agent_Yposition, "A1")
+            copyState.floor.appendToCell(x, y, "A1")
             return copyState
         return None
 
@@ -197,24 +208,26 @@ class Level4(Level1):
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
-        destination_y = copyState.agent_Yposition + 1
-        destination_x = copyState.agent_Xposition + 1
+        x = copyState.agents[current_agent].x
+        y = copyState.agents[current_agent].y
+        destination_y = y + 1
+        destination_x = x + 1
 
         # Check if the destination cell is within bounds and available
         if (
                 destination_x < copyState.floor.rows and destination_y < copyState.floor.cols and
-                copyState.floor.checkValueInCell(destination_x, copyState.agent_Yposition, "-1") == False and
-                copyState.floor.checkValueInCell(copyState.agent_Xposition, destination_y, "-1") == False and
+                copyState.floor.checkValueInCell(destination_x, y, "-1") == False and
+                copyState.floor.checkValueInCell(x, destination_y, "-1") == False and
                 copyState.floor.checkValueInCell(destination_x, destination_y, "-1") == False
         ):
-            old_x, old_y = copyState.agent_Xposition, copyState.agent_Yposition
-            copyState.agent_Xposition, copyState.agent_Yposition = destination_x, destination_y
+            old_x, old_y = x, y
+            x, y = destination_x, destination_y
 
             # Remove value "A1" from the old cell
             copyState.floor.removeFromCell(old_x, old_y, "A1")
 
             # Add value "A1" to the new cell
-            copyState.floor.appendToCell(copyState.agent_Xposition, copyState.agent_Yposition, "A1")
+            copyState.floor.appendToCell(x, y, "A1")
             return copyState
         return None
 
@@ -222,24 +235,26 @@ class Level4(Level1):
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
-        destination_x = copyState.agent_Xposition + 1
-        destination_y = copyState.agent_Yposition - 1
+        x = copyState.agents[current_agent].x
+        y = copyState.agents[current_agent].y
+        destination_x = x + 1
+        destination_y = y - 1
 
         # Check if the destination cell is within bounds and available
         if (
                 destination_x < copyState.floor.rows and destination_y >= 0 and
-                copyState.floor.checkValueInCell(destination_x, copyState.agent_Yposition, "-1") == False and
-                copyState.floor.checkValueInCell(copyState.agent_Xposition, destination_y, "-1") == False and
+                copyState.floor.checkValueInCell(destination_x, y, "-1") == False and
+                copyState.floor.checkValueInCell(x, destination_y, "-1") == False and
                 copyState.floor.checkValueInCell(destination_x, destination_y, "-1") == False
         ):
-            old_x, old_y = copyState.agent_Xposition, copyState.agent_Yposition
-            copyState.agent_Xposition, copyState.agent_Yposition = destination_x, destination_y
+            old_x, old_y = x, y
+            x, y = destination_x, destination_y
 
             # Remove value "A1" from the old cell
             copyState.floor.removeFromCell(old_x, old_y, "A1")
 
             # Add value "A1" to the new cell
-            copyState.floor.appendToCell(copyState.agent_Xposition, copyState.agent_Yposition, "A1")
+            copyState.floor.appendToCell(x, y, "A1")
             return copyState
         return None
 
@@ -247,24 +262,26 @@ class Level4(Level1):
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
-        destination_y = copyState.agent_Yposition - 1
-        destination_x = copyState.agent_Xposition - 1
+        x = copyState.agents[current_agent].x
+        y = copyState.agents[current_agent].y
+        destination_y = y - 1
+        destination_x = x - 1
 
         # Check if the destination cell is within bounds and available
         if (
                 destination_x >= 0 and destination_y >= 0 and
-                copyState.floor.checkValueInCell(destination_x, copyState.agent_Yposition, "-1") == False and
-                copyState.floor.checkValueInCell(copyState.agent_Xposition, destination_y, "-1") == False and
+                copyState.floor.checkValueInCell(destination_x, y, "-1") == False and
+                copyState.floor.checkValueInCell(x, destination_y, "-1") == False and
                 copyState.floor.checkValueInCell(destination_x, destination_y, "-1") == False
         ):
-            old_x, old_y = copyState.agent_Xposition, copyState.agent_Yposition
-            copyState.agent_Xposition, copyState.agent_Yposition = destination_x, destination_y
+            old_x, old_y = x, y
+            x, y = destination_x, destination_y
 
             # Remove value "A1" from the old cell
             copyState.floor.removeFromCell(old_x, old_y, "A1")
 
             # Add value "A1" to the new cell
-            copyState.floor.appendToCell(copyState.agent_Xposition, copyState.agent_Yposition, "A1")
+            copyState.floor.appendToCell(x, y, "A1")
             return copyState
         return None
 
