@@ -132,12 +132,11 @@ class Level4():
         old_x = copyState.agents[current_agent].x
         old_y = copyState.agents[current_agent].y
 
-        x = copyState.stairs[(current_floor, current_floor + 1)].x
-        y = copyState.stairs[(current_floor, current_floor + 1)].y
+        x = copyState.stairs[(current_floor+1, current_floor)].x
+        y = copyState.stairs[(current_floor+1, current_floor)].y
 
-        copyState.floor.removeFromCell(old_x, old_y, "A1")
-        copyState.floor.appendToCell(x, y, "A1")
-
+        copyState.floors[current_floor+1].removeFromCell(old_x, old_y, "A1")
+        copyState.floors[current_floor+1].appendToCell(x, y, "A1")
 
 
     def moveDown(self, current_agent):
@@ -148,24 +147,25 @@ class Level4():
         old_x = copyState.agents[current_agent].x
         old_y = copyState.agents[current_agent].y
 
-        x = copyState.stairs[(current_floor, current_floor-1)].x
-        y = copyState.stairs[(current_floor, current_floor-1)].y
+        x = copyState.stairs[(current_floor-1, current_floor)].x
+        y = copyState.stairs[(current_floor-1, current_floor)].y
 
-        copyState.floor.removeFromCell(old_x, old_y, "A1")
-        copyState.floor.appendToCell(x, y, "A1")
+        copyState.floors[current_floor-1].removeFromCell(old_x, old_y, "A1")
+        copyState.floors[current_floor-1].appendToCell(x, y, "A1")
 
     def moveN(self, current_agent):
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
-
+        
+        current_floor = copyState.agents[current_agent].floor
         x = copyState.agents[current_agent].x
         y = copyState.agents[current_agent].y
-        if x > 0 and copyState.floor.checkValueInCell(x - 1,
-                                                      y, "-1") == False and copyState.floor.getCell(x-1,y).__contains__("A") == False:
+        if x > 0 and copyState.floors[current_floor].checkValueInCell(x - 1,
+                                                      y, "-1") == False and copyState.floors[current_floor].getCell(x-1,y).__contains__("A") == False:
             old_x, old_y = x, y
             x -= 1
-            copyState.floor.removeFromCell(old_x, old_y, "A1")
-            copyState.floor.appendToCell(x, y, "A1")
+            copyState.floors[current_floor].removeFromCell(old_x, old_y, "A1")
+            copyState.floors[current_floor].appendToCell(x, y, "A1")
             return copyState
         return None
 
@@ -173,14 +173,15 @@ class Level4():
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
+        current_floor = copyState.agents[current_agent].floor
         x = copyState.agents[current_agent].x
         y = copyState.agents[current_agent].y
-        if y < copyState.floor.rows - 1 and copyState.floor.checkValueInCell(
-                x + 1, y, "-1") == False and copyState.floor.getCell(x+1,y).__contains__("A") == False:
+        if y < copyState.floors[current_floor].rows - 1 and copyState.floors[current_floor].checkValueInCell(
+                x + 1, y, "-1") == False and copyState.floors[current_floor].getCell(x+1,y).__contains__("A") == False:
             old_x, old_y = x, y
             x += 1
-            copyState.floor.removeFromCell(old_x, old_y, "A1")
-            copyState.floor.appendToCell(x, y, "A1")
+            copyState.floors[current_floor].removeFromCell(old_x, old_y, "A1")
+            copyState.floors[current_floor].appendToCell(x, y, "A1")
             return copyState
         return None
 
@@ -188,14 +189,15 @@ class Level4():
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
+        current_floor = copyState.agents[current_agent].floor
         x = copyState.agents[current_agent].x
         y = copyState.agents[current_agent].y
-        if y < copyState.floor.cols - 1 and copyState.floor.checkValueInCell(
-                x, y + 1, "-1") == False and copyState.floor.getCell(x,y+1).__contains__("A") == False:
+        if y < copyState.floors[current_floor].cols - 1 and copyState.floors[current_floor].checkValueInCell(
+                x, y + 1, "-1") == False and copyState.floors[current_floor].getCell(x,y+1).__contains__("A") == False:
             old_x, old_y = x, y
             y += 1
-            copyState.floor.removeFromCell(old_x, old_y, "A1")
-            copyState.floor.appendToCell(x, y, "A1")
+            copyState.floors[current_floor].removeFromCell(old_x, old_y, "A1")
+            copyState.floors[current_floor].appendToCell(x, y, "A1")
             return copyState
         return None
 
@@ -203,13 +205,14 @@ class Level4():
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
+        current_floor = copyState.agents[current_agent].floor
         x = copyState.agents[current_agent].x
         y = copyState.agents[current_agent].y
-        if y > 0 and copyState.floor.checkValueInCell(x, y - 1, "-1") == False and copyState.floor.getCell(x,y-1).__contains__("A") == False:
+        if y > 0 and copyState.floors[current_floor].checkValueInCell(x, y - 1, "-1") == False and copyState.floors[current_floor].getCell(x,y-1).__contains__("A") == False:
             old_x, old_y = x, y
             y -= 1
-            copyState.floor.removeFromCell(old_x, old_y, "A1")
-            copyState.floor.appendToCell(x, y, "A1")
+            copyState.floors[current_floor].removeFromCell(old_x, old_y, "A1")
+            copyState.floors[current_floor].appendToCell(x, y, "A1")
             return copyState
         return None
 
@@ -217,6 +220,7 @@ class Level4():
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
+        current_floor = copyState.agents[current_agent].floor
         x = copyState.agents[current_agent].x
         y = copyState.agents[current_agent].y
 
@@ -225,22 +229,22 @@ class Level4():
 
         # Check if the destination cell is within bounds and available
         if (
-                destination_x >= 0 and destination_y < copyState.floor.cols and
-                copyState.floor.checkValueInCell(destination_x, y, "-1") == False and
-                copyState.floor.checkValueInCell(x, destination_y, "-1") == False and
-                copyState.floor.checkValueInCell(destination_x, destination_y, "-1") == False and
-                copyState.floor.getCell(destination_x, y).__contains__("A") == False and
-                copyState.floor.getCell(x, destination_y).__contains__("A") == False and
-                copyState.floor.getCell(destination_x, destination_y).__contains__("A") == False
+                destination_x >= 0 and destination_y < copyState.floors[current_floor].cols and
+                copyState.floors[current_floor].checkValueInCell(destination_x, y, "-1") == False and
+                copyState.floors[current_floor].checkValueInCell(x, destination_y, "-1") == False and
+                copyState.floors[current_floor].checkValueInCell(destination_x, destination_y, "-1") == False and
+                copyState.floors[current_floor].getCell(destination_x, y).__contains__("A") == False and
+                copyState.floors[current_floor].getCell(x, destination_y).__contains__("A") == False and
+                copyState.floors[current_floor].getCell(destination_x, destination_y).__contains__("A") == False
         ):
             old_x, old_y = x, y
             x, y = destination_x, destination_y
 
             # Remove value "A1" from the old cell
-            copyState.floor.removeFromCell(old_x, old_y, "A1")
+            copyState.floors[current_floor].removeFromCell(old_x, old_y, "A1")
 
             # Add value "A1" to the new cell
-            copyState.floor.appendToCell(x, y, "A1")
+            copyState.floors[current_floor].appendToCell(x, y, "A1")
             return copyState
         return None
 
@@ -248,6 +252,7 @@ class Level4():
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
+        current_floor = copyState.agents[current_agent].floor
         x = copyState.agents[current_agent].x
         y = copyState.agents[current_agent].y
         destination_y = y + 1
@@ -255,22 +260,22 @@ class Level4():
 
         # Check if the destination cell is within bounds and available
         if (
-                destination_x < copyState.floor.rows and destination_y < copyState.floor.cols and
-                copyState.floor.checkValueInCell(destination_x, y, "-1") == False and
-                copyState.floor.checkValueInCell(x, destination_y, "-1") == False and
-                copyState.floor.checkValueInCell(destination_x, destination_y, "-1") == False and
-                copyState.floor.getCell(destination_x, y).__contains__("A") == False and
-                copyState.floor.getCell(x, destination_y).__contains__("A") == False and
-                copyState.floor.getCell(destination_x, destination_y).__contains__("A") == False
+                destination_x < copyState.floors[current_floor].rows and destination_y < copyState.floors[current_floor].cols and
+                copyState.floors[current_floor].checkValueInCell(destination_x, y, "-1") == False and
+                copyState.floors[current_floor].checkValueInCell(x, destination_y, "-1") == False and
+                copyState.floors[current_floor].checkValueInCell(destination_x, destination_y, "-1") == False and
+                copyState.floors[current_floor].getCell(destination_x, y).__contains__("A") == False and
+                copyState.floors[current_floor].getCell(x, destination_y).__contains__("A") == False and
+                copyState.floors[current_floor].getCell(destination_x, destination_y).__contains__("A") == False
         ):
             old_x, old_y = x, y
             x, y = destination_x, destination_y
 
             # Remove value "A1" from the old cell
-            copyState.floor.removeFromCell(old_x, old_y, "A1")
+            copyState.floors[current_floor].removeFromCell(old_x, old_y, "A1")
 
             # Add value "A1" to the new cell
-            copyState.floor.appendToCell(x, y, "A1")
+            copyState.floors[current_floor].appendToCell(x, y, "A1")
             return copyState
         return None
 
@@ -278,6 +283,7 @@ class Level4():
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
+        current_floor = copyState.agents[current_agent].floor
         x = copyState.agents[current_agent].x
         y = copyState.agents[current_agent].y
         destination_x = x + 1
@@ -285,22 +291,22 @@ class Level4():
 
         # Check if the destination cell is within bounds and available
         if (
-                destination_x < copyState.floor.rows and destination_y >= 0 and
-                copyState.floor.checkValueInCell(destination_x, y, "-1") == False and
-                copyState.floor.checkValueInCell(x, destination_y, "-1") == False and
-                copyState.floor.checkValueInCell(destination_x, destination_y, "-1") == False
-                and copyState.floor.getCell(destination_x, y).__contains__("A") == False and
-                copyState.floor.getCell(x, destination_y).__contains__("A") == False and
-                copyState.floor.getCell(destination_x, destination_y).__contains__("A") == False
+                destination_x < copyState.floors[current_floor].rows and destination_y >= 0 and
+                copyState.floors[current_floor].checkValueInCell(destination_x, y, "-1") == False and
+                copyState.floors[current_floor].checkValueInCell(x, destination_y, "-1") == False and
+                copyState.floors[current_floor].checkValueInCell(destination_x, destination_y, "-1") == False
+                and copyState.floors[current_floor].getCell(destination_x, y).__contains__("A") == False and
+                copyState.floors[current_floor].getCell(x, destination_y).__contains__("A") == False and
+                copyState.floors[current_floor].getCell(destination_x, destination_y).__contains__("A") == False
         ):
             old_x, old_y = x, y
             x, y = destination_x, destination_y
 
             # Remove value "A1" from the old cell
-            copyState.floor.removeFromCell(old_x, old_y, "A1")
+            copyState.floors[current_floor].removeFromCell(old_x, old_y, "A1")
 
             # Add value "A1" to the new cell
-            copyState.floor.appendToCell(x, y, "A1")
+            copyState.floors[current_floor].appendToCell(x, y, "A1")
             return copyState
         return None
 
@@ -308,6 +314,7 @@ class Level4():
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
+        current_floor = copyState.agents[current_agent].floor
         x = copyState.agents[current_agent].x
         y = copyState.agents[current_agent].y
         destination_y = y - 1
@@ -316,21 +323,21 @@ class Level4():
         # Check if the destination cell is within bounds and available
         if (
                 destination_x >= 0 and destination_y >= 0 and
-                copyState.floor.checkValueInCell(destination_x, y, "-1") == False and
-                copyState.floor.checkValueInCell(x, destination_y, "-1") == False and
-                copyState.floor.checkValueInCell(destination_x, destination_y, "-1") == False
-                and copyState.floor.getCell(destination_x, y).__contains__("A") == False and
-                copyState.floor.getCell(x, destination_y).__contains__("A") == False and
-                copyState.floor.getCell(destination_x, destination_y).__contains__("A") == False
+                copyState.floors[current_floor].checkValueInCell(destination_x, y, "-1") == False and
+                copyState.floors[current_floor].checkValueInCell(x, destination_y, "-1") == False and
+                copyState.floors[current_floor].checkValueInCell(destination_x, destination_y, "-1") == False
+                and copyState.floors[current_floor].getCell(destination_x, y).__contains__("A") == False and
+                copyState.floors[current_floor].getCell(x, destination_y).__contains__("A") == False and
+                copyState.floors[current_floor].getCell(destination_x, destination_y).__contains__("A") == False
         ):
             old_x, old_y = x, y
             x, y = destination_x, destination_y
 
             # Remove value "A1" from the old cell
-            copyState.floor.removeFromCell(old_x, old_y, "A1")
+            copyState.floors[current_floor].removeFromCell(old_x, old_y, "A1")
 
             # Add value "A1" to the new cell
-            copyState.floor.appendToCell(x, y, "A1")
+            copyState.floors[current_floor].appendToCell(x, y, "A1")
             return copyState
         return None
 
