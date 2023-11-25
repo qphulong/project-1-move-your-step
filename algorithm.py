@@ -53,6 +53,7 @@ class Algorithm:
         heapq.heappush(frontier, (0, start))  # priority queue based on moves
 
         found = False
+        current_state = None
 
         while frontier:
             current_state = heapq.heappop(frontier)[1] # get starts
@@ -88,44 +89,19 @@ class Algorithm:
         if found == False:
             current_path = None
 
-        return (found, current_path)
+        return (current_state,(found, current_path))
 
-    def AStar_KeysAndDoors(self, room_no, level4):
-        visited = set()
-        current_path = []
-        frontier = []  # queue
-        heapq.heappush(frontier, (0, room_no))  # priority queue based on moves
+    # mở cửa phòng
+    def GoWithKey(self, start, room_no, level4):
+        res = self.AStar(start, level4.keys[room_no])
+        path = res[1] #tìm đường đến key
+        last_state = res[0] #tìm state mới nhất
 
-        found = False
+        res = self.AStar(last_state, level4.doors[room_no])
+        last_state = res[0] # tìm state mới nhất
+        path.__add__(res[1]) # tìm đường đến door
 
-        while frontier:
-            current_room = heapq.heappop(frontier)[1] # get starts
-
-            if current_room is None:
-                continue
-
-            visited.add(current_room)
-
-            # ucs (start, key)
-            # ucs (key, door)
-            # ucs (door, t1)
-
-            successors = current_state.successors()
-
-            for successor in successors:
-                total_cost = successor.moves + successor.heuristic_lvl4()
-
-                if successor.floor_rep not in visited and not any(successor == s for _, s in frontier):
-                    heapq.heappush(frontier, (total_cost, successor))
-                elif any(total_cost < cost for cost, s in frontier if tuple(s.puzzle) == tuple(successor.puzzle)):
-                    # if in frontier already but higher path cost
-                    frontier.remove(successor)
-                    heapq.heappush(frontier, (total_cost, successor))  # replace with lower path cost
-
-        if found == False:
-            current_path = None
-
-        return (found, current_path)
+        return (last_state, path)
 
     # nếu không phải floor chứa goal (T1 hoặc tìm key) thì đi tìm đường lên (hoặc xuống)
     # nếu floor chứa goal thì làm giống level 2
@@ -135,9 +111,12 @@ class Algorithm:
         # kiếm trong những đường có thể đi không có
         if path is None:
             if goal_floor == floor: # đang ở cùng tầng với goal hiện tại, nghĩa là đang thiếu chìa khoá phòng
-                for i in range(level4.obtained_keys): # duyệt tất cả mọi key đã lấy
+                for i in range(level4.obtained_keys): # duyệt tất cả mọi key đã lấy cho phòng ở tầng này
 
-            else: # khác tầng thì phải đi lên mới itmf được goal
+                # tìm được trong một căn phòng thì oke
+            # không thì buộc phải tìm goal mới
+
+            else: # khác tầng thì phải đi lên mới tìm được goal
                 next_floor = None
 
                 if floor > goal_floor:

@@ -27,7 +27,8 @@ class Level4:
 
         self.floors = []  # list of floors
         self.obtained_keys = []  # list of obtained keys (Save room numbers)
-        self.rooms = 0
+        self.rooms = 0 # count number of rooms
+        self.visited_rooms = {} # whether a room is visited
 
         self.currentGoal = None  # there are many goals, from smaller to the biggest (T1)
 
