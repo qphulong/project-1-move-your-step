@@ -45,7 +45,8 @@ class Algorithm:
         return (found, current_path)
 
 
-    def AStar_General(self, start, goal):
+
+    def AStar(self, start, goal=None):
         visited = set()
         current_path = []
         frontier = []  # queue
@@ -62,51 +63,7 @@ class Algorithm:
             visited.add(current_state.floor_rep())
 
             # check goal
-            if current_state.checkGoal():
-                current_path.append((current_state.agent_Xposition, current_state.agent_Yposition))
-                previous = current_state.previous
-
-                while previous is not None:
-                    current_path.append((previous.agent_Xposition, previous.agent_Yposition))
-                    previous = previous.previous
-                found = True
-                break
-
-            successors = current_state.successors()
-
-            for successor in successors:
-                total_cost = successor.moves + successor.heuristic_lvl4()
-
-                if successor.floor_rep not in visited and not any(successor == s for _, s in frontier):
-                    heapq.heappush(frontier, (total_cost, successor))
-                elif any(total_cost < cost for cost, s in frontier if tuple(s.puzzle) == tuple(successor.puzzle)):
-                    # if in frontier already but higher path cost
-                    frontier.remove(successor)
-                    heapq.heappush(frontier, (total_cost, successor))  # replace with lower path cost
-
-        if found == False:
-            current_path = None
-
-        return (found, current_path)
-
-    def AStar_Level4(self, start):
-        visited = set()
-        current_path = []
-        frontier = []  # queue
-        heapq.heappush(frontier, (0, start))  # priority queue based on moves
-
-        found = False
-
-        while frontier:
-            current_state = heapq.heappop(frontier)[1] # get starts
-
-            if current_state is None:
-                continue
-
-            visited.add(current_state.floor_rep())
-
-            # check goal
-            if current_state.checkGoal():
+            if current_state.checkGoal(goal):
                 current_path.append((current_state.agent_Xposition, current_state.agent_Yposition))
                 previous = current_state.previous
 
