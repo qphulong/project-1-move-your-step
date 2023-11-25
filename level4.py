@@ -28,7 +28,7 @@ class Level4():
         self.stairs = {}
 
         self.floors = []  # list of floors
-        self.obtained_keys = []  # list of obtained keys (Save room no)
+        self.obtained_keys = []  # list of obtained keys (Save room numbers)
         self.rooms = 0
 
         self.currentGoal = None  # there are many goals, from smaller to the biggest (T1)
@@ -51,7 +51,7 @@ class Level4():
 
         dist = np.linalg.norm(point1 - point2)
 
-        return floor_diff * dist
+        return floor_diff + dist
 
     def floor_rep(self):
         rep = tuple([tuple(self.agents), tuple(self.keys), tuple(self.agents)])
@@ -96,9 +96,9 @@ class Level4():
                         self.rooms += 1
                     elif str(row_values[j]) == "UP" or str(row_values[j]) == "DO":
                         if str(row_values[j]) == "UP":
-                            self.stairs[current_floor + 1] = pos
+                            self.stairs[(current_floor,current_floor + 1)] = pos
                         else:
-                            self.stairs[current_floor - 1] = pos
+                            self.stairs[(current_floor,current_floor - 1)] = pos
 
                     self.floor.appendToCell(i - 2, j, row_values[j])  # set value for the board cell
 
@@ -121,7 +121,38 @@ class Level4():
         return True
 
     def checkGoal(self):
-        return self.agents[1].x == self.goals[1].x and self.agents[1].y == self.goals[1].y
+        return self.agents[1].x == self.goals[1].x and self.agents[1].y == self.goals[1].y \
+            and self.agents[1].floor == self.goals[1].floor
+
+    def moveUp(self, current_agent):
+        copyState = copy.deepcopy(self)
+        copyState.setPrevious(self)
+
+        current_floor = copyState.agents[current_agent].floor
+        old_x = copyState.agents[current_agent].x
+        old_y = copyState.agents[current_agent].y
+
+        x = copyState.stairs[(current_floor, current_floor + 1)].x
+        y = copyState.stairs[(current_floor, current_floor + 1)].y
+
+        copyState.floor.removeFromCell(old_x, old_y, "A1")
+        copyState.floor.appendToCell(x, y, "A1")
+
+
+
+    def moveDown(self, current_agent):
+        copyState = copy.deepcopy(self)
+        copyState.setPrevious(self)
+
+        current_floor = copyState.agents[current_agent].floor
+        old_x = copyState.agents[current_agent].x
+        old_y = copyState.agents[current_agent].y
+
+        x = copyState.stairs[(current_floor, current_floor-1)].x
+        y = copyState.stairs[(current_floor, current_floor-1)].y
+
+        copyState.floor.removeFromCell(old_x, old_y, "A1")
+        copyState.floor.appendToCell(x, y, "A1")
 
     def moveN(self, current_agent):
         copyState = copy.deepcopy(self)

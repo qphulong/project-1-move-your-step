@@ -44,6 +44,51 @@ class Algorithm:
 
         return (found, current_path)
 
+
+    def AStar_General(self, start, goal):
+        visited = set()
+        current_path = []
+        frontier = []  # queue
+        heapq.heappush(frontier, (0, start))  # priority queue based on moves
+
+        found = False
+
+        while frontier:
+            current_state = heapq.heappop(frontier)[1] # get starts
+
+            if current_state is None:
+                continue
+
+            visited.add(current_state.floor_rep())
+
+            # check goal
+            if current_state.checkGoal():
+                current_path.append((current_state.agent_Xposition, current_state.agent_Yposition))
+                previous = current_state.previous
+
+                while previous is not None:
+                    current_path.append((previous.agent_Xposition, previous.agent_Yposition))
+                    previous = previous.previous
+                found = True
+                break
+
+            successors = current_state.successors()
+
+            for successor in successors:
+                total_cost = successor.moves + successor.heuristic_lvl4()
+
+                if successor.floor_rep not in visited and not any(successor == s for _, s in frontier):
+                    heapq.heappush(frontier, (total_cost, successor))
+                elif any(total_cost < cost for cost, s in frontier if tuple(s.puzzle) == tuple(successor.puzzle)):
+                    # if in frontier already but higher path cost
+                    frontier.remove(successor)
+                    heapq.heappush(frontier, (total_cost, successor))  # replace with lower path cost
+
+        if found == False:
+            current_path = None
+
+        return (found, current_path)
+
     def AStar_Level4(self, start):
         visited = set()
         current_path = []
@@ -88,29 +133,64 @@ class Algorithm:
 
         return (found, current_path)
 
+    def AStar_KeysAndDoors(self, room_no, level4):
+        visited = set()
+        current_path = []
+        frontier = []  # queue
+        heapq.heappush(frontier, (0, room_no))  # priority queue based on moves
 
+        found = False
 
-    # # nếu không phải floor chứa goal (T1 hoặc tìm key) thì đi tìm đường lên (hoặc xuống)
-    # # nếu floor chứa goal thì làm giống level 2
-    # def discover_floor(self, start, level4, floor, goal_floor, goal_pos):
-    #
-    #     path = None
-    #     # path = UCS
-    #     # kiếm trong những đường có thể đi không có
-    #     if path is None:
-    #         if goal_floor == floor: # đang ở cùng tầng với goal hiện tại, nghĩa là đang thiếu chìa khoá phòng
-    #             # tim key
-    #         else: # khác tầng thì phải đi lên mới itmf được goal
-    #             next_floor = None
-    #
-    #             if floor > goal_floor:
-    #                 next_floor = floor + 1
-    #             else:
-    #                 next_floor = floor - 1
-    #         path = self.discover_floor(start, level4, floor, goal_floor, goal_pos)
-    #         # path = BFS với goal mới
-    #     else:
-    #         return path # tim duoc duong di
+        while frontier:
+            current_room = heapq.heappop(frontier)[1] # get starts
+
+            if current_room is None:
+                continue
+
+            visited.add(current_room)
+
+            # ucs (start, key)
+            # ucs (key, door)
+            # ucs (door, t1)
+
+            successors = current_state.successors()
+
+            for successor in successors:
+                total_cost = successor.moves + successor.heuristic_lvl4()
+
+                if successor.floor_rep not in visited and not any(successor == s for _, s in frontier):
+                    heapq.heappush(frontier, (total_cost, successor))
+                elif any(total_cost < cost for cost, s in frontier if tuple(s.puzzle) == tuple(successor.puzzle)):
+                    # if in frontier already but higher path cost
+                    frontier.remove(successor)
+                    heapq.heappush(frontier, (total_cost, successor))  # replace with lower path cost
+
+        if found == False:
+            current_path = None
+
+        return (found, current_path)
+
+    # nếu không phải floor chứa goal (T1 hoặc tìm key) thì đi tìm đường lên (hoặc xuống)
+    # nếu floor chứa goal thì làm giống level 2
+    def discover_floor(self, start, level4, floor, goal_floor, goal_pos):
+        path = None
+        # path = UCS
+        # kiếm trong những đường có thể đi không có
+        if path is None:
+            if goal_floor == floor: # đang ở cùng tầng với goal hiện tại, nghĩa là đang thiếu chìa khoá phòng
+                for i in range(level4.obtained_keys): # duyệt tất cả mọi key đã lấy
+
+            else: # khác tầng thì phải đi lên mới itmf được goal
+                next_floor = None
+
+                if floor > goal_floor:
+                    next_floor = floor + 1
+                else:
+                    next_floor = floor - 1
+            path = self.discover_floor(start, level4, floor, goal_floor, goal_pos)
+            # path = BFS với goal mới
+        else:
+            return path # tim duoc duong di
 
 
     def visualize_path(self, floor, path):
