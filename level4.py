@@ -41,10 +41,13 @@ class Level4():
 
 
     def heuristic_lvl4(self,current_agent):
-        point1 = np.array(current_pos.x, current_pos.y)
-        point2 = np.array(goal_pos.x, goal_pos.y)
+        x = self.agents[current_agent].x
+        y = self.agents[current_agent].y
 
-        floor_diff = abs(current_pos.floor - goal_pos.floor)
+        point1 = np.array(x, y)
+        point2 = np.array(self.goals[current_agent].x, self.goals[current_agent].y)
+
+        floor_diff = abs(self.agents[current_agent].floor - self.goals[current_agent].floor)
 
         dist = np.linalg.norm(point1 - point2)
 
@@ -165,8 +168,8 @@ class Level4():
     def moveW(self,current_agent):
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
-        x = copyState.agents[current_agent].x
 
+        x = copyState.agents[current_agent].x
         y = copyState.agents[current_agent].y
         if y > 0 and copyState.floor.checkValueInCell(x,y - 1,"-1") == False:
             old_x, old_y = x, y
