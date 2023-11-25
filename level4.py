@@ -6,6 +6,7 @@ import numpy as np
 import floor
 from level1 import Level1
 
+
 class GOAL(Enum):
     KEY = 1
     ROOM = 2
@@ -18,29 +19,28 @@ class Level4():
     def __init__(self):
         super.__init__()
 
-        self.subgoal_stack = [] # subgoals before achieving the ultimate goal
+        self.subgoal_stack = []  # subgoals before achieving the ultimate goal
 
         self.keys = {}  # save position of keys for each rooms with a dictionary
-        self.doors = {} # save positions of room doors
-        self.agents = {} # positions of agents
-        self.goals = {} # pos of goals
+        self.doors = {}  # save positions of room doors
+        self.agents = {}  # positions of agents
+        self.goals = {}  # pos of goals
         self.stairs = {}
 
-        self.floors = [] # list of floors
-        self.obtained_keys = [] # list of obtained keys (Save room no)
+        self.floors = []  # list of floors
+        self.obtained_keys = []  # list of obtained keys (Save room no)
         self.rooms = 0
 
-        self.currentGoal = None # there are many goals, from smaller to the biggest (T1)
+        self.currentGoal = None  # there are many goals, from smaller to the biggest (T1)
 
-        self.moves = {} # number of moves for each agent
+        self.moves = {}  # number of moves for each agent
 
         self.algo = None
 
-    def setPrevious(self,prev):
+    def setPrevious(self, prev):
         self.previous = prev
 
-
-    def heuristic_lvl4(self,current_agent):
+    def heuristic_lvl4(self, current_agent):
         x = self.agents[current_agent].x
         y = self.agents[current_agent].y
 
@@ -58,7 +58,7 @@ class Level4():
         return rep
 
     class Pos():
-        def __init__(self,floor,x,y):
+        def __init__(self, floor, x, y):
             self.floor = floor
             self.x = x
             self.y = y
@@ -73,8 +73,8 @@ class Level4():
         for i in range(1, len(lines)):
             self.floor = floor.Floor(rows, cols)
             if lines[i].__contains__("floor"):
-                current_floor+=1
-                self.floors.append(floor.Floor(rows,cols))
+                current_floor += 1
+                self.floors.append(floor.Floor(rows, cols))
             else:
                 row_values = list(map(str, lines[i].strip().split(',')))
                 for j in range(cols):
@@ -94,11 +94,11 @@ class Level4():
                         door_no = row_values[j][1]
                         self.doors[door_no] = pos
                         self.rooms += 1
-                    elif str(row_values[j])=="UP" or str(row_values[j])=="DO":
-                        if str(row_values[j])=="UP":
-                            self.stairs[current_floor+1] = pos
+                    elif str(row_values[j]) == "UP" or str(row_values[j]) == "DO":
+                        if str(row_values[j]) == "UP":
+                            self.stairs[current_floor + 1] = pos
                         else:
-                            self.stairs[current_floor-1] = pos
+                            self.stairs[current_floor - 1] = pos
 
                     self.floor.appendToCell(i - 2, j, row_values[j])  # set value for the board cell
 
@@ -107,9 +107,9 @@ class Level4():
 
         def goUp(_current_floor):
             _current_floor += 1
+
         def goDown(_current_floor):
             _current_floor -= 1
-
 
     def solve(self):
         path = self.algo.BFS_Level4(self)[1]
@@ -120,44 +120,47 @@ class Level4():
         self.algo.visualize_path(self.floor, path)
         return True
 
-    def moveN(self,current_agent):
+    def checkGoal(self):
+        return self.agents[1].x == self.goals[1].x and self.agents[1].y == self.goals[1].y
+
+    def moveN(self, current_agent):
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
         x = copyState.agents[current_agent].x
         y = copyState.agents[current_agent].y
         if x > 0 and copyState.floor.checkValueInCell(x - 1,
-                                                                              y, "-1") == False:
-            old_x, old_y = x,y
+                                                      y, "-1") == False and copyState.floor.getCell(x-1,y).__contains__("A") == False:
+            old_x, old_y = x, y
             x -= 1
             copyState.floor.removeFromCell(old_x, old_y, "A1")
             copyState.floor.appendToCell(x, y, "A1")
             return copyState
         return None
 
-    def moveS(self,current_agent):
+    def moveS(self, current_agent):
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
         x = copyState.agents[current_agent].x
         y = copyState.agents[current_agent].y
         if y < copyState.floor.rows - 1 and copyState.floor.checkValueInCell(
-               x + 1, y, "-1") == False:
-            old_x, old_y = x,y
+                x + 1, y, "-1") == False and copyState.floor.getCell(x+1,y).__contains__("A") == False:
+            old_x, old_y = x, y
             x += 1
             copyState.floor.removeFromCell(old_x, old_y, "A1")
             copyState.floor.appendToCell(x, y, "A1")
             return copyState
         return None
 
-    def moveE(self,current_agent):
+    def moveE(self, current_agent):
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
         x = copyState.agents[current_agent].x
         y = copyState.agents[current_agent].y
         if y < copyState.floor.cols - 1 and copyState.floor.checkValueInCell(
-                x, y + 1, "-1") == False:
+                x, y + 1, "-1") == False and copyState.floor.getCell(x,y+1).__contains__("A") == False:
             old_x, old_y = x, y
             y += 1
             copyState.floor.removeFromCell(old_x, old_y, "A1")
@@ -165,13 +168,13 @@ class Level4():
             return copyState
         return None
 
-    def moveW(self,current_agent):
+    def moveW(self, current_agent):
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
         x = copyState.agents[current_agent].x
         y = copyState.agents[current_agent].y
-        if y > 0 and copyState.floor.checkValueInCell(x,y - 1,"-1") == False:
+        if y > 0 and copyState.floor.checkValueInCell(x, y - 1, "-1") == False and copyState.floor.getCell(x,y-1).__contains__("A") == False:
             old_x, old_y = x, y
             y -= 1
             copyState.floor.removeFromCell(old_x, old_y, "A1")
@@ -179,7 +182,7 @@ class Level4():
             return copyState
         return None
 
-    def moveNE(self,current_agent):
+    def moveNE(self, current_agent):
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
@@ -194,7 +197,10 @@ class Level4():
                 destination_x >= 0 and destination_y < copyState.floor.cols and
                 copyState.floor.checkValueInCell(destination_x, y, "-1") == False and
                 copyState.floor.checkValueInCell(x, destination_y, "-1") == False and
-                copyState.floor.checkValueInCell(destination_x, destination_y, "-1") == False
+                copyState.floor.checkValueInCell(destination_x, destination_y, "-1") == False and
+                copyState.floor.getCell(destination_x, y).__contains__("A") == False and
+                copyState.floor.getCell(x, destination_y).__contains__("A") == False and
+                copyState.floor.getCell(destination_x, destination_y).__contains__("A") == False
         ):
             old_x, old_y = x, y
             x, y = destination_x, destination_y
@@ -207,7 +213,7 @@ class Level4():
             return copyState
         return None
 
-    def moveSE(self,current_agent):
+    def moveSE(self, current_agent):
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
@@ -221,7 +227,10 @@ class Level4():
                 destination_x < copyState.floor.rows and destination_y < copyState.floor.cols and
                 copyState.floor.checkValueInCell(destination_x, y, "-1") == False and
                 copyState.floor.checkValueInCell(x, destination_y, "-1") == False and
-                copyState.floor.checkValueInCell(destination_x, destination_y, "-1") == False
+                copyState.floor.checkValueInCell(destination_x, destination_y, "-1") == False and
+                copyState.floor.getCell(destination_x, y).__contains__("A") == False and
+                copyState.floor.getCell(x, destination_y).__contains__("A") == False and
+                copyState.floor.getCell(destination_x, destination_y).__contains__("A") == False
         ):
             old_x, old_y = x, y
             x, y = destination_x, destination_y
@@ -234,7 +243,7 @@ class Level4():
             return copyState
         return None
 
-    def moveSW(self,current_agent):
+    def moveSW(self, current_agent):
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
@@ -249,6 +258,9 @@ class Level4():
                 copyState.floor.checkValueInCell(destination_x, y, "-1") == False and
                 copyState.floor.checkValueInCell(x, destination_y, "-1") == False and
                 copyState.floor.checkValueInCell(destination_x, destination_y, "-1") == False
+                and copyState.floor.getCell(destination_x, y).__contains__("A") == False and
+                copyState.floor.getCell(x, destination_y).__contains__("A") == False and
+                copyState.floor.getCell(destination_x, destination_y).__contains__("A") == False
         ):
             old_x, old_y = x, y
             x, y = destination_x, destination_y
@@ -261,7 +273,7 @@ class Level4():
             return copyState
         return None
 
-    def moveNW(self,current_agent):
+    def moveNW(self, current_agent):
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
 
@@ -276,6 +288,9 @@ class Level4():
                 copyState.floor.checkValueInCell(destination_x, y, "-1") == False and
                 copyState.floor.checkValueInCell(x, destination_y, "-1") == False and
                 copyState.floor.checkValueInCell(destination_x, destination_y, "-1") == False
+                and copyState.floor.getCell(destination_x, y).__contains__("A") == False and
+                copyState.floor.getCell(x, destination_y).__contains__("A") == False and
+                copyState.floor.getCell(destination_x, destination_y).__contains__("A") == False
         ):
             old_x, old_y = x, y
             x, y = destination_x, destination_y
@@ -290,12 +305,12 @@ class Level4():
 
 
 class Task:
-    def __init__(self,x,y,floor):
+    def __init__(self, x, y, floor):
         self.floor = floor
         self.destinationX = x
         self.destinationY = y
 
-    def set_task(self,x,y):
+    def set_task(self, x, y):
         if floor[x][y].isWall == False:
             self.destinationX = x
             self.destinationY = y

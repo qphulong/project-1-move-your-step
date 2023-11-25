@@ -54,9 +54,6 @@ class Level1:
         self.previous = prev
         self.moves = prev.moves + 1
 
-
-
-
     def moveN(self):
         copyState = copy.deepcopy(self)
         copyState.setPrevious(self)
