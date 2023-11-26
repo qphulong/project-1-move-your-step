@@ -6,7 +6,6 @@ class Cell:
         self.y = y
         self.x = x
         self.values = []
-        self.connectedCells = []
         self.belongTo = None
 
     def setBelongTo(self, value):
@@ -48,15 +47,6 @@ class Cell:
     
     def getBelongTo(self):
         return self.belongTo
-    
-    def isAlreadyConnected(self,Cell):
-        return Cell in self.connectedCells
-
-    def connectToCell(self, Cell):
-        if self.isAlreadyConnected(Cell):
-            return
-        self.connectedCells.append(Cell)
-        Cell.connectedCells.append(self)
 
     def __del__(self):
         pass
@@ -66,20 +56,12 @@ class Floor:
         self.rows=rows
         self.cols=cols
         self.table = [[Cell(i, j) for j in range(cols)] for i in range(rows)]
-        self.listOfSpreads = []
-        self.visited= []
+
 
         for i in range(self.rows):
             for j in range(self.cols):
                 self.table[i][j].setBelongTo(self)     
-    
-    #function return a spread that has at least 1 tag that has same value
-    def getSpread(self, tagCell):
-        return next((spread for spread in self.listOfSpreads if tagCell in spread.tags), None)
-    
-    def getSpread(self, stringTag):
-        return next((spread for spread in self.listOfSpreads if any(stringTag in cell.values for cell in spread.tags)), None)
-    
+        
     def getTagCell(self, stringTag):
         return next((cell for spread in self.listOfSpreads for cell in spread.tags if cell.checkValue(stringTag)), None)
 
@@ -95,33 +77,6 @@ class Floor:
     
     def getCell(self, row, col):
         return self.table[row][col]
-    
-    def appendSpread(self, newSpread):
-        self.listOfSpreads.append(newSpread)
-    
-    def removeSpread(self, spread):
-        if spread in self.listOfSpreads:
-            self.listOfSpreads.remove(spread)
-    
-    #console
-    def printTable(self):
-        for i in range(self.rows):
-            for j in range(self.cols):
-                cell_values = self.table[i][j].values
-
-                # Check if specific values are present
-                specific_values = {"A1", "K1", "D1", "T1"}
-                if any(value in specific_values for value in cell_values):
-                    # Print specific values
-                    print("[", end="")
-                    for value in cell_values:
-                        if value in specific_values:
-                            print("'" + value + "'", end=" ")
-                    print("]", end=" ")
-                else:
-                    # Print the entire values array
-                    print(cell_values, end=" ")
-            print()  # Move to the next row
         
 class Node:
     def __init__(self,Cell,SearchTree):
@@ -161,8 +116,8 @@ class Node:
     def getF(self):
         return self.f
           
-    # a function that add neighbour cell to frontier if they not in frontier and
-    # not in visited, also add the cell to the visited
+    # a function that add neighbour cell to tempFrontier if they not in frontier and
+    # not in visited and not in tempFrontier
     def expandFrontierCell(self,cell,BFSvisited,BFSfrontier,BFStempFrontier):
         # add N cell to tempFrontier
         if (
@@ -315,7 +270,7 @@ class Node:
 
                             #expand this cell
                             self.expandFrontierCell(cell,BFSvisited,BFSfrontier,BFStempFrontier)
-                #TODO xu ly truong hop trong mot nhanh neu co 2 node D giong nhau nhung khac key thi van dc ton tai
+
                 elif cell_tag[0] == "D":
                     #first expand, cause it will not expand since first cell in frontier and dup key
                     if len(BFSfrontier)==1 and BFSfrontier[0]==self.cell:
@@ -442,44 +397,7 @@ class SearchTree:
 
         print("No path found")
 
-    def visualize(self):
-        floor = self.floor
-        rows, cols = floor.rows, floor.cols
-
-        # Create the main window
-        root = tk.Tk()
-        root.title("Spread Visualization")
-
-        # Create a canvas to draw on
-        canvas = tk.Canvas(root, width=cols * 30, height=rows * 30)
-        canvas.pack()
-
-        # Draw rectangles for each cell
-        for i in range(rows):
-            for j in range(cols):
-                x0, y0 = j * 30, i * 30
-                x1, y1 = (j + 1) * 30, (i + 1) * 30
-
-                current_cell = floor.table[i][j]
-
-                # Set color for cells with value "-1" to black
-                if current_cell.checkValue("-1"):
-                    canvas.create_rectangle(x0, y0, x1, y1, fill="black")
-                # Set color for cells in each spread's tags to green
-                elif any(current_cell == node.cell for node in self.visited):
-                    canvas.create_rectangle(x0, y0, x1, y1, fill="green")
-                # Set color for cells in each spread's frontier to yellow
-                elif any(current_cell == node.cell for node in self.frontier):
-                    canvas.create_rectangle(x0, y0, x1, y1, fill="yellow")
-                # Set color for other cells to white
-                else:
-                    canvas.create_rectangle(x0, y0, x1, y1, fill="white")
-
-        # Run the GUI
-        root.mainloop()
-
-
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input1-level2.txt")
+searchTree2.getInputFile("input//input2-level2.txt")
 searchTree2.AStar()
 pass
