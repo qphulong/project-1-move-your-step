@@ -73,8 +73,11 @@ class Algorithm:
             successors = current_state.successors(current_agent)
 
             for successor in successors:
-                total_cost = successor.moves + successor.heuristic_lvl4()
+                if successor is None:
+                    continue
 
+                total_cost = successor.moves[current_agent] + successor.heuristic_lvl4(current_agent)
+                print(total_cost)
                 if successor.floor_rep not in visited and not any(successor == s for _, s in frontier):
                     heapq.heappush(frontier, (total_cost, successor))
                 elif any(total_cost < cost for cost, s in frontier if tuple(s.puzzle) == tuple(successor.puzzle)):
@@ -107,7 +110,7 @@ class Algorithm:
     # nếu floor chứa goal thì làm giống level 2
     def discover_floor(self, level4, floor, goal_floor, goal):
         if goal_floor == floor:
-            path = self.AStar(level4, goal, 1)
+            path = self.AStar(level4, 1, goal)
 
             # kiếm trong những đường có thể đi không có
             if path is None:
@@ -121,19 +124,19 @@ class Algorithm:
                     path = open_door[1]
                     cost = open_door[0].moves
 
-                if path is not None:
-                    if cost < current_cost:
-                        current_cost = cost
-                        returned_path = path
+                    if path is not None:
+                        if cost < current_cost:
+                            current_cost = cost
+                            returned_path = path
 
                 if returned_path is not None:
                     return returned_path  # tìm được goal khi vào phòng
 
-                #nếu không tìm được goal khi vào phòng
-                #phải đi tìm chìa khoá
+                # nếu không tìm được goal khi vào phòng
+                # phải đi tìm chìa khoá
             else:  # tìm được đến goal
                 return path
-        else: # ở tầng khác
+        else:  # ở tầng khác
             next_floor = None
 
             if floor > goal_floor:
@@ -141,8 +144,7 @@ class Algorithm:
             else:
                 next_floor = floor + 1
 
-            return self.discover_floor(level4,next_floor,goal_floor,goal)
-
+            return self.discover_floor(level4, next_floor, goal_floor, goal)
 
     def visualize_path(self, floor, path):
         board_size = 8  # Define the size of the board
