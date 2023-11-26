@@ -27,10 +27,12 @@ class Level4:
 
         self.floors = {}  # list of floors
         self.obtained_keys = []  # list of obtained keys (Save room numbers)
-        self.rooms = 0 # count number of rooms
-        self.visited_rooms = {} # whether a room is visited
+        self.rooms = 0  # count number of rooms
+        self.visited_rooms = {}  # whether a room is visited
 
         self.currentGoal = None  # there are many goals, from smaller to the biggest (T1)
+
+        self.previous = None
 
         self.moves = {}  # number of moves for each agent
 
@@ -40,10 +42,13 @@ class Level4:
         if isinstance(other, Level4):
             return self.moves[1] < other.moves[1]
 
+    def __eq__(self, other):
+        return self.moves[1] < other.moves[1]
+
     def setPrevious(self, prev, agent):
         self.previous = prev
 
-        self.moves[agent]+=1
+        self.moves[agent] += 1
 
     # mở cửa phòng
     def open_door(self, room_no, goal):
@@ -78,8 +83,11 @@ class Level4:
 
         return floor_diff + dist
 
+    def __hash__(self):
+        return hash(self.floor_rep())
+
     def floor_rep(self):
-        rep = tuple([tuple(self.agents), tuple(self.keys), tuple(self.agents)])
+        rep = tuple([tuple(self.agents), tuple(self.obtained_keys)])
         return rep
 
     class Pos():
@@ -141,7 +149,7 @@ class Level4:
             _current_floor -= 1
 
     def solve(self):
-        path = self.algo.discover_floor(self,1,1,self.goals[1])
+        path = self.algo.discover_floor(self, 1, 1, self.goals[1])
         if path is None:
             print("No solutions found")
             return False
@@ -164,7 +172,7 @@ class Level4:
         y = self.agents[1].y
 
         if current_floor[x][y].isKey == True:
-            self.obtained_keys.append(current_floor[x][y][len(current_floor[x][y])-1][1]) #thêm số phòng
+            self.obtained_keys.append(current_floor[x][y][len(current_floor[x][y]) - 1][1])  # thêm số phòng
 
     def moveUp(self, current_agent):
         copyState = copy.deepcopy(self)
@@ -179,6 +187,7 @@ class Level4:
 
         copyState.floors[current_floor + 1].removeFromCell(old_x, old_y, "A1")
         copyState.floors[current_floor + 1].appendToCell(x, y, "A1")
+        copyState.agents[current_agent] = self.Pos(current_floor+1,x,y)
 
     def moveDown(self, current_agent):
         copyState = copy.deepcopy(self)
@@ -193,6 +202,7 @@ class Level4:
 
         copyState.floors[current_floor - 1].removeFromCell(old_x, old_y, "A1")
         copyState.floors[current_floor - 1].appendToCell(x, y, "A1")
+        copyState.agents[current_agent] = self.Pos(current_floor-1,x,y)
 
     def moveN(self, current_agent):
         copyState = copy.deepcopy(self)
@@ -203,11 +213,12 @@ class Level4:
         y = copyState.agents[current_agent].y
         if x > 0 and copyState.floors[current_floor].checkValueInCell(x - 1,
                                                                       y, "-1") == False and copyState.floors[
-            current_floor].getCell(x - 1, y).isAgent() == False == False:
+            current_floor].getCell(x - 1, y).isAgent() == False:
             old_x, old_y = x, y
             x -= 1
             copyState.floors[current_floor].removeFromCell(old_x, old_y, "A1")
             copyState.floors[current_floor].appendToCell(x, y, "A1")
+            copyState.agents[current_agent]=self.Pos(current_floor,x,y)
             return copyState
         return None
 
@@ -224,6 +235,7 @@ class Level4:
             x += 1
             copyState.floors[current_floor].removeFromCell(old_x, old_y, "A1")
             copyState.floors[current_floor].appendToCell(x, y, "A1")
+            copyState.agents[current_agent]=self.Pos(current_floor,x,y)
             return copyState
         return None
 
@@ -240,6 +252,7 @@ class Level4:
             y += 1
             copyState.floors[current_floor].removeFromCell(old_x, old_y, "A1")
             copyState.floors[current_floor].appendToCell(x, y, "A1")
+            copyState.agents[current_agent]=self.Pos(current_floor,x,y)
             return copyState
         return None
 
@@ -256,6 +269,7 @@ class Level4:
             y -= 1
             copyState.floors[current_floor].removeFromCell(old_x, old_y, "A1")
             copyState.floors[current_floor].appendToCell(x, y, "A1")
+            copyState.agents[current_agent]=self.Pos(current_floor,x,y)
             return copyState
         return None
 
@@ -288,6 +302,7 @@ class Level4:
 
             # Add value "A1" to the new cell
             copyState.floors[current_floor].appendToCell(x, y, "A1")
+            copyState.agents[current_agent]=self.Pos(current_floor,x,y)
             return copyState
         return None
 
@@ -320,6 +335,7 @@ class Level4:
 
             # Add value "A1" to the new cell
             copyState.floors[current_floor].appendToCell(x, y, "A1")
+            copyState.agents[current_agent]=self.Pos(current_floor,x,y)
             return copyState
         return None
 
@@ -351,6 +367,7 @@ class Level4:
 
             # Add value "A1" to the new cell
             copyState.floors[current_floor].appendToCell(x, y, "A1")
+            copyState.agents[current_agent]=self.Pos(current_floor,x,y)
             return copyState
         return None
 
@@ -382,13 +399,15 @@ class Level4:
 
             # Add value "A1" to the new cell
             copyState.floors[current_floor].appendToCell(x, y, "A1")
+            copyState.agents[current_agent]=self.Pos(current_floor,x,y)
             return copyState
         return None
 
-    def successors(self,current_agent):
-        successors = [self.moveE(current_agent),self.moveW(current_agent),self.moveN(current_agent),self.moveS(current_agent),self.moveSW(current_agent),self.moveSE(current_agent),self.moveNE(current_agent),self.moveNW(current_agent)]
+    def successors(self, current_agent):
+        successors = [self.moveE(current_agent), self.moveW(current_agent), self.moveN(current_agent),
+                      self.moveS(current_agent), self.moveSW(current_agent), self.moveSE(current_agent),
+                      self.moveNE(current_agent), self.moveNW(current_agent)]
         return successors
-
 
 
 class Task:
