@@ -117,19 +117,32 @@ class Algorithm:
                 for i in range(level4.obtained_keys):  # duyệt tất cả mọi key đã lấy cho phòng ở tầng này
                     room = heapq.heappop(level4.obtained_keys)
 
-                    open_door = self.open_door(room, level4, )
+                    open_door = level4.open_door(room, goal)
                     path = open_door[1]
                     cost = open_door[0].moves
 
-                    if path is not None:
-                        if cost < current_cost:
-                            current_cost = cost
-                            returned_path = path
+                if path is not None:
+                    if cost < current_cost:
+                        current_cost = cost
+                        returned_path = path
 
-                    if returned_path is not None:
-                        return returned_path  # tìm được goal khi vào phòng
+                if returned_path is not None:
+                    return returned_path  # tìm được goal khi vào phòng
+
+                #nếu không tìm được goal khi vào phòng
+                #phải đi tìm chìa khoá
             else:  # tìm được đến goal
                 return path
+        else: # ở tầng khác
+            next_floor = None
+
+            if floor > goal_floor:
+                next_floor = floor - 1
+            else:
+                next_floor = floor + 1
+
+            return self.discover_floor(level4,next_floor,goal_floor,goal)
+
 
     def visualize_path(self, floor, path):
         board_size = 8  # Define the size of the board

@@ -4,7 +4,8 @@ from enum import Enum, auto
 import numpy as np
 
 import floor
-from level1 import Level1
+
+from algorithm import Algorithm
 
 
 class GOAL(Enum):
@@ -17,7 +18,6 @@ class GOAL(Enum):
 
 class Level4:
     def __init__(self):
-        super.__init__()
 
         self.keys = {}  # save position of keys for each rooms with a dictionary
         self.doors = {}  # save positions of room doors
@@ -25,7 +25,7 @@ class Level4:
         self.goals = {}  # pos of goals
         self.stairs = {}
 
-        self.floors = []  # list of floors
+        self.floors = {}  # list of floors
         self.obtained_keys = []  # list of obtained keys (Save room numbers)
         self.rooms = 0 # count number of rooms
         self.visited_rooms = {} # whether a room is visited
@@ -34,10 +34,28 @@ class Level4:
 
         self.moves = {}  # number of moves for each agent
 
-        self.algo = None
+        self.algo = Algorithm()
 
     def setPrevious(self, prev):
         self.previous = prev
+
+    # mở cửa phòng
+    def open_door(self, room_no, goal):
+        res = self.AStar(self, self.keys[room_no])
+        path = res[1][1]  # tìm đường đến key
+        last_state = res[1][0]  # tìm state mới nhất
+
+        res = self.AStar(last_state, self.doors[room_no])
+        last_state = res[1][0]  # tìm state mới nhất
+        path.__add__(res[1][1])  # tìm đường đến door
+
+        # nhớ tính tới vụ chìa khoá ở trên lầu => phải cho nó đi xuống
+
+        final = self.AStar(last_state, goal)[1]
+
+        self.visited_rooms[room_no] = True
+
+        return final
 
     def heuristic_lvl4(self, current_agent):
         x = self.agents[current_agent].x
@@ -76,7 +94,7 @@ class Level4:
             self.floor = floor.Floor(rows, cols)
             if lines[i].__contains__("floor"):
                 current_floor += 1
-                self.floors.append(floor.Floor(rows, cols))
+                self.floors[current_floor] = floor.Floor(rows, cols)
             else:
                 row_values = list(map(str, lines[i].strip().split(',')))
                 for j in range(cols):
@@ -89,10 +107,11 @@ class Level4:
                     elif str(row_values[j]).__contains__("T"):
                         goal_no = row_values[j][1]
                         self.goals[goal_no] = pos
-                    elif str(row_values[j].__contains__("K")):  # key
+                    elif str(row_values[j]).__contains__("K"):  # key
+                        print(row_values[j])
                         key_no = row_values[j][1]
                         self.keys[key_no] = pos
-                    elif str(row_values[j].__contains__("D")):  # door
+                    elif str(row_values[j]).__contains__("D"):  # door
                         door_no = row_values[j][1]
                         self.doors[door_no] = pos
                         self.rooms += 1
@@ -102,7 +121,7 @@ class Level4:
                         else:
                             self.stairs[(current_floor, current_floor - 1)] = pos
 
-                    self.floor.appendToCell(i - 2, j, row_values[j])  # set value for the board cell
+                    self.floors[current_floor].appendToCell(i - 2, j, row_values[j])  # set value for the board cell
 
     def move(self):
         _current_floor = 1
@@ -114,7 +133,7 @@ class Level4:
             _current_floor -= 1
 
     def solve(self):
-        path = self.algo.BFS_Level4(self)[1]
+        path = self.algo.discover_floor(self,1,1,self.goals[1])
         if path is None:
             print("No solutions found")
             return False
@@ -129,6 +148,15 @@ class Level4:
         else:
             return self.agents[1].x == goal.x and self.agents[1].y == goal.y \
                 and self.agents[1].floor == goal.floor
+
+    def checkKey(self):
+        current_floor = self.floors[self.agents[1].floor]
+
+        x = self.agents[1].x
+        y = self.agents[1].y
+
+        if current_floor[x][y].isKey == True:
+            self.obtained_keys.append(current_floor[x][y][len(current_floor[x][y])-1][1]) #thêm số phòng
 
     def moveUp(self, current_agent):
         copyState = copy.deepcopy(self)
