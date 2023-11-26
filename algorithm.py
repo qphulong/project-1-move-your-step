@@ -42,7 +42,7 @@ class Algorithm:
 
         return (found, current_path)
 
-    def AStar(self, start, goal=None):
+    def AStar(self, start, current_agent, goal=None):
         visited = set()
         current_path = []
         frontier = []  # queue
@@ -70,7 +70,7 @@ class Algorithm:
                 found = True
                 break
 
-            successors = current_state.successors()
+            successors = current_state.successors(current_agent)
 
             for successor in successors:
                 total_cost = successor.moves + successor.heuristic_lvl4()
@@ -107,7 +107,7 @@ class Algorithm:
     # nếu floor chứa goal thì làm giống level 2
     def discover_floor(self, level4, floor, goal_floor, goal):
         if goal_floor == floor:
-            path = self.AStar(level4, goal)
+            path = self.AStar(level4, goal, 1)
 
             # kiếm trong những đường có thể đi không có
             if path is None:

@@ -102,17 +102,16 @@ class Level4:
                     pos = self.Pos(current_floor, i - 2, j)
 
                     if str(row_values[j]).__contains__("A"):  # agent
-                        agent_no = row_values[j][1]
+                        agent_no = int(row_values[j][1])
                         self.agents[agent_no] = pos
                     elif str(row_values[j]).__contains__("T"):
-                        goal_no = row_values[j][1]
+                        goal_no = int(row_values[j][1])
                         self.goals[goal_no] = pos
                     elif str(row_values[j]).__contains__("K"):  # key
-                        print(row_values[j])
-                        key_no = row_values[j][1]
+                        key_no = int(row_values[j][1])
                         self.keys[key_no] = pos
                     elif str(row_values[j]).__contains__("D"):  # door
-                        door_no = row_values[j][1]
+                        door_no = int(row_values[j][1])
                         self.doors[door_no] = pos
                         self.rooms += 1
                     elif str(row_values[j]) == "UP" or str(row_values[j]) == "DO":
@@ -378,6 +377,11 @@ class Level4:
             copyState.floors[current_floor].appendToCell(x, y, "A1")
             return copyState
         return None
+
+    def successors(self,current_agent):
+        successors = [self.moveE(current_agent),self.moveW(current_agent),self.moveN(current_agent),self.moveS(current_agent),self.moveSW(current_agent),self.moveSE(current_agent),self.moveNE(current_agent),self.moveNW(current_agent)]
+        return successors
+
 
 
 class Task:
