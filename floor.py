@@ -35,8 +35,18 @@ class Cell:
     def isKey(self):
         return any('K' in value for value in self.values)
 
+    def getKeyNo(self):
+        if self.isKey() == True:
+            return int(self.values[len(self.values)-1][1])
+        return -1
+
     def isDoor(self):
         return any('D' in value for value in self.values)
+
+    def getDoorNo(self):
+        if self.isDoor() == True:
+            return int(self.values[len(self.values)-1][1])
+        return -1
 
     def __del__(self):
         pass

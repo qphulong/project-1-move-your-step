@@ -59,17 +59,17 @@ class Level4:
 
     # mở cửa phòng
     def open_door(self, room_no, goal):
-        res = self.AStar(self, self.keys[room_no])
+        res = self.algo.AStar(self, self.keys[room_no])
         path = res[1][1]  # tìm đường đến key
         last_state = res[1][0]  # tìm state mới nhất
 
-        res = self.AStar(last_state, self.doors[room_no])
+        res = self.algo.AStar(last_state, self.doors[room_no])
         last_state = res[1][0]  # tìm state mới nhất
         path.__add__(res[1][1])  # tìm đường đến door
 
         # nhớ tính tới vụ chìa khoá ở trên lầu => phải cho nó đi xuống
 
-        final = self.AStar(last_state, goal)[1]
+        final = self.algo.AStar(last_state, goal)[1]
 
         self.visited_rooms[room_no] = True
 
@@ -169,8 +169,9 @@ class Level4:
         x = self.agents[1].x
         y = self.agents[1].y
 
-        if current_floor[x][y].isKey() == True:
-            self.obtained_keys.append(current_floor[x][y][len(current_floor[x][y]) - 1][1])  # thêm số phòng
+        key_no = current_floor.getCell(x,y).getKeyNo()  # lấy số phòng của chìa khoá (nếu đây là chìa khoá)
+        if key_no != -1:
+            self.obtained_keys.append(key_no)
 
     def moveUp(self, current_agent):
         copyState = copy.deepcopy(self)
@@ -212,6 +213,12 @@ class Level4:
         if x > 0 and copyState.floors[current_floor].checkValueInCell(x - 1,
                                                                       y, "-1") == False and copyState.floors[
             current_floor].getCell(x - 1, y).isAgent() == False:
+
+            door_no = copyState.floors[current_floor].getCell(x-1, y).getDoorNo() #lấy số phòng của chìa khoá (nếu đây là chìa khoá)
+            if door_no != -1:
+                if door_no not in self.obtained_keys:
+                    return None
+
             old_x, old_y = x, y
             x -= 1
             copyState.floors[current_floor].removeFromCell(old_x, old_y, "A1")
@@ -229,6 +236,12 @@ class Level4:
         y = copyState.agents[current_agent].y
         if x < copyState.floors[current_floor].rows - 1 and copyState.floors[current_floor].checkValueInCell(
                 x + 1, y, "-1") == False and copyState.floors[current_floor].getCell(x + 1, y).isAgent() == False:
+
+            door_no = copyState.floors[current_floor].getCell(x-1, y).getDoorNo() #lấy số phòng của chìa khoá (nếu đây là chìa khoá)
+            if door_no != -1:
+                if door_no not in self.obtained_keys:
+                    return None
+
             old_x, old_y = x, y
             x += 1
             copyState.floors[current_floor].removeFromCell(old_x, old_y, "A1")
@@ -246,6 +259,12 @@ class Level4:
         y = copyState.agents[current_agent].y
         if y < copyState.floors[current_floor].cols - 1 and copyState.floors[current_floor].checkValueInCell(
                 x, y + 1, "-1") == False and copyState.floors[current_floor].getCell(x, y + 1).isAgent() == False:
+
+            door_no = copyState.floors[current_floor].getCell(x-1, y).getDoorNo() #lấy số phòng của chìa khoá (nếu đây là chìa khoá)
+            if door_no != -1:
+                if door_no not in self.obtained_keys:
+                    return None
+
             old_x, old_y = x, y
             y += 1
             copyState.floors[current_floor].removeFromCell(old_x, old_y, "A1")
@@ -263,6 +282,12 @@ class Level4:
         y = copyState.agents[current_agent].y
         if y > 0 and copyState.floors[current_floor].checkValueInCell(x, y - 1, "-1") == False and copyState.floors[
             current_floor].getCell(x, y - 1).isAgent() == False == False:
+
+            door_no = copyState.floors[current_floor].getCell(x-1, y).getDoorNo() #lấy số phòng của chìa khoá (nếu đây là chìa khoá)
+            if door_no != -1:
+                if door_no not in self.obtained_keys:
+                    return None
+
             old_x, old_y = x, y
             y -= 1
             copyState.floors[current_floor].removeFromCell(old_x, old_y, "A1")
@@ -292,6 +317,11 @@ class Level4:
                 copyState.floors[current_floor].getCell(x, destination_y).isAgent() == False == False and
                 copyState.floors[current_floor].getCell(destination_x, destination_y).isAgent() == False == False
         ):
+            door_no = copyState.floors[current_floor].getCell(x-1, y).getDoorNo() #lấy số phòng của chìa khoá (nếu đây là chìa khoá)
+            if door_no != -1:
+                if door_no not in self.obtained_keys:
+                    return None
+
             old_x, old_y = x, y
             x, y = destination_x, destination_y
 
@@ -325,6 +355,11 @@ class Level4:
                 copyState.floors[current_floor].getCell(x, destination_y).isAgent() == False == False and
                 copyState.floors[current_floor].getCell(destination_x, destination_y).isAgent() == False == False
         ):
+            door_no = copyState.floors[current_floor].getCell(x-1, y).getDoorNo() #lấy số phòng của chìa khoá (nếu đây là chìa khoá)
+            if door_no != -1:
+                if door_no not in self.obtained_keys:
+                    return None
+
             old_x, old_y = x, y
             x, y = destination_x, destination_y
 
@@ -357,6 +392,11 @@ class Level4:
                 copyState.floors[current_floor].getCell(x, destination_y).isAgent() == False == False and
                 copyState.floors[current_floor].getCell(destination_x, destination_y).isAgent() == False == False
         ):
+            door_no = copyState.floors[current_floor].getCell(x-1, y).getDoorNo() #lấy số phòng của chìa khoá (nếu đây là chìa khoá)
+            if door_no != -1:
+                if door_no not in self.obtained_keys:
+                    return None
+
             old_x, old_y = x, y
             x, y = destination_x, destination_y
 
@@ -389,6 +429,11 @@ class Level4:
                 copyState.floors[current_floor].getCell(x, destination_y).isAgent() == False == False and
                 copyState.floors[current_floor].getCell(destination_x, destination_y).isAgent() == False == False
         ):
+            door_no = copyState.floors[current_floor].getCell(x-1, y).getDoorNo() #lấy số phòng của chìa khoá (nếu đây là chìa khoá)
+            if door_no != -1:
+                if door_no not in self.obtained_keys:
+                    return None
+
             old_x, old_y = x, y
             x, y = destination_x, destination_y
 

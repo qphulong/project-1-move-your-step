@@ -61,6 +61,8 @@ class Algorithm:
 
             visited.add(current_state.floor_rep())
 
+            current_state.checkKey() # lượm key
+
             # check goal
             if current_state.checkGoal(goal):
                 print("Found goal")
