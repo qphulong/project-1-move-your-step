@@ -55,7 +55,6 @@ class Algorithm:
 
         while frontier:
             current_state = heapq.heappop(frontier)[1]
-            print(f'Agent {current_state.agents[1].x} {current_state.agents[1].y} {current_state.agents[1].floor}')
 
             if current_state is None:
                 continue
@@ -64,11 +63,14 @@ class Algorithm:
 
             # check goal
             if current_state.checkGoal(goal):
+                print("Found goal")
                 current_path.append(current_state.agents[current_agent])
+                print(current_state.agents[current_agent])
                 previous = current_state.previous
 
                 while previous is not None:
                     current_path.append(previous.agents[current_agent])
+                    print(previous.agents[current_agent])
                     previous = previous.previous
                 found = True
                 break
@@ -76,15 +78,16 @@ class Algorithm:
             successors = current_state.successors(current_agent)
 
             for successor in successors:
+
                 if successor is None:
                     continue
 
                 print(f'Successor agent {successor.agents[1].x} {successor.agents[1].y} {successor.agents[1].floor}')
 
                 total_cost = successor.moves[current_agent] + successor.heuristic_lvl4(current_agent)
-                if successor.floor_rep not in visited and not any(successor == s for _, s in frontier):
+                if successor.floor_rep() not in visited and not any(successor == s for _, s in frontier):
                     heapq.heappush(frontier, (total_cost, successor))
-                elif any(total_cost < cost for cost, s in frontier if tuple(s.puzzle) == tuple(successor.puzzle)):
+                elif any(total_cost < cost for cost, s in frontier if s == successor):
                     # if in frontier already but higher path cost
                     frontier.remove(successor)
                     heapq.heappush(frontier, (total_cost, successor))  # replace with lower path cost
@@ -118,8 +121,12 @@ class Algorithm:
 
             # kiếm trong những đường có thể đi không có
             if path is None:
+                print("Finding with keys")
+
                 current_cost = -1
                 returned_path = None
+
+                print(len(level4.obtained_keys))
 
                 for i in range(len(level4.obtained_keys)):  # duyệt tất cả mọi key đã lấy cho phòng ở tầng này
                     room = level4.obtained_keys.pop(0)
@@ -134,13 +141,11 @@ class Algorithm:
                             returned_path = path
 
                 if returned_path is not None:
-                    print("Founded path " + str(returned_path))
                     return returned_path  # tìm được goal khi vào phòng
 
                 # nếu không tìm được goal khi vào phòng
                 # phải đi tìm chìa khoá
             else:  # tìm được đến goal
-                print("Founded path immediately "+str(path))
                 return path
         else:  # ở tầng khác
             next_floor = None

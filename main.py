@@ -7,7 +7,8 @@ from level4 import Level4
 
 m = Level4()
 m.getInputFile("input//input1-level4.txt")
+m.solve()
 
-while True:
-    if m.solve() == False:
-        break
+# while True:
+#     if m.solve() == False:
+#         break

@@ -43,7 +43,14 @@ class Level4:
             return self.moves[1] < other.moves[1]
 
     def __eq__(self, other):
-        return self.moves[1] < other.moves[1]
+        return self.agents[1] == other.agents[1] and tuple(self.obtained_keys) == tuple(other.obtained_keys)
+
+    def __hash__(self):
+        return hash(self.floor_rep())
+
+    def floor_rep(self):
+        rep = tuple([self.agents[1], tuple(self.obtained_keys)])
+        return rep
 
     def setPrevious(self, prev, agent):
         self.previous = prev
@@ -83,12 +90,7 @@ class Level4:
 
         return floor_diff + dist
 
-    def __hash__(self):
-        return hash(self.floor_rep())
 
-    def floor_rep(self):
-        rep = tuple([tuple(self.agents), tuple(self.obtained_keys)])
-        return rep
 
     class Pos():
         def __init__(self, floor, x, y):
@@ -98,6 +100,12 @@ class Level4:
 
         def __eq__(self, other):
             return self.floor == other.floor and self.x == other.x and self.y == other.y
+
+        def __hash__(self):
+            return self.x * 10 + self.y * 20 + int(self.floor / 30)
+
+        def __str__(self):
+            return f"x: {self.x} - y: {self.y} - floor: {self.floor}"
 
     def getInputFile(self, filePath):
         with open(filePath, "r") as file:
@@ -139,22 +147,12 @@ class Level4:
 
                     self.floors[current_floor].appendToCell(i - 2, j, row_values[j])  # set value for the board cell
 
-    def move(self):
-        _current_floor = 1
-
-        def goUp(_current_floor):
-            _current_floor += 1
-
-        def goDown(_current_floor):
-            _current_floor -= 1
-
     def solve(self):
         path = self.algo.discover_floor(self, 1, 1, self.goals[1])
         if path is None:
             print("No solutions found")
             return False
-        print(f"Path: {path}")
-        self.algo.visualize_path(self.floor, path)
+        # self.algo.visualize_path(self.floor, path)
         return True
 
     def checkGoal(self, goal=None):
@@ -171,7 +169,7 @@ class Level4:
         x = self.agents[1].x
         y = self.agents[1].y
 
-        if current_floor[x][y].isKey == True:
+        if current_floor[x][y].isKey() == True:
             self.obtained_keys.append(current_floor[x][y][len(current_floor[x][y]) - 1][1])  # thêm số phòng
 
     def moveUp(self, current_agent):
@@ -229,7 +227,7 @@ class Level4:
         current_floor = copyState.agents[current_agent].floor
         x = copyState.agents[current_agent].x
         y = copyState.agents[current_agent].y
-        if y < copyState.floors[current_floor].rows - 1 and copyState.floors[current_floor].checkValueInCell(
+        if x < copyState.floors[current_floor].rows - 1 and copyState.floors[current_floor].checkValueInCell(
                 x + 1, y, "-1") == False and copyState.floors[current_floor].getCell(x + 1, y).isAgent() == False:
             old_x, old_y = x, y
             x += 1
