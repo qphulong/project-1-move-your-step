@@ -46,6 +46,9 @@ class Cell:
     def getManhattanFrom(self, Cell):
         return abs(self.x - Cell.x) + abs(self.y - Cell.y)
 
+    def getFloorsHeuristic(self, Cell):
+        return self.getManhattanFrom(Cell) + abs(self.floor_no - Cell.floor_no)
+
     def getPhanTrungDucDistance(self, Cell):
         return max(abs(self.x - Cell.x), abs(self.y - Cell.y))
 
@@ -121,7 +124,7 @@ class Node:
         return self.pathCost
 
     def saveHeuristic(self, Cell):
-        self.heuristic = self.cell.getManhattanFrom(Cell)
+        self.heuristic = self.cell.getFloorsHeuristic(Cell)
         return self.heuristic
 
     # f is total cost
@@ -351,11 +354,6 @@ class Node:
                         # append new node to tree
                         self.children.append(newNode)
                         newNode.parent = self
-
-                        # inherit collected keys so far
-                        for eachKey in self.keys:
-                            newNode.appendKey(eachKey)  # keep track of collected keys
-                        newNode.appendKey(cell_tag)  # add current key
 
                         copyCell = copy.deepcopy(cell)
 
