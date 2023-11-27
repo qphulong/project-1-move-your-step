@@ -245,8 +245,6 @@ class Node:
                 # analyze cell
                 cell_tag = cell.getSpecialValue()
 
-                print(f"{cell.y} {cell.x} {cell.floor_no} {cell_tag}")
-
                 # normal cell
                 if cell_tag == "" or cell_tag[0] == "A":
                     self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
@@ -287,7 +285,7 @@ class Node:
                             self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
 
                 # door
-                elif cell_tag[0] == "D":
+                elif cell_tag[0] == "D" and cell_tag[1] != "O":
                     # first expand, cause it will not expand since first cell in frontier and dup key
                     if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
                         self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
@@ -335,14 +333,15 @@ class Node:
                     self.children.append(newNode)
                     newNode.parent = self
 
-                # stair
-                elif cell_tag[0] == "UP" or cell_tag[0] == "DO":
+                # stairs
+                elif cell_tag == "UP" or cell_tag == "DO":
+                    print(f"{cell.y} {cell.x} {cell_tag}")
                     # first expand (not worry about duplicates)
                     if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
                         self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
                     else:
                         if len(BFSfrontier) > 1:
-                            if (BFSfrontier[-1].getSpecialValue() == "DO" and cell_tag[0] == "UP") or (BFSfrontier[-1].getSpecialValue() == "UP" and cell_tag[0] == "DO"):
+                            if (BFSfrontier[-1].getSpecialValue() == "DO" and cell_tag == "UP") or (BFSfrontier[-1].getSpecialValue() == "UP" and cell_tag == "DO"):
                                 pass # if previous is up and then this down (or the other way around) then we don't have to consider this
 
                         # create new node
@@ -357,11 +356,11 @@ class Node:
 
                         copyCell = copy.deepcopy(cell)
 
-                        if cell_tag[0] == "UP":
-                            copyCell.values.replace("UP", "DO")
+                        if cell_tag == "UP":
+                            [value.replace("UP'", "DO") for value in copyCell.values]
                             copyCell.floor_no = copyCell.floor_no + 1  # go up one floor
                         else:
-                            copyCell.values.replace("DO", "UP")
+                            [value.replace("DO'", "UP") for value in copyCell.values]
                             copyCell.floor_no = copyCell.floor_no - 1 # go down one floor
 
                         # expand this cell
@@ -437,6 +436,9 @@ class SearchTree:
                     self.frontier.append(self.root)
                     self.currentNode = self.root
 
+                if cell_value == "UP" or cell_value == "DO":
+                    self.floors[current_floor].appendToCell(i, j, "0")
+
                 # Regardless of the condition, add the original cell value to the cell
                 self.floors[current_floor].appendToCell(i, j, cell_value)
 
@@ -451,7 +453,6 @@ class SearchTree:
 
             # if path found
             if self.currentNode.cell == self.goalCell:  # goal node
-                print(f"Goal {self.currentNode.cell.x} {self.currentNode.cell.y} {self.currentNode.cell.floor_no}")
                 tempNode = self.currentNode
                 while (tempNode):
                     print(tempNode.cell.getSpecialValue())
