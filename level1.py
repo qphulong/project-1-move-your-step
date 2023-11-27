@@ -212,7 +212,9 @@ class Level1:
     def solve(self):
         path = self.bfs.BFS(self)
         print(f"Path: {path}")
-        self.bfs.visualize_path(self.floor,path)
+        # self.bfs.visualize_path(self.floor,path)
 
 
-
+myLevel1 = Level1()
+myLevel1.getInputFile("input//input1-level1.txt")
+myLevel1.solve()
