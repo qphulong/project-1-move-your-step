@@ -19,7 +19,7 @@ class Cell:
             for value in self.values:
                 if value not in ["0", "-1"]:
                     return value
-            return None  # Or return a default value if all values are "0" or "-1"
+            return ""  # Or return a default value if all values are "0" or "-1"
 
     def appendValue(self, value):
         self.values.append(value)
