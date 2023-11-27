@@ -4,10 +4,6 @@ from enum import Enum
 import copy
 
 
-class Stair(Enum):
-    UP = 1
-    DOWN = -1
-    NONE = 0
 
 
 class Cell:
@@ -19,7 +15,6 @@ class Cell:
         self.values = []
         self.belongTo = None
 
-        self.stair = Stair.NONE
 
     def setBelongTo(self, value):
         self.belongTo = value
@@ -389,15 +384,21 @@ class SearchTree:
 
         rows, cols = map(int, lines[0].strip().split(','))
 
-        current_floor = 0
+        lines.pop(0) # delete first line
 
-        for i in range(1, len(lines)):
-            if lines[i].__contains__("floor"):
+        current_floor = 0
+        i = 0
+
+        for line in lines:
+            if line.__contains__("floor"):
+                i = 0 # for row index
                 current_floor += 1
                 self.floors[current_floor] = Floor(rows, cols, current_floor)
                 continue
 
-            row_values = list(map(str, lines[i].strip().split(',')))
+            row_values = list(map(str, line.strip().split(',')))
+
+            i+= 1 # increase row index
 
             for j in range(cols):
                 cell_value = row_values[j]
@@ -429,14 +430,6 @@ class SearchTree:
                     self.frontier.append(self.root)
                     self.currentNode = self.root
 
-                if cell_value == "UP":
-                    self.floors[current_floor].appendToCell(i - 2, j, "0")
-                    self.floors[current_floor].stair = Stair.UP
-
-                if cell_value == "DO":
-                    self.floors[current_floor].appendToCell(i - 2, j, "0")
-                    self.floors[current_floor].stair = Stair.DOWN
-
                 # Regardless of the condition, add the original cell value to the cell
                 self.floors[current_floor].appendToCell(i - 2, j, cell_value)
 
@@ -466,6 +459,6 @@ class SearchTree:
 
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input3-level2.txt")
+searchTree2.getInputFile("input//input1-level4.txt")
 searchTree2.AStar()
 pass
