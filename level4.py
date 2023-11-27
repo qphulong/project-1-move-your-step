@@ -245,6 +245,7 @@ class Node:
                 # analyze cell
                 cell_tag = cell.getSpecialValue()
 
+
                 # normal cell
                 if cell_tag == "" or cell_tag[0] == "A":
                     self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
@@ -284,10 +285,9 @@ class Node:
                             # expand this cell
                             self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
 
-
                 # door
                 elif cell_tag[0] == "D":
-                    # first expand (not worry about duplicates)
+                    # first expand, cause it will not expand since first cell in frontier and dup key
                     if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
                         self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
                     else:
@@ -299,7 +299,8 @@ class Node:
                             newNode.saveHeuristic(self.belongTo.goalCell)
                             newNode.saveF()
 
-                            for eachKey in self.keys:  # inherit collected keys so far
+                            # inherit key
+                            for eachKey in self.keys:
                                 newNode.appendKey(eachKey)
 
                             # append new node to tree
@@ -314,10 +315,11 @@ class Node:
                                     newNode.parent = None
                                     del newNode
                                 tempNode = tempNode.parent
-
                         # if does not have key
                         else:
                             pass
+
+
 
                 elif cell_tag[0] == "T":
                     # create new node
@@ -337,7 +339,7 @@ class Node:
                         self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
                     else:
                         if len(BFSfrontier) > 1:
-                            if (BFSfrontier[-1].getSpecialValue() == "DO" and cell_tag == "UP") or (BFSfrontier[-1].getSpecialValue() == "UP" and cell_tag == "DOWN"):
+                            if (BFSfrontier[-1].getSpecialValue() == "DO" and cell_tag[0] == "UP") or (BFSfrontier[-1].getSpecialValue() == "UP" and cell_tag[0] == "DO"):
                                 pass # if previous is up and then this down (or the other way around) then we don't have to consider this
 
                         # create new node
@@ -391,7 +393,7 @@ class SearchTree:
 
         for line in lines:
             if line.__contains__("floor"):
-                i = 0 # for row index
+                i = -1 # for row index
                 current_floor += 1
                 self.floors[current_floor] = Floor(rows, cols, current_floor)
                 continue
@@ -405,33 +407,33 @@ class SearchTree:
 
                 # Check if the cell value has the format "Ki", "Di"
                 if re.match(r'[KD]\d+', cell_value):
-                    self.floors[current_floor].appendToCell(i - 2, j, "0")
+                    self.floors[current_floor].appendToCell(i, j, "0")
 
                     # Extract the character and integer parts from the cell value
                     char_part, num_part = re.match(r'([KD])(\d+)', cell_value).groups()
 
                 # if goalCell show up
                 if re.match(r'[T]\d+', cell_value):
-                    self.floors[current_floor].appendToCell(i - 2, j, "0")
+                    self.floors[current_floor].appendToCell(i, j, "0")
 
                     # Extract the character and integer parts from the cell value
                     char_part, num_part = re.match(r'([AKTD])(\d+)', cell_value).groups()
 
-                    self.goalCell = self.floors[current_floor].getCell(i - 2, j)
+                    self.goalCell = self.floors[current_floor].getCell(i, j)
 
                 # if startCell show up
                 if re.match(r'[A]\d+', cell_value):
-                    self.floors[current_floor].appendToCell(i - 2, j, "0")
+                    self.floors[current_floor].appendToCell(i, j, "0")
 
                     # Extract the character and integer parts from the cell value
                     char_part, num_part = re.match(r'([AKTD])(\d+)', cell_value).groups()
 
-                    self.root = Node(self.floors[current_floor].getCell(i - 2, j), self)
+                    self.root = Node(self.floors[current_floor].getCell(i, j), self)
                     self.frontier.append(self.root)
                     self.currentNode = self.root
 
                 # Regardless of the condition, add the original cell value to the cell
-                self.floors[current_floor].appendToCell(i - 2, j, cell_value)
+                self.floors[current_floor].appendToCell(i, j, cell_value)
 
     def AStar(self):
         self.root.saveHeuristic(self.goalCell)
@@ -459,6 +461,6 @@ class SearchTree:
 
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input1-level4.txt")
+searchTree2.getInputFile("input//input2-level2.txt")
 searchTree2.AStar()
 pass
