@@ -245,6 +245,7 @@ class Node:
                 # analyze cell
                 cell_tag = cell.getSpecialValue()
 
+                print(f"{cell.y} {cell.x} {cell.floor_no} {cell_tag}")
 
                 # normal cell
                 if cell_tag == "" or cell_tag[0] == "A":
@@ -293,6 +294,7 @@ class Node:
                     else:
                         # if has key
                         if str("K" + str(cell_tag[1])) in self.keys:
+                            print("has key")
                             # create new node
                             newNode = Node(cell, self.belongTo)
                             newNode.setPathCost(self.pathCost + steps)
@@ -317,6 +319,7 @@ class Node:
                                 tempNode = tempNode.parent
                         # if does not have key
                         else:
+                            print("no key")
                             pass
 
 
@@ -355,8 +358,10 @@ class Node:
                         copyCell = copy.deepcopy(cell)
 
                         if cell_tag[0] == "UP":
+                            copyCell.values.replace("UP", "DO")
                             copyCell.floor_no = copyCell.floor_no + 1  # go up one floor
                         else:
+                            copyCell.values.replace("DO", "UP")
                             copyCell.floor_no = copyCell.floor_no - 1 # go down one floor
 
                         # expand this cell
@@ -446,6 +451,7 @@ class SearchTree:
 
             # if path found
             if self.currentNode.cell == self.goalCell:  # goal node
+                print(f"Goal {self.currentNode.cell.x} {self.currentNode.cell.y} {self.currentNode.cell.floor_no}")
                 tempNode = self.currentNode
                 while (tempNode):
                     print(tempNode.cell.getSpecialValue())
@@ -461,6 +467,6 @@ class SearchTree:
 
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input2-level2.txt")
+searchTree2.getInputFile("input//input1-level4.txt")
 searchTree2.AStar()
 pass
