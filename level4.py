@@ -1,12 +1,14 @@
 import re
 import tkinter as tk
 from enum import Enum
+import copy
 
 
 class Stair(Enum):
     UP = 1
     DOWN = -1
     NONE = 0
+
 
 class Cell:
 
@@ -55,7 +57,7 @@ class Cell:
 
     def getX(self):
         return self.x
-    
+
     def getBelongTo(self):
         return self.belongTo
 
@@ -220,7 +222,8 @@ class Node:
 
         # Add SE cell to tempFrontier
         if (
-                cell.y < self.belongTo.floors[floor_no].rows - 1 and cell.x < self.belongTo.floors[floor_no].cols - 1 and
+                cell.y < self.belongTo.floors[floor_no].rows - 1 and cell.x < self.belongTo.floors[
+            floor_no].cols - 1 and
                 not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x).isWall() and
                 not self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1).isWall() and
                 not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1).isWall() and
@@ -231,7 +234,6 @@ class Node:
             seCell = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1)
             BFStempFrontier.append(seCell)
 
-
     def expand(self):
         BFSfrontier = []
         BFStempFrontier = []
@@ -241,33 +243,30 @@ class Node:
         while BFSfrontier:
             steps += 1
 
-            # block nay de debug
-            # if self.cell.checkValue("K1"):
-            #     print("Frontier")
-            #     for eachCell in BFSfrontier:
-            #         print(eachCell.y,eachCell.x)
-
             for cell in BFSfrontier:
-
                 # analyze cell
                 cell_tag = cell.getSpecialValue()
+
                 # normal cell
                 if cell_tag == "" or cell_tag[0] == "A":
                     self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
+
+                # key
                 elif cell_tag[0] == "K":
-                    # first expand, cause it will not expand since first cell in frontier and dup key
+                    # first expand (not worry about duplicates)
                     if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
                         self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
                     else:
-                        # check dups
+                        # check duplicates
                         tempNode = self
                         addNode = True
-                        while (tempNode):
-                            if cell_tag in tempNode.keys:
-                                addNode = False
+                        while tempNode:
+                            if cell_tag in tempNode.keys: # if current key is used before
+                                addNode = False  # found duplicate
                                 break
                             tempNode = tempNode.parent
 
+                        # key not used before
                         if addNode:
                             # create new node
                             newNode = Node(cell, self.belongTo)
@@ -279,16 +278,18 @@ class Node:
                             self.children.append(newNode)
                             newNode.parent = self
 
-                            # inherit and append new key
+                            # inherit collected keys so far
                             for eachKey in self.keys:
-                                newNode.appendKey(eachKey)
-                            newNode.appendKey(cell_tag)
+                                newNode.appendKey(eachKey)  # keep track of collected keys
+                            newNode.appendKey(cell_tag)  # add current key
 
                             # expand this cell
                             self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
 
+
+                # door
                 elif cell_tag[0] == "D":
-                    # first expand, cause it will not expand since first cell in frontier and dup key
+                    # first expand (not worry about duplicates)
                     if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
                         self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
                     else:
@@ -300,8 +301,7 @@ class Node:
                             newNode.saveHeuristic(self.belongTo.goalCell)
                             newNode.saveF()
 
-                            # inherit key
-                            for eachKey in self.keys:
+                            for eachKey in self.keys:  # inherit collected keys so far
                                 newNode.appendKey(eachKey)
 
                             # append new node to tree
@@ -316,6 +316,7 @@ class Node:
                                     newNode.parent = None
                                     del newNode
                                 tempNode = tempNode.parent
+
                         # if does not have key
                         else:
                             pass
@@ -330,6 +331,42 @@ class Node:
                     # append new node to tree
                     self.children.append(newNode)
                     newNode.parent = self
+
+                # stair
+                elif cell_tag[0] == "UP" or cell_tag[0] == "DO":
+                    # first expand (not worry about duplicates)
+                    if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
+                        self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
+                    else:
+                        if len(BFSfrontier) > 1:
+                            if (BFSfrontier[-1].getSpecialValue() == "DO" and cell_tag == "UP") or (BFSfrontier[-1].getSpecialValue() == "UP" and cell_tag == "DOWN"):
+                                pass # if previous is up and then this down (or the other way around) then we don't have to consider this
+
+                        # create new node
+                        newNode = Node(cell, self.belongTo)
+                        newNode.setPathCost(self.pathCost + steps)
+                        newNode.saveHeuristic(self.belongTo.goalCell)
+                        newNode.saveF()
+
+                        # append new node to tree
+                        self.children.append(newNode)
+                        newNode.parent = self
+
+                        # inherit collected keys so far
+                        for eachKey in self.keys:
+                            newNode.appendKey(eachKey)  # keep track of collected keys
+                        newNode.appendKey(cell_tag)  # add current key
+
+                        copyCell = copy.deepcopy(cell)
+
+                        if cell_tag[0] == "UP":
+                            copyCell.floor_no = copyCell.floor_no + 1  # go up one floor
+                        else:
+                            copyCell.floor_no = copyCell.floor_no - 1 # go down one floor
+
+                        # expand this cell
+                        self.expandFrontierCell(copyCell, BFSvisited, BFSfrontier, BFStempFrontier)
+
                 BFSvisited.append(cell)
             pass
 
@@ -361,7 +398,7 @@ class SearchTree:
                 current_floor += 1
                 self.floors[current_floor] = Floor(rows, cols, current_floor)
                 continue
-                
+
             row_values = list(map(str, lines[i].strip().split(',')))
 
             for j in range(cols):
@@ -407,15 +444,15 @@ class SearchTree:
 
     def AStar(self):
         self.root.saveHeuristic(self.goalCell)
-        self.root.saveF() # save total cost
+        self.root.saveF()  # save total cost
 
         while (self.frontier):
             # self.visualize()
-            self.frontier.sort(key=lambda x: x.getF()) # priority queue
+            self.frontier.sort(key=lambda x: x.getF())  # priority queue
             self.currentNode = self.frontier.pop(0)
 
             # if path found
-            if self.currentNode.cell == self.goalCell: # goal node
+            if self.currentNode.cell == self.goalCell:  # goal node
                 tempNode = self.currentNode
                 while (tempNode):
                     print(tempNode.cell.getSpecialValue())
