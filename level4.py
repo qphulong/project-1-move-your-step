@@ -318,10 +318,11 @@ class Node:
                                 tempNode = tempNode.parent
                         # if does not have key
                         else:
-                            door_no = str(cell_tag[1])
-                            key_cell = self.belongTo.keys[door_no]
-                            if key_cell.floor_no != self.cell.floor_no:  # key is in a different floor from the door
-                               self.belongTo.floor_priorities.append((self.cell.floor_no, key_cell.floor_no, 0)) # it should now try to go that key floor from this floor
+                            door_no = int(cell_tag[1])
+                            if door_no <= len(self.belongTo.keys): # nếu số cửa nhỏ hơn số key đã có
+                               key_cell = self.belongTo.keys[door_no]
+                               if key_cell.floor_no != self.cell.floor_no:  # key is in a different floor from the door
+                                   self.belongTo.floor_priorities.append((self.cell.floor_no, key_cell.floor_no, 0)) # it should now try to go that key floor from this floor
                             pass
 
 
@@ -426,7 +427,7 @@ class SearchTree:
                     char_part, num_part = re.match(r'([KD])(\d+)', cell_value).groups()
 
                     if char_part == "K":
-                        self.keys[num_part] = self.floors[current_floor].getCell(i, j)
+                        self.keys[int(num_part)] = self.floors[current_floor].getCell(i, j)
 
                 # if goalCell show up
                 if re.match(r'[T]\d+', cell_value):
