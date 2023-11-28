@@ -234,7 +234,7 @@ class Node:
             seCell = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1)
             BFStempFrontier.append(seCell)
 
-    def expand(self):
+    def expand(self,agent_no):
         BFSfrontier = []
         BFStempFrontier = []
         BFSvisited = []
@@ -271,7 +271,7 @@ class Node:
                             # create new node
                             newNode = Node(cell, self.belongTo)
                             newNode.setPathCost(self.pathCost + steps)
-                            newNode.saveHeuristic(self.belongTo.goalCell)
+                            newNode.saveHeuristic(self.belongTo.goals[agent_no])
                             newNode.saveF()
 
                             # append new node to tree
@@ -294,11 +294,10 @@ class Node:
                     else:
                         # if has key
                         if str("K" + str(cell_tag[1])) in self.keys:
-                            print("has key")
                             # create new node
                             newNode = Node(cell, self.belongTo)
                             newNode.setPathCost(self.pathCost + steps)
-                            newNode.saveHeuristic(self.belongTo.goalCell)
+                            newNode.saveHeuristic(self.belongTo.goals[agent_no])
                             newNode.saveF()
 
                             # inherit key
@@ -319,16 +318,14 @@ class Node:
                                 tempNode = tempNode.parent
                         # if does not have key
                         else:
-                            print("no key")
                             pass
-
 
 
                 elif cell_tag[0] == "T":
                     # create new node
                     newNode = Node(cell, self.belongTo)
                     newNode.setPathCost(self.pathCost + steps)
-                    newNode.saveHeuristic(self.belongTo.goalCell)
+                    newNode.saveHeuristic(self.belongTo.goals[agent_no])
                     newNode.saveF()
 
                     # append new node to tree
@@ -349,7 +346,7 @@ class Node:
                         # create new node
                         newNode = Node(cell, self.belongTo)
                         newNode.setPathCost(self.pathCost + steps)
-                        newNode.saveHeuristic(self.belongTo.goalCell)
+                        newNode.saveHeuristic(self.belongTo.goals[agent_no])
                         newNode.saveF()
 
                         # append new node to tree
@@ -473,13 +470,13 @@ class SearchTree:
 
             # if path found
             if self.currentNode[1].cell == self.goals[1]:  # goal node
-                tempNode = self.currentNode
+                tempNode = self.currentNode[1]
                 while (tempNode):
                     print(tempNode.cell.getSpecialValue())
                     tempNode = tempNode.parent
                 return self.MainStatus.REACHED
 
-            self.currentNode[1].expand()
+            self.currentNode[1].expand(1)
             for eachChild in self.currentNode[1].children:
                 self.frontier[1].append(eachChild)
                 return self.MainStatus.IN_PROGRESS
@@ -492,13 +489,9 @@ class SearchTree:
 
             # if path found
             if self.currentNode[agent_no].cell == self.goals[agent_no]:  # goal node
-                tempNode = self.currentNode[agent_no]
-                while (tempNode):
-                    print(tempNode.cell.getSpecialValue())
-                    tempNode = tempNode.parent
                 return self.MainStatus.REACHED
 
-            self.currentNode[agent_no].expand()
+            self.currentNode[agent_no].expand(agent_no)
             for eachChild in self.currentNode[agent_no].children:
                 self.frontier[agent_no].append(eachChild)
                 return self.MainStatus.IN_PROGRESS
@@ -521,6 +514,11 @@ class SearchTree:
                 res = self.BFS_OtherAgents(current_agent) # other agents reached their goals
                 if res != self.MainStatus.IN_PROGRESS: # reached goal or unsolvable
                     self.goals[current_agent] = self.generate_goal() # generate new goal for this agent
+
+            current_agent += 1
+
+            if current_agent >= self.number_agents:
+                current_agent = 1
 
     def generate_goal(self):
         random_goal = None
