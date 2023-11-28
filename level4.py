@@ -6,8 +6,6 @@ from enum import Enum
 import copy
 
 
-
-
 class Cell:
 
     def __init__(self, y, x, floor_no):
@@ -16,7 +14,6 @@ class Cell:
         self.floor_no = floor_no
         self.values = []
         self.belongTo = None
-
 
     def setBelongTo(self, value):
         self.belongTo = value
@@ -120,7 +117,7 @@ class Node:
     def getPathCost(self):
         return self.pathCost
 
-    def saveHeuristic(self, GoalCell): # calculate heuristic of the current cell
+    def saveHeuristic(self, GoalCell):  # calculate heuristic of the current cell
         self.heuristic = self.cell.getFloorsHeuristic(GoalCell)
         return self.heuristic
 
@@ -234,7 +231,7 @@ class Node:
             seCell = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1)
             BFStempFrontier.append(seCell)
 
-    def expand(self,agent_no):
+    def expand(self, agent_no):
         BFSfrontier = []
         BFStempFrontier = []
         BFSvisited = []
@@ -261,7 +258,7 @@ class Node:
                         tempNode = self
                         addNode = True
                         while tempNode:
-                            if cell_tag in tempNode.keys: # if current key is used before
+                            if cell_tag in tempNode.keys:  # if current key is used before
                                 addNode = False  # found duplicate
                                 break
                             tempNode = tempNode.parent
@@ -319,10 +316,12 @@ class Node:
                         # if does not have key
                         else:
                             door_no = int(cell_tag[1])
-                            if door_no <= len(self.belongTo.keys): # nếu số cửa nhỏ hơn số key đã có
-                               key_cell = self.belongTo.keys[door_no]
-                               if key_cell.floor_no != self.cell.floor_no:  # key is in a different floor from the door
-                                   self.belongTo.floor_priorities.append((self.cell.floor_no, key_cell.floor_no, 0)) # it should now try to go that key floor from this floor
+                            if door_no <= len(self.belongTo.keys):  # nếu số cửa nhỏ hơn số key đã có
+                                key_cell = self.belongTo.keys[door_no]
+                                if key_cell.floor_no != self.cell.floor_no:  # key is in a different floor from the door
+                                    self.belongTo.floor_priorities.append((self.cell.floor_no, key_cell.floor_no,
+                                                                           0))  # it should now try to go that key floor from this floor
+                                    self.belongTo.custom_goals.append(key_cell)  # add key to custom goal
                             pass
 
 
@@ -345,8 +344,9 @@ class Node:
                         self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
                     else:
                         if len(BFSfrontier) > 1:
-                            if (BFSfrontier[-1].getSpecialValue() == "DO" and cell_tag == "UP") or (BFSfrontier[-1].getSpecialValue() == "UP" and cell_tag == "DO"):
-                                pass # if previous is up and then this down (or the other way around) then we don't have to consider this
+                            if (BFSfrontier[-1].getSpecialValue() == "DO" and cell_tag == "UP") or (
+                                    BFSfrontier[-1].getSpecialValue() == "UP" and cell_tag == "DO"):
+                                pass  # if previous is up and then this down (or the other way around) then we don't have to consider this
 
                         # create new node
                         newNode = Node(cell, self.belongTo)
@@ -365,7 +365,7 @@ class Node:
                             copyCell.floor_no = copyCell.floor_no + 1  # go up one floor
                         else:
                             [value.replace("DO'", "UP") for value in copyCell.values]
-                            copyCell.floor_no = copyCell.floor_no - 1 # go down one floor
+                            copyCell.floor_no = copyCell.floor_no - 1  # go down one floor
 
                         # expand this cell
                         self.expandFrontierCell(copyCell, BFSvisited, BFSfrontier, BFStempFrontier)
@@ -384,15 +384,17 @@ class SearchTree:
         self.floors = {}
         self.agents = {}
         self.goals = {}
-        self.currentNode = {} # save for all agents
+        self.currentNode = {}  # save for all agents
         self.frontier = {}
         self.visited = {}
         self.root = {}
         self.keys = {}
 
-        self.floor_priorities = [] # if there is an object in this, it means that there is a priority for going to some floor. This array saves floor numbers
+        self.floor_priorities = []  # if there is an object in this, it means that there is a priority for going to some floor. This array saves floor numbers
 
-        self.number_agents = 0 # số agent
+        self.number_agents = 0  # số agent
+
+        self.custom_goals = []  # stack custom goal là để lưu chìa khoá khi tìm ở tầng khác
 
     def getInputFile(self, filePath):
         with open(filePath, "r") as file:
@@ -400,21 +402,21 @@ class SearchTree:
 
         rows, cols = map(int, lines[0].strip().split(','))
 
-        lines.pop(0) # delete first line
+        lines.pop(0)  # delete first line
 
         current_floor = 0
         i = 0
 
         for line in lines:
             if line.__contains__("floor"):
-                i = -1 # for row index
+                i = -1  # for row index
                 current_floor += 1
                 self.floors[current_floor] = Floor(rows, cols, current_floor)
                 continue
 
             row_values = list(map(str, line.strip().split(',')))
 
-            i+= 1 # increase row index
+            i += 1  # increase row index
 
             for j in range(cols):
                 cell_value = row_values[j]
@@ -455,14 +457,13 @@ class SearchTree:
 
                     self.agents[agent_no] = self.floors[current_floor].getCell(i, j)
 
-                    self.number_agents+=1
+                    self.number_agents += 1
 
-                if cell_value == "UP" or cell_value == "DO": # for stairs
+                if cell_value == "UP" or cell_value == "DO":  # for stairs
                     self.floors[current_floor].appendToCell(i, j, "0")
 
                 # Regardless of the condition, add the original cell value to the cell
                 self.floors[current_floor].appendToCell(i, j, cell_value)
-
 
     class MainStatus(Enum):
         REACHED = 1
@@ -470,9 +471,15 @@ class SearchTree:
         IN_PROGRESS = 0
 
     def AStar(self):
-        self.root[1].saveHeuristic(self.goals[1]) # save heuristic to goal of current state (root)
-        self.root[1].saveF()
+        finding_custom_goal = False
 
+        if len(self.custom_goals) > 0:
+            goal = self.custom_goals[-1]
+            finding_custom_goal = True
+        else:
+            goal = self.goals[1]
+        self.root[1].saveHeuristic(goal)  # save heuristic to goal of current state (root)
+        self.root[1].saveF()
 
         if self.frontier[1]:
             # self.visualize()
@@ -481,40 +488,46 @@ class SearchTree:
 
             special = self.currentNode[1].cell.getSpecialValue()
             if special == "UP" or special == "DO":
-                if len(self.floor_priorities) == 0: # không có priority
+                if len(self.floor_priorities) == 0:  # không có priority
                     return
 
                 from_to_floor = self.floor_priorities[-1]
-                if self.currentNode[1].cell.floor_no == from_to_floor[1]: # reached the floor
-                    if from_to_floor[2] == 0: # = 0 thì tức là mới một chiều xong, 1 là khứ hồi xong
-                        from_to_floor[2]+=1 # increase to 1
-                        from_to_floor[0], from_to_floor[1] = from_to_floor[1], from_to_floor[0] # swap
-                    else:
-                        self.floor_priorities.pop() # pop stack
-                else:
-                    if from_to_floor[0] <= self.currentNode[1].cell.floor_no < from_to_floor[1] and special != "UP": # đang đi lên
-                        return
-                    if from_to_floor[0] >= self.currentNode[1].cell.floor_no > from_to_floor[1] and special != "DO": # đang đi xuống
-                        return
+                if self.currentNode[1].cell.floor_no == from_to_floor[1]:  # reached the floor
+                    if from_to_floor[2] == 0:  # = 0 thì tức là mới một chiều xong, 1 là khứ hồi xong
+                        from_to_floor[2] += 1  # increase to 1
+                        from_to_floor[0], from_to_floor[1] = from_to_floor[1], from_to_floor[0]  # swap
 
+                        # khám phá tìm chìa khoá ở tầng này
+                    else:  # xong đi lên và đi xuống
+                        self.floor_priorities.pop()  # pop stack
+                else:
+                    if from_to_floor[0] <= self.currentNode[1].cell.floor_no < from_to_floor[
+                        1] and special != "UP":  # đang đi lên
+                        return
+                    if from_to_floor[0] >= self.currentNode[1].cell.floor_no > from_to_floor[
+                        1] and special != "DO":  # đang đi xuống
+                        return
 
             # if path found
-            if self.currentNode[1].cell == self.goals[1]:  # goal node
-                tempNode = self.currentNode[1]
-                while (tempNode):
-                    print(tempNode.cell.getSpecialValue())
-                    tempNode = tempNode.parent
-                return self.MainStatus.REACHED
+            if self.currentNode[1].cell == goal:  # goal node
+                if finding_custom_goal == False:
+                    tempNode = self.currentNode[1]
+                    while (tempNode):
+                        print(tempNode.cell.getSpecialValue())
+                        tempNode = tempNode.parent
+                    return self.MainStatus.REACHED
+                else:  # đang đi kiếm chìa khoá và kiếm được rồi
+                    self.custom_goals.pop()
 
             self.currentNode[1].expand(1)
             for eachChild in self.currentNode[1].children:
                 self.frontier[1].append(eachChild)
                 return self.MainStatus.IN_PROGRESS
         else:
-            return self.MainStatus.UNSOLVABLE # không giải được
+            return self.MainStatus.UNSOLVABLE  # không giải được
 
     def BFS_OtherAgents(self, agent_no):
-        if self.frontier[agent_no]: # changed to if for turn by turn
+        if self.frontier[agent_no]:  # changed to if for turn by turn
             self.currentNode[agent_no] = self.frontier[agent_no].pop(0)
 
             # if path found
@@ -532,18 +545,18 @@ class SearchTree:
         current_agent = 1  # Initialize the index to track the current agent
 
         while True:
-            if current_agent == 1: # A1
+            if current_agent == 1:  # A1
                 res = self.AStar()
-                if res != self.MainStatus.IN_PROGRESS: # reached goal or unsolvable
+                if res != self.MainStatus.IN_PROGRESS:  # reached goal or unsolvable
                     if res == self.MainStatus.REACHED:
                         print("Found goal")
                     else:
                         print("Cannot solve")
                     break
-            else: # other agents
-                res = self.BFS_OtherAgents(current_agent) # other agents reached their goals
-                if res != self.MainStatus.IN_PROGRESS: # reached goal or unsolvable
-                    self.goals[current_agent] = self.generate_goal() # generate new goal for this agent
+            else:  # other agents
+                res = self.BFS_OtherAgents(current_agent)  # other agents reached their goals
+                if res != self.MainStatus.IN_PROGRESS:  # reached goal or unsolvable
+                    self.goals[current_agent] = self.generate_goal()  # generate new goal for this agent
 
             current_agent += 1
 
