@@ -1,3 +1,4 @@
+import heapq
 import re
 import tkinter as tk
 from enum import Enum
@@ -41,8 +42,8 @@ class Cell:
     def getManhattanFrom(self, Cell):
         return abs(self.x - Cell.x) + abs(self.y - Cell.y)
 
-    def getFloorsHeuristic(self, Cell):
-        return self.getManhattanFrom(Cell) + abs(self.floor_no - Cell.floor_no)
+    def getFloorsHeuristic(self, GoalCell):
+        return self.getManhattanFrom(GoalCell) + abs(self.floor_no - GoalCell.floor_no)
 
     def getPhanTrungDucDistance(self, Cell):
         return max(abs(self.x - Cell.x), abs(self.y - Cell.y))
@@ -118,8 +119,8 @@ class Node:
     def getPathCost(self):
         return self.pathCost
 
-    def saveHeuristic(self, Cell):
-        self.heuristic = self.cell.getFloorsHeuristic(Cell)
+    def saveHeuristic(self, GoalCell): # calculate heuristic of the current cell
+        self.heuristic = self.cell.getFloorsHeuristic(GoalCell)
         return self.heuristic
 
     # f is total cost
@@ -382,7 +383,10 @@ class SearchTree:
         self.visited = []
         self.currentNode = None
         self.goalCell = None
+
         self.floors = {}
+        self.agents = {}
+        self.goals = {}
 
     def getInputFile(self, filePath):
         with open(filePath, "r") as file:
@@ -423,7 +427,10 @@ class SearchTree:
                     # Extract the character and integer parts from the cell value
                     char_part, num_part = re.match(r'([AKTD])(\d+)', cell_value).groups()
 
-                    self.goalCell = self.floors[current_floor].getCell(i, j)
+                    if cell_value[1] == "1": # nếu là goal của agent chính
+                        self.goalCell = self.floors[current_floor].getCell(i, j)
+                    else:
+                        self.goals = self.floors[current_floor].getCell(i, j)
 
                 # if startCell show up
                 if re.match(r'[A]\d+', cell_value):
@@ -432,9 +439,11 @@ class SearchTree:
                     # Extract the character and integer parts from the cell value
                     char_part, num_part = re.match(r'([AKTD])(\d+)', cell_value).groups()
 
-                    self.root = Node(self.floors[current_floor].getCell(i, j), self)
+                    self.root = Node(self.floors[current_floor].getCell(i, j), self) # start from here
                     self.frontier.append(self.root)
                     self.currentNode = self.root
+
+                    self.agents[int(cell_value[1])] = self.floors[current_floor].getCell(i, j)
 
                 if cell_value == "UP" or cell_value == "DO":
                     self.floors[current_floor].appendToCell(i, j, "0")
@@ -443,8 +452,8 @@ class SearchTree:
                 self.floors[current_floor].appendToCell(i, j, cell_value)
 
     def AStar(self):
-        self.root.saveHeuristic(self.goalCell)
-        self.root.saveF()  # save total cost
+        self.root.saveHeuristic(self.goalCell) # save heuristic to goal of current state (root)
+        self.root.saveF()
 
         while (self.frontier):
             # self.visualize()
@@ -465,6 +474,34 @@ class SearchTree:
                 pass
 
         print("No path found")
+
+    def BFS_Custom(self, start_cell, goal_cell):
+        frontier = []
+        frontier.append(start_cell)
+
+        while (frontier):
+            currentNode = frontier.pop(0)
+
+            # if path found
+            if currentNode.cell == goal_cell:  # goal node
+                tempNode = currentNode
+                while (tempNode):
+                    print(tempNode.cell.getSpecialValue())
+                    tempNode = tempNode.parent
+                return
+
+            currentNode.expand()
+            for eachChild in currentNode.children:
+                frontier.append(eachChild)
+                pass
+
+        print("No path found")
+
+    def agent_move(self, agent_no): # move other agents
+        start_cell = self.agents[agent_no] # get start pos
+        goal_cell = self.goals[agent_no] # get goal for this agent
+
+        self.BFS_Custom(start_cell, goal_cell) # this agent reach target
 
 
 searchTree2 = SearchTree()

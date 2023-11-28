@@ -30,8 +30,8 @@ class Cell:
     def checkValue(self, value):
         return value in self.values
     
-    def getManhattanFrom(self, Cell):
-        return abs(self.x - Cell.x) + abs(self.y - Cell.y)
+    def getManhattanFrom(self, GoalCell):
+        return abs(self.x - GoalCell.x) + abs(self.y - GoalCell.y)
     
     def getPhanTrungDucDistance(self,Cell):
         return max(abs(self.x - Cell.x), abs(self.y - Cell.y))
