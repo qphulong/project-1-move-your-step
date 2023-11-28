@@ -318,6 +318,10 @@ class Node:
                                 tempNode = tempNode.parent
                         # if does not have key
                         else:
+                            door_no = str(cell_tag[1])
+                            key_cell = self.belongTo.keys[door_no]
+                            if key_cell.floor_no != self.cell.floor_no:  # key is in a different floor from the door
+                               self.belongTo.floor_priorities.append((self.cell.floor_no, key_cell.floor_no, 0)) # it should now try to go that key floor from this floor
                             pass
 
 
@@ -334,7 +338,7 @@ class Node:
 
                 # stairs
                 elif cell_tag == "UP" or cell_tag == "DO":
-                    print(f"{cell.y} {cell.x} {cell_tag}")
+                    # up and do won't be expanded unless it's time to do so
                     # first expand (not worry about duplicates)
                     if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
                         self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
@@ -353,7 +357,7 @@ class Node:
                         self.children.append(newNode)
                         newNode.parent = self
 
-                        copyCell = copy.deepcopy(cell)
+                        copyCell = copy.copy(cell)
 
                         if cell_tag == "UP":
                             [value.replace("UP'", "DO") for value in copyCell.values]
@@ -383,6 +387,9 @@ class SearchTree:
         self.frontier = {}
         self.visited = {}
         self.root = {}
+        self.keys = {}
+
+        self.floor_priorities = [] # if there is an object in this, it means that there is a priority for going to some floor. This array saves floor numbers
 
         self.number_agents = 0 # số agent
 
@@ -417,6 +424,9 @@ class SearchTree:
 
                     # Extract the character and integer parts from the cell value
                     char_part, num_part = re.match(r'([KD])(\d+)', cell_value).groups()
+
+                    if char_part == "K":
+                        self.keys[num_part] = self.floors[current_floor].getCell(i, j)
 
                 # if goalCell show up
                 if re.match(r'[T]\d+', cell_value):
@@ -467,6 +477,25 @@ class SearchTree:
             # self.visualize()
             self.frontier[1].sort(key=lambda x: x.getF())  # priority queue
             self.currentNode[1] = self.frontier[1].pop(0)
+
+            special = self.currentNode[1].cell.getSpecialValue()
+            if special == "UP" or special == "DO":
+                if len(self.floor_priorities) == 0: # không có priority
+                    return
+
+                from_to_floor = self.floor_priorities[-1]
+                if self.currentNode[1].cell.floor_no == from_to_floor[1]: # reached the floor
+                    if from_to_floor[2] == 0: # = 0 thì tức là mới một chiều xong, 1 là khứ hồi xong
+                        from_to_floor[2]+=1 # increase to 1
+                        from_to_floor[0], from_to_floor[1] = from_to_floor[1], from_to_floor[0] # swap
+                    else:
+                        self.floor_priorities.pop() # pop stack
+                else:
+                    if from_to_floor[0] <= self.currentNode[1].cell.floor_no < from_to_floor[1] and special != "UP": # đang đi lên
+                        return
+                    if from_to_floor[0] >= self.currentNode[1].cell.floor_no > from_to_floor[1] and special != "DO": # đang đi xuống
+                        return
+
 
             # if path found
             if self.currentNode[1].cell == self.goals[1]:  # goal node
@@ -527,7 +556,7 @@ class SearchTree:
             random_floor = random.randint(1, len(self.floors))
             random_x = random.randint(0, self.floors[random_floor].rows - 1)
             random_y = random.randint(0, self.floors[random_floor].cols - 1)
-            random_goal = self.floors[random_floor].getCell(random_y, random_x)
+            random_goal = self.floors[random_floor].getCell(random_x, random_y)
 
         return random_goal
 
