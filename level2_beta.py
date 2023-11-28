@@ -1,6 +1,7 @@
 import re
 import tkinter as tk
 
+
 class Cell:
     def __init__(self, y, x):
         self.y = y
@@ -28,37 +29,37 @@ class Cell:
 
     def removeValue(self, value):
         self.values.remove(value)
-        
+
     def checkValue(self, value):
         return value in self.values
-    
+
     def getManhattanFrom(self, GoalCell):
         return abs(self.x - GoalCell.x) + abs(self.y - GoalCell.y)
-    
-    def getPhanTrungDucDistance(self,Cell):
+
+    def getPhanTrungDucDistance(self, Cell):
         return max(abs(self.x - Cell.x), abs(self.y - Cell.y))
-    
+
     def isWall(self):
         return "-1" in self.values
 
     def getY(self):
         return self.y
-    
+
     def getX(self):
         return self.x
-    
+
     def getBelongTo(self):
         return self.belongTo
 
     def __del__(self):
         pass
 
-class Floor:
-    def __init__(self,rows,cols):
-        self.rows=rows
-        self.cols=cols
-        self.table = [[Cell(i, j) for j in range(cols)] for i in range(rows)]
 
+class Floor:
+    def __init__(self, rows, cols):
+        self.rows = rows
+        self.cols = cols
+        self.table = [[Cell(i, j) for j in range(cols)] for i in range(rows)]
 
         for i in range(self.rows):
             for j in range(self.cols):
@@ -70,7 +71,7 @@ class Floor:
             for j in range(self.cols):
                 self.table[i][j].children = []
                 self.table[i][j].parrent = None
-        
+
     def getTagCell(self, stringTag):
         return next((cell for spread in self.listOfSpreads for cell in spread.tags if cell.checkValue(stringTag)), None)
 
@@ -83,60 +84,61 @@ class Floor:
 
     def checkValueInCell(self, row, col, value):
         return self.table[row][col].checkValue(value)
-    
+
     def getCell(self, row, col):
         return self.table[row][col]
-        
+
+
 class Node:
-    def __init__(self,Cell,SearchTree):
-        self.cell=Cell
+    def __init__(self, Cell, SearchTree):
+        self.cell = Cell
         self.belongTo = SearchTree
         self.pathCost = 0
         self.heuristic = 0
-        self.f=0
-        self.keys=[]
-        self.children=[]
-        self.parent=None
+        self.f = 0
+        self.keys = []
+        self.children = []
+        self.parent = None
         # attribute that is array of cell leads from parrent node to self
-        self.path=[]
+        self.path = []
 
-    def appendKey(self,value):
+    def appendKey(self, value):
         if value not in self.keys:
             self.keys.append(value)
 
     def setParrent(self, node):
-        self.parent=node   
+        self.parent = node
 
     def getParrent(self):
         return self.parent
-    
+
     def setPathCost(self, value):
         self.pathCost = value
 
     def getPathCost(self):
         return self.pathCost
-    
+
     def saveHeuristic(self, Cell):
         self.heuristic = self.cell.getManhattanFrom(Cell)
         return self.heuristic
-    
+
     def saveF(self):
         self.f = self.pathCost + self.heuristic
         return self.f
-    
+
     def getF(self):
         return self.f
-          
+
     # a function that add neighbour cell to tempFrontier if they not in frontier and
     # not in visited and not in tempFrontier
-    def expandFrontierCell(self,cell,BFSvisited,BFSfrontier,BFStempFrontier):
+    def expandFrontierCell(self, cell, BFSvisited, BFSfrontier, BFStempFrontier):
         # add N cell to tempFrontier
         if (
-            cell.y > 0 and
-            not self.belongTo.floor.getCell(cell.y - 1, cell.x).isWall() and
-            self.belongTo.floor.getCell(cell.y - 1, cell.x) not in BFSvisited and
-            self.belongTo.floor.getCell(cell.y - 1, cell.x) not in BFSfrontier and 
-            self.belongTo.floor.getCell(cell.y - 1, cell.x) not in BFStempFrontier
+                cell.y > 0 and
+                not self.belongTo.floor.getCell(cell.y - 1, cell.x).isWall() and
+                self.belongTo.floor.getCell(cell.y - 1, cell.x) not in BFSvisited and
+                self.belongTo.floor.getCell(cell.y - 1, cell.x) not in BFSfrontier and
+                self.belongTo.floor.getCell(cell.y - 1, cell.x) not in BFStempFrontier
         ):
             northCell = self.belongTo.floor.getCell(cell.y - 1, cell.x)
             BFStempFrontier.append(northCell)
@@ -145,11 +147,11 @@ class Node:
 
         # add W cell to tempFrontier
         if (
-            cell.x > 0 and
-            not self.belongTo.floor.getCell(cell.y, cell.x - 1).isWall() and
-            self.belongTo.floor.getCell(cell.y, cell.x - 1) not in BFSvisited and
-            self.belongTo.floor.getCell(cell.y, cell.x - 1) not in BFSfrontier and 
-            self.belongTo.floor.getCell(cell.y, cell.x - 1) not in BFStempFrontier
+                cell.x > 0 and
+                not self.belongTo.floor.getCell(cell.y, cell.x - 1).isWall() and
+                self.belongTo.floor.getCell(cell.y, cell.x - 1) not in BFSvisited and
+                self.belongTo.floor.getCell(cell.y, cell.x - 1) not in BFSfrontier and
+                self.belongTo.floor.getCell(cell.y, cell.x - 1) not in BFStempFrontier
         ):
             westCell = self.belongTo.floor.getCell(cell.y, cell.x - 1)
             BFStempFrontier.append(westCell)
@@ -158,11 +160,11 @@ class Node:
 
         # add S cell to tempFrontier
         if (
-            cell.y < self.belongTo.floor.rows - 1 and
-            not self.belongTo.floor.getCell(cell.y + 1, cell.x).isWall() and
-            self.belongTo.floor.getCell(cell.y + 1, cell.x) not in BFSvisited and
-            self.belongTo.floor.getCell(cell.y + 1, cell.x) not in BFSfrontier and
-            self.belongTo.floor.getCell(cell.y + 1, cell.x) not in BFStempFrontier
+                cell.y < self.belongTo.floor.rows - 1 and
+                not self.belongTo.floor.getCell(cell.y + 1, cell.x).isWall() and
+                self.belongTo.floor.getCell(cell.y + 1, cell.x) not in BFSvisited and
+                self.belongTo.floor.getCell(cell.y + 1, cell.x) not in BFSfrontier and
+                self.belongTo.floor.getCell(cell.y + 1, cell.x) not in BFStempFrontier
         ):
             southCell = self.belongTo.floor.getCell(cell.y + 1, cell.x)
             BFStempFrontier.append(southCell)
@@ -171,11 +173,11 @@ class Node:
 
         # add E cell to tempFrontier
         if (
-            cell.x < self.belongTo.floor.cols - 1 and
-            not self.belongTo.floor.getCell(cell.y, cell.x + 1).isWall() and
-            self.belongTo.floor.getCell(cell.y, cell.x + 1) not in BFSvisited and
-            self.belongTo.floor.getCell(cell.y, cell.x + 1) not in BFSfrontier and
-            self.belongTo.floor.getCell(cell.y, cell.x + 1) not in BFStempFrontier
+                cell.x < self.belongTo.floor.cols - 1 and
+                not self.belongTo.floor.getCell(cell.y, cell.x + 1).isWall() and
+                self.belongTo.floor.getCell(cell.y, cell.x + 1) not in BFSvisited and
+                self.belongTo.floor.getCell(cell.y, cell.x + 1) not in BFSfrontier and
+                self.belongTo.floor.getCell(cell.y, cell.x + 1) not in BFStempFrontier
         ):
             eastCell = self.belongTo.floor.getCell(cell.y, cell.x + 1)
             BFStempFrontier.append(eastCell)
@@ -184,13 +186,13 @@ class Node:
 
         # add NE cell to tempFrontier
         if (
-            cell.y > 0 and cell.x < self.belongTo.floor.cols - 1 and
-            not self.belongTo.floor.getCell(cell.y - 1, cell.x).isWall() and
-            not self.belongTo.floor.getCell(cell.y,cell.x + 1).isWall() and
-            not self.belongTo.floor.getCell(cell.y - 1, cell.x + 1).isWall() and
-            self.belongTo.floor.getCell(cell.y - 1, cell.x + 1) not in BFSvisited and
-            self.belongTo.floor.getCell(cell.y - 1, cell.x + 1) not in BFSfrontier and
-            self.belongTo.floor.getCell(cell.y - 1, cell.x + 1) not in BFStempFrontier
+                cell.y > 0 and cell.x < self.belongTo.floor.cols - 1 and
+                not self.belongTo.floor.getCell(cell.y - 1, cell.x).isWall() and
+                not self.belongTo.floor.getCell(cell.y, cell.x + 1).isWall() and
+                not self.belongTo.floor.getCell(cell.y - 1, cell.x + 1).isWall() and
+                self.belongTo.floor.getCell(cell.y - 1, cell.x + 1) not in BFSvisited and
+                self.belongTo.floor.getCell(cell.y - 1, cell.x + 1) not in BFSfrontier and
+                self.belongTo.floor.getCell(cell.y - 1, cell.x + 1) not in BFStempFrontier
         ):
             neCell = self.belongTo.floor.getCell(cell.y - 1, cell.x + 1)
             BFStempFrontier.append(neCell)
@@ -199,13 +201,13 @@ class Node:
 
         # Add NW cell to tempFrontier
         if (
-            cell.y > 0 and cell.x > 0 and
-            not self.belongTo.floor.getCell(cell.y - 1, cell.x).isWall() and
-            not self.belongTo.floor.getCell(cell.y, cell.x - 1).isWall() and
-            not self.belongTo.floor.getCell(cell.y - 1, cell.x - 1).isWall() and
-            self.belongTo.floor.getCell(cell.y - 1, cell.x - 1) not in BFSvisited and
-            self.belongTo.floor.getCell(cell.y - 1, cell.x - 1) not in BFSfrontier and
-            self.belongTo.floor.getCell(cell.y - 1, cell.x - 1) not in BFStempFrontier
+                cell.y > 0 and cell.x > 0 and
+                not self.belongTo.floor.getCell(cell.y - 1, cell.x).isWall() and
+                not self.belongTo.floor.getCell(cell.y, cell.x - 1).isWall() and
+                not self.belongTo.floor.getCell(cell.y - 1, cell.x - 1).isWall() and
+                self.belongTo.floor.getCell(cell.y - 1, cell.x - 1) not in BFSvisited and
+                self.belongTo.floor.getCell(cell.y - 1, cell.x - 1) not in BFSfrontier and
+                self.belongTo.floor.getCell(cell.y - 1, cell.x - 1) not in BFStempFrontier
         ):
             nwCell = self.belongTo.floor.getCell(cell.y - 1, cell.x - 1)
             BFStempFrontier.append(nwCell)
@@ -214,13 +216,13 @@ class Node:
 
         # Add SW cell to tempFrontier
         if (
-            cell.y < self.belongTo.floor.rows - 1 and cell.x > 0 and
-            not self.belongTo.floor.getCell(cell.y + 1, cell.x).isWall() and
-            not self.belongTo.floor.getCell(cell.y, cell.x - 1).isWall() and
-            not self.belongTo.floor.getCell(cell.y + 1, cell.x - 1).isWall() and
-            self.belongTo.floor.getCell(cell.y + 1, cell.x - 1) not in BFSvisited and
-            self.belongTo.floor.getCell(cell.y + 1, cell.x - 1) not in BFSfrontier and
-            self.belongTo.floor.getCell(cell.y + 1, cell.x - 1) not in BFStempFrontier
+                cell.y < self.belongTo.floor.rows - 1 and cell.x > 0 and
+                not self.belongTo.floor.getCell(cell.y + 1, cell.x).isWall() and
+                not self.belongTo.floor.getCell(cell.y, cell.x - 1).isWall() and
+                not self.belongTo.floor.getCell(cell.y + 1, cell.x - 1).isWall() and
+                self.belongTo.floor.getCell(cell.y + 1, cell.x - 1) not in BFSvisited and
+                self.belongTo.floor.getCell(cell.y + 1, cell.x - 1) not in BFSfrontier and
+                self.belongTo.floor.getCell(cell.y + 1, cell.x - 1) not in BFStempFrontier
         ):
             swCell = self.belongTo.floor.getCell(cell.y + 1, cell.x - 1)
             BFStempFrontier.append(swCell)
@@ -229,19 +231,18 @@ class Node:
 
         # Add SE cell to tempFrontier
         if (
-            cell.y < self.belongTo.floor.rows - 1 and cell.x < self.belongTo.floor.cols - 1 and
-            not self.belongTo.floor.getCell(cell.y + 1, cell.x).isWall() and
-            not self.belongTo.floor.getCell(cell.y, cell.x + 1).isWall() and
-            not self.belongTo.floor.getCell(cell.y + 1, cell.x + 1).isWall() and
-            self.belongTo.floor.getCell(cell.y + 1, cell.x + 1) not in BFSvisited and
-            self.belongTo.floor.getCell(cell.y + 1, cell.x + 1) not in BFSfrontier and
-            self.belongTo.floor.getCell(cell.y + 1, cell.x + 1) not in BFStempFrontier
+                cell.y < self.belongTo.floor.rows - 1 and cell.x < self.belongTo.floor.cols - 1 and
+                not self.belongTo.floor.getCell(cell.y + 1, cell.x).isWall() and
+                not self.belongTo.floor.getCell(cell.y, cell.x + 1).isWall() and
+                not self.belongTo.floor.getCell(cell.y + 1, cell.x + 1).isWall() and
+                self.belongTo.floor.getCell(cell.y + 1, cell.x + 1) not in BFSvisited and
+                self.belongTo.floor.getCell(cell.y + 1, cell.x + 1) not in BFSfrontier and
+                self.belongTo.floor.getCell(cell.y + 1, cell.x + 1) not in BFStempFrontier
         ):
             seCell = self.belongTo.floor.getCell(cell.y + 1, cell.x + 1)
             BFStempFrontier.append(seCell)
             cell.children.append(seCell)
             seCell.parrent = cell
-        
 
     def expand(self):
         BFSfrontier = []
@@ -260,114 +261,115 @@ class Node:
 
             for cell in BFSfrontier:
 
-                #analize cell
+                # analize cell
                 cell_tag = cell.getSpecialValue()
-                #normal cell
-                if cell_tag == "" or cell_tag[0]=="A":
-                    self.expandFrontierCell(cell,BFSvisited,BFSfrontier,BFStempFrontier)
+                # normal cell
+                if cell_tag == "" or cell_tag[0] == "A":
+                    self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
                 elif cell_tag[0] == "K":
-                    #first expand, cause it will not expand since first cell in frontier and dup key
-                    if len(BFSfrontier)==1 and BFSfrontier[0]==self.cell:
-                        self.expandFrontierCell(cell,BFSvisited,BFSfrontier,BFStempFrontier)
+                    # first expand, cause it will not expand since first cell in frontier and dup key
+                    if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
+                        self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
                     else:
-                        #check dups
-                        tempNode=self
-                        addNode=True
-                        while(tempNode):
+                        # check dups
+                        tempNode = self
+                        addNode = True
+                        while (tempNode):
                             if cell_tag in tempNode.keys:
                                 addNode = False
                                 break
-                            tempNode=tempNode.parent
+                            tempNode = tempNode.parent
 
                         if addNode:
-                            #create new node
-                            newNode = Node(cell,self.belongTo)
-                            newNode.setPathCost(self.pathCost+steps)
+                            # create new node
+                            newNode = Node(cell, self.belongTo)
+                            newNode.setPathCost(self.pathCost + steps)
                             newNode.saveHeuristic(self.belongTo.goalCell)
                             newNode.saveF()
 
-                            #append new node to tree
+                            # append new node to tree
                             self.children.append(newNode)
-                            newNode.parent=self
+                            newNode.parent = self
 
-                            #inherit and append new key
+                            # inherit and append new key
                             for eachKey in self.keys:
                                 newNode.appendKey(eachKey)
                             newNode.appendKey(cell_tag)
 
-                            #get path from parrent to this node
+                            # get path from parrent to this node
                             tempCell = cell
-                            while(tempCell):
+                            while (tempCell):
                                 self.path.append(tempCell)
-                                tempCell=tempCell.parrent
+                                tempCell = tempCell.parrent
 
-                            #expand this cell
-                            self.expandFrontierCell(cell,BFSvisited,BFSfrontier,BFStempFrontier)
+                            # expand this cell
+                            self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
 
                 elif cell_tag[0] == "D":
-                    #first expand, cause it will not expand since first cell in frontier and dup key
-                    if len(BFSfrontier)==1 and BFSfrontier[0]==self.cell:
-                        self.expandFrontierCell(cell,BFSvisited,BFSfrontier,BFStempFrontier)
+                    # first expand, cause it will not expand since first cell in frontier and dup key
+                    if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
+                        self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
                     else:
                         # if has key
-                        if str("K"+str(cell_tag[1])) in self.keys:
-                            #create new node
-                            newNode = Node(cell,self.belongTo)
-                            newNode.setPathCost(self.pathCost+steps)
+                        if str("K" + str(cell_tag[1])) in self.keys:
+                            # create new node
+                            newNode = Node(cell, self.belongTo)
+                            newNode.setPathCost(self.pathCost + steps)
                             newNode.saveHeuristic(self.belongTo.goalCell)
                             newNode.saveF()
-                            
-                            #inherit key
+
+                            # inherit key
                             for eachKey in self.keys:
                                 newNode.appendKey(eachKey)
 
-                            #append new node to tree
+                            # append new node to tree
                             self.children.append(newNode)
-                            newNode.parent=self
+                            newNode.parent = self
 
-                            #get path from parrent to this node
+                            # get path from parrent to this node
                             tempCell = cell
-                            while(tempCell):
+                            while (tempCell):
                                 self.path.append(tempCell)
-                                tempCell=tempCell.parrent
+                                tempCell = tempCell.parrent
 
                             # if go through the same door with same keys,then delete this new node
                             tempNode = self
-                            while(tempNode):
+                            while (tempNode):
                                 if len(newNode.keys) == (tempNode.keys):
                                     self.children.remove(newNode)
-                                    newNode.parent=None
+                                    newNode.parent = None
                                     del newNode
-                                tempNode=tempNode.parent
-                        #if does not have key
+                                tempNode = tempNode.parent
+                        # if does not have key
                         else:
                             pass
 
                 elif cell_tag[0] == "T":
-                    #create new node
-                    newNode = Node(cell,self.belongTo)
-                    newNode.setPathCost(self.pathCost+steps)
+                    # create new node
+                    newNode = Node(cell, self.belongTo)
+                    newNode.setPathCost(self.pathCost + steps)
                     newNode.saveHeuristic(self.belongTo.goalCell)
                     newNode.saveF()
 
-                    #append new node to tree
+                    # append new node to tree
                     self.children.append(newNode)
-                    newNode.parent=self
+                    newNode.parent = self
 
-                    #get path from parrent to this node
+                    # get path from parrent to this node
                     tempCell = cell
-                    while(tempCell):
+                    while (tempCell):
                         self.path.append(tempCell)
-                        tempCell=tempCell.parrent
+                        tempCell = tempCell.parrent
 
                 BFSvisited.append(cell)
             pass
 
-            #update the frontier
-            BFSfrontier=BFStempFrontier
-            BFStempFrontier=[]
-        #after finish the loop, which is expand a node in search tree, set all cell relation to empty
+            # update the frontier
+            BFSfrontier = BFStempFrontier
+            BFStempFrontier = []
+        # after finish the loop, which is expand a node in search tree, set all cell relation to empty
         self.cell.belongTo.clearAllRelation()
+
 
 class SearchTree:
     def __init__(self):
@@ -377,14 +379,14 @@ class SearchTree:
         self.currentNode = None
         self.goalCell = None
         self.floor = None
-    
-    def getInputFile(self,filePath):
-        with open (filePath, "r") as file:
+
+    def getInputFile(self, filePath):
+        with open(filePath, "r") as file:
             lines = file.readlines()
-        
+
         rows, cols = map(int, lines[0].strip().split(','))
-        self.floor=Floor(rows, cols)
-        
+        self.floor = Floor(rows, cols)
+
         for i in range(2, len(lines)):
             row_values = list(map(str, lines[i].strip().split(',')))
 
@@ -398,16 +400,16 @@ class SearchTree:
                     # Extract the character and integer parts from the cell value
                     char_part, num_part = re.match(r'([KD])(\d+)', cell_value).groups()
 
-                #if goalCell show up
+                # if goalCell show up
                 if re.match(r'[T]\d+', cell_value):
                     self.floor.appendToCell(i - 2, j, "0")
 
                     # Extract the character and integer parts from the cell value
                     char_part, num_part = re.match(r'([AKTD])(\d+)', cell_value).groups()
 
-                    self.goalCell=self.floor.getCell(i - 2, j)
+                    self.goalCell = self.floor.getCell(i - 2, j)
 
-                #if startCell show up
+                # if startCell show up
                 if re.match(r'[A]\d+', cell_value):
                     self.floor.appendToCell(i - 2, j, "0")
 
@@ -416,7 +418,7 @@ class SearchTree:
 
                     self.root = Node(self.floor.getCell(i - 2, j), self)
                     self.frontier.append(self.root)
-                    self.currentNode=self.root
+                    self.currentNode = self.root
 
                 # Regardless of the condition, add the original cell value to the cell
                 self.floor.appendToCell(i - 2, j, cell_value)
@@ -424,20 +426,20 @@ class SearchTree:
     def AStar(self):
         self.root.saveHeuristic(self.goalCell)
         self.root.saveF()
-        while(self.frontier):
-            #self.visualize()
+        while (self.frontier):
+            # self.visualize()
             self.frontier.sort(key=lambda x: x.getF())
             self.currentNode = self.frontier.pop(0)
 
             # if path found
             if self.currentNode.cell == self.goalCell:
                 tempNode = self.currentNode
-                while(tempNode):
+                while (tempNode):
                     print(tempNode.cell.getSpecialValue())
-                    tempNode=tempNode.parent
+                    tempNode = tempNode.parent
                 self.visualize()
                 return
-            
+
             self.currentNode.expand()
             for eachChild in self.currentNode.children:
                 self.frontier.append(eachChild)
@@ -455,15 +457,15 @@ class SearchTree:
         canvas.pack()
 
         for i in range(self.floor.rows):
-                for j in range(self.floor.cols):
-                    x0, y0 = j * 20, i * 20
-                    x1, y1 = (j + 1) * 20, (i + 1) * 20
+            for j in range(self.floor.cols):
+                x0, y0 = j * 20, i * 20
+                x1, y1 = (j + 1) * 20, (i + 1) * 20
 
-                    # Set color for cells with value "-1" to black
-                    if self.floor.table[i][j].checkValue("-1"):
-                        canvas.create_rectangle(x0, y0, x1, y1, fill="black")
-                    else:
-                        canvas.create_rectangle(x0, y0, x1, y1, fill="white")
+                # Set color for cells with value "-1" to black
+                if self.floor.table[i][j].checkValue("-1"):
+                    canvas.create_rectangle(x0, y0, x1, y1, fill="black")
+                else:
+                    canvas.create_rectangle(x0, y0, x1, y1, fill="white")
 
         tempNode = self.currentNode
         while tempNode:
@@ -490,7 +492,7 @@ class SearchTree:
                 for j in range(self.floor.cols):
                     x0, y0 = j * 20, i * 20
                     x1, y1 = (j + 1) * 20, (i + 1) * 20
-                    
+
                     # Set color for cells pointed by tempNode to red
                     if tempNode.cell and self.floor.table[i][j] == tempNode.cell:
                         canvas.create_rectangle(x0, y0, x1, y1, fill="red")

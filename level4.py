@@ -243,8 +243,10 @@ class Node:
         BFSfrontier = []
         BFStempFrontier = []
         BFSvisited = []
+
         BFSfrontier.append(self.cell)
         steps = -1
+
         while BFSfrontier:
             steps += 1
 
@@ -346,7 +348,6 @@ class Node:
 
                 # stairs
                 elif cell_tag == "UP" or cell_tag == "DO":
-                    # create new node
                     newNode = Node(cell, self.belongTo)
                     newNode.setPathCost(self.pathCost + steps)
                     newNode.saveHeuristic(self.belongTo.custom_goals[-1])
@@ -359,13 +360,23 @@ class Node:
                     copyCell = copy.copy(cell)
 
                     if cell_tag == "UP":
-                        [value.replace("UP'", "DO") for value in copyCell.values]
-                        copyCell.floor_no = copyCell.floor_no + 1  # go up one floor
+                        copyCell.values = [value.replace("UP", "DO") for value in copyCell.values]
+                        copyCell.floor_no += 1  # Go up one floor
                     else:
-                        [value.replace("DO'", "UP") for value in copyCell.values]
-                        copyCell.floor_no = copyCell.floor_no - 1  # go down one floor
+                        copyCell.values = [value.replace("DO", "UP") for value in copyCell.values]
+                        copyCell.floor_no -= 1  # Go down one floor
 
-                    # expand this cell
+                    # Create a new node with the updated cell
+                    newNode = Node(copyCell, self.belongTo)
+                    newNode.setPathCost(self.pathCost + steps)
+                    newNode.saveHeuristic(self.belongTo.custom_goals[-1])
+                    newNode.saveF()
+
+                    # Append new node to tree
+                    self.children.append(newNode)
+                    newNode.parent = self
+
+                    # Expand the neighbors of the updated cell
                     self.expandFrontierCell(copyCell, BFSvisited, BFSfrontier, BFStempFrontier)
 
                 BFSvisited.append(cell)
@@ -374,7 +385,6 @@ class Node:
             # update the frontier
             BFSfrontier = BFStempFrontier
             BFStempFrontier = []
-            pass
 
 
 class SearchTree:
