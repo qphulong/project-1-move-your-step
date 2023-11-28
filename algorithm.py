@@ -5,15 +5,24 @@ import numpy as np
 
 
 class Algorithm:
+    def heuristic_Level1(self, current_state, goal_x, goal_y):
+        return np.sqrt((current_state.agent_Xposition - goal_x)**2 + (current_state.agent_Yposition - goal_y)**2)
+
     def BFS_Level1(self, start):
         visited = set()
         current_path = []
-        frontier = [start]  # queue
+        frontier = []  # queue
+
+        goal_x = start.goal_Xposition
+        goal_y = start.goal_Yposition
+
+        heapq.heappush(frontier, (self.heuristic_Level1(start, goal_x, goal_y) + 0, start))  # priority queue based on moves
 
         found = False
 
         while frontier:
-            current_state = frontier.pop(0)
+
+            current_state = heapq.heappop(frontier)[1]
 
             if current_state is None:
                 continue
@@ -34,8 +43,29 @@ class Algorithm:
             successors = current_state.successors()
 
             for successor in successors:
-                if successor is not None and successor.floor_rep() not in visited and successor not in frontier:
-                    frontier.append(successor)
+                if successor is None:
+                    continue
+
+                total_cost = successor.moves + self.heuristic_Level1(successor, goal_x, goal_y)
+
+                if tuple(successor.floor_rep()) not in visited and not any(
+                        successor == s for _, s in frontier
+                ):
+                    heapq.heappush(frontier, (total_cost, successor))
+                elif any(
+                        total_cost < cost
+                        for cost, s in frontier
+                        if s.floor_rep() == successor.floor_rep()
+                ):
+                    # if in frontier already but higher path cost
+                    frontier = [
+                        (cost, s)
+                        for cost, s in frontier
+                        if s.floor_rep() != successor.floor_rep()
+                    ]
+                    heapq.heappush(
+                        frontier, (total_cost, successor)
+                    )  # replace with lower path cost
 
         if found == False:
             current_path = None
@@ -61,7 +91,7 @@ class Algorithm:
 
             visited.add(current_state.floor_rep())
 
-            current_state.checkKey() # lượm key
+            current_state.checkKey()  # lượm key
 
             # check goal
             if current_state.checkGoal(goal):
@@ -156,9 +186,9 @@ class Algorithm:
 
             return self.discover_floor(level4, next_floor, goal_floor, goal)
 
-    def visualize_path(self, floor, path):
-        board_size = 8  # Define the size of the board
-        cell_size = 50  # Define the size of each cell in pixels
+    def visualize_path(self, start_x, start_y, goal_x, goal_y, floor, path):
+        board_size = 50  # Define the size of the board
+        cell_size = 20  # Define the size of each cell in pixels
 
         canvas = tk.Canvas(root, width=board_size * cell_size, height=board_size * cell_size)
         canvas.pack()
@@ -182,16 +212,9 @@ class Algorithm:
                 text_y = y1 + cell_size // 2
 
                 canvas.create_text(text_x, text_y,
-                                   text=(floor.table[i][j].getValue() if floor.table[i][j].isAgent() or
-                                                                         floor.table[i][
-                                                                             j].isGoal() or floor.table[i][
-                                                                             j].isKey() or floor.table[i][
-                                                                             j].isDoor() else "")
+                                   text=("A1" if i == start_x and j == start_y else "T1" if i == goal_x and j == goal_y else "")
                                    , fill=(
-                        "blue" if floor.table[i][j].isGoal() else "red" if floor.table[i][j].isAgent()
-                        else "yellow" if floor.table[i][j].isKey()
-                        else "orange" if floor.table[i][j].isDoor()
-                        else "white")
-                                   , font=("Arial", 25))
+                        "blue" if i == goal_x and j == goal_y else "red" if i == start_x and j == start_y else "white")
+                                   , font=("Arial", 10))
 
         root.mainloop()

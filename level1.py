@@ -19,6 +19,9 @@ class Level1:
     def __hash__(self):
         return hash(self.floor_rep())
 
+    def __lt__(self, other):
+        return self.moves < other.moves
+
     def floor_rep(self):
         rep = (self.agent_Xposition, self.agent_Yposition)
         return rep
@@ -55,7 +58,7 @@ class Level1:
         self.moves = prev.moves + 1
 
     def moveN(self):
-        copyState = copy.deepcopy(self)
+        copyState = copy.copy(self)
         copyState.setPrevious(self)
 
         if copyState.agent_Xposition > 0 and copyState.floor.checkValueInCell(copyState.agent_Xposition-1, copyState.agent_Yposition, "-1")==False:
@@ -65,9 +68,9 @@ class Level1:
             copyState.floor.appendToCell(copyState.agent_Xposition, copyState.agent_Yposition, "A1")
             return copyState
         return None
-    
+
     def moveS(self):
-        copyState = copy.deepcopy(self)
+        copyState = copy.copy(self)
         copyState.setPrevious(self)
 
         if copyState.agent_Xposition < copyState.floor.rows - 1 and copyState.floor.checkValueInCell(copyState.agent_Xposition + 1, copyState.agent_Yposition, "-1") == False:
@@ -79,7 +82,7 @@ class Level1:
         return None
 
     def moveE(self):
-        copyState = copy.deepcopy(self)
+        copyState = copy.copy(self)
         copyState.setPrevious(self)
 
         if copyState.agent_Yposition < copyState.floor.cols - 1 and copyState.floor.checkValueInCell(copyState.agent_Xposition, copyState.agent_Yposition + 1, "-1") == False:
@@ -91,7 +94,7 @@ class Level1:
         return None
 
     def moveW(self):
-        copyState = copy.deepcopy(self)
+        copyState = copy.copy(self)
         copyState.setPrevious(self)
 
         if copyState.agent_Yposition > 0 and copyState.floor.checkValueInCell(copyState.agent_Xposition, copyState.agent_Yposition - 1, "-1") == False:
@@ -103,7 +106,7 @@ class Level1:
         return None
 
     def moveNE(self):
-        copyState = copy.deepcopy(self)
+        copyState = copy.copy(self)
         copyState.setPrevious(self)
 
         destination_x = copyState.agent_Xposition - 1
@@ -127,9 +130,9 @@ class Level1:
             return copyState
         return None
 
-    
+
     def moveSE(self):
-        copyState = copy.deepcopy(self)
+        copyState = copy.copy(self)
         copyState.setPrevious(self)
 
         destination_y = copyState.agent_Yposition + 1
@@ -155,7 +158,7 @@ class Level1:
 
 
     def moveSW(self):
-        copyState = copy.deepcopy(self)
+        copyState = copy.copy(self)
         copyState.setPrevious(self)
 
         destination_x = copyState.agent_Xposition + 1
@@ -181,7 +184,7 @@ class Level1:
 
 
     def moveNW(self):
-        copyState = copy.deepcopy(self)
+        copyState = copy.copy(self)
         copyState.setPrevious(self)
 
         destination_y = copyState.agent_Yposition - 1
@@ -215,11 +218,15 @@ class Level1:
 
     def solve(self):
         path = self.algo.BFS_Level1(self)[1]
+        start_x = self.agent_Xposition
+        start_y = self.agent_Yposition
+        goal_x = self.goal_Xposition
+        goal_y = self.goal_Yposition
         if path is None:
             print("No solutions found")
             return False
         print(f"Path: {path}")
-        self.algo.visualize_path(self.floor,path)
+        self.algo.visualize_path(start_x,start_y,goal_x,goal_y,self.floor,path)
         return True
 
 

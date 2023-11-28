@@ -6,7 +6,7 @@ from level4 import Level4
 # m.getInputFile("input//input1-level1.txt")
 
 m = Level1()
-m.getInputFile("input//input4_level1.txt")
+m.getInputFile("input//input4-level1.txt")
 
 while True:
     if m.solve() == False:

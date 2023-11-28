@@ -174,7 +174,7 @@ class Level4:
             self.obtained_keys.append(key_no)
 
     def moveUp(self, current_agent):
-        copyState = copy.deepcopy(self)
+        copyState = copy.copy(self)
         copyState.setPrevious(self, current_agent)
 
         current_floor = copyState.agents[current_agent].floor
@@ -189,7 +189,7 @@ class Level4:
         copyState.agents[current_agent] = self.Pos(current_floor+1,x,y)
 
     def moveDown(self, current_agent):
-        copyState = copy.deepcopy(self)
+        copyState = copy.copy(self)
         copyState.setPrevious(self, current_agent)
 
         current_floor = copyState.agents[current_agent].floor
@@ -204,7 +204,7 @@ class Level4:
         copyState.agents[current_agent] = self.Pos(current_floor-1,x,y)
 
     def moveN(self, current_agent):
-        copyState = copy.deepcopy(self)
+        copyState = copy.copy(self)
         copyState.setPrevious(self, current_agent)
 
         current_floor = copyState.agents[current_agent].floor
@@ -228,7 +228,7 @@ class Level4:
         return None
 
     def moveS(self, current_agent):
-        copyState = copy.deepcopy(self)
+        copyState = copy.copy(self)
         copyState.setPrevious(self, current_agent)
 
         current_floor = copyState.agents[current_agent].floor
@@ -251,7 +251,7 @@ class Level4:
         return None
 
     def moveE(self, current_agent):
-        copyState = copy.deepcopy(self)
+        copyState = copy.copy(self)
         copyState.setPrevious(self, current_agent)
 
         current_floor = copyState.agents[current_agent].floor
@@ -274,7 +274,7 @@ class Level4:
         return None
 
     def moveW(self, current_agent):
-        copyState = copy.deepcopy(self)
+        copyState = copy.copy(self)
         copyState.setPrevious(self, current_agent)
 
         current_floor = copyState.agents[current_agent].floor
@@ -297,7 +297,7 @@ class Level4:
         return None
 
     def moveNE(self, current_agent):
-        copyState = copy.deepcopy(self)
+        copyState = copy.copy(self)
         copyState.setPrevious(self, current_agent)
 
         current_floor = copyState.agents[current_agent].floor
@@ -335,7 +335,7 @@ class Level4:
         return None
 
     def moveSE(self, current_agent):
-        copyState = copy.deepcopy(self)
+        copyState = copy.copy(self)
         copyState.setPrevious(self, current_agent)
 
         current_floor = copyState.agents[current_agent].floor
@@ -373,7 +373,7 @@ class Level4:
         return None
 
     def moveSW(self, current_agent):
-        copyState = copy.deepcopy(self)
+        copyState = copy.copy(self)
         copyState.setPrevious(self, current_agent)
 
         current_floor = copyState.agents[current_agent].floor
@@ -410,7 +410,7 @@ class Level4:
         return None
 
     def moveNW(self, current_agent):
-        copyState = copy.deepcopy(self)
+        copyState = copy.copy(self)
         copyState.setPrevious(self, current_agent)
 
         current_floor = copyState.agents[current_agent].floor
