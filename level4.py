@@ -96,6 +96,7 @@ class Floor:
                     return self.table[i][j]
         return None
 
+
 class Node:
     def __init__(self, Cell, SearchTree):
         self.cell = Cell
@@ -139,6 +140,7 @@ class Node:
     # not in visited and not in tempFrontier
     def expandFrontierCell(self, cell, BFSvisited, BFSfrontier, BFStempFrontier):
         floor_no = cell.floor_no
+        print(f"Current floor {floor_no} - Cell {cell.y} {cell.x} {cell.getSpecialValue()}")
 
         # add N cell to tempFrontier
         if (
@@ -344,37 +346,27 @@ class Node:
 
                 # stairs
                 elif cell_tag == "UP" or cell_tag == "DO":
-                    # up and do won't be expanded unless it's time to do so
-                    # first expand (not worry about duplicates)
-                    if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
-                        self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
+                    # create new node
+                    newNode = Node(cell, self.belongTo)
+                    newNode.setPathCost(self.pathCost + steps)
+                    newNode.saveHeuristic(self.belongTo.custom_goals[-1])
+                    newNode.saveF()
+
+                    # append new node to tree
+                    self.children.append(newNode)
+                    newNode.parent = self
+
+                    copyCell = copy.copy(cell)
+
+                    if cell_tag == "UP":
+                        [value.replace("UP'", "DO") for value in copyCell.values]
+                        copyCell.floor_no = copyCell.floor_no + 1  # go up one floor
                     else:
-                        if len(BFSfrontier) > 1:
-                            if (BFSfrontier[-1].getSpecialValue() == "DO" and cell_tag == "UP") or (
-                                    BFSfrontier[-1].getSpecialValue() == "UP" and cell_tag == "DO"):
-                                pass  # if previous is up and then this down (or the other way around) then we don't have to consider this
+                        [value.replace("DO'", "UP") for value in copyCell.values]
+                        copyCell.floor_no = copyCell.floor_no - 1  # go down one floor
 
-                        # create new node
-                        newNode = Node(cell, self.belongTo)
-                        newNode.setPathCost(self.pathCost + steps)
-                        newNode.saveHeuristic(self.belongTo.goals[agent_no])
-                        newNode.saveF()
-
-                        # append new node to tree
-                        self.children.append(newNode)
-                        newNode.parent = self
-
-                        copyCell = copy.copy(cell)
-
-                        if cell_tag == "UP":
-                            [value.replace("UP'", "DO") for value in copyCell.values]
-                            copyCell.floor_no = copyCell.floor_no + 1  # go up one floor
-                        else:
-                            [value.replace("DO'", "UP") for value in copyCell.values]
-                            copyCell.floor_no = copyCell.floor_no - 1  # go down one floor
-
-                        # expand this cell
-                        self.expandFrontierCell(copyCell, BFSvisited, BFSfrontier, BFStempFrontier)
+                    # expand this cell
+                    self.expandFrontierCell(copyCell, BFSvisited, BFSfrontier, BFStempFrontier)
 
                 BFSvisited.append(cell)
             pass
