@@ -16,7 +16,8 @@ class Cell:
         self.floor_no = floor_no
         self.values = []
         self.belongTo = None
-
+        self.parent = None
+        self.children = []
 
     def setBelongTo(self, value):
         self.belongTo = value
@@ -76,6 +77,12 @@ class Floor:
             for j in range(self.cols):
                 self.table[i][j].setBelongTo(self)
 
+    def clearAllRelation(self):
+        for i in range(self.rows):
+            for j in range(self.cols):
+                self.table[i][j].children = []
+                self.table[i][j].parent = None
+
     def getTagCell(self, stringTag):
         return next((cell for spread in self.listOfSpreads for cell in spread.tags if cell.checkValue(stringTag)), None)
 
@@ -104,14 +111,17 @@ class Node:
         self.children = []
         self.parent = None
 
+        # attribute that is array of cell leads from parent node to self
+        self.path=[]
+
     def appendKey(self, value):
         if value not in self.keys:
             self.keys.append(value)
 
-    def setParrent(self, node):
+    def setParent(self, node):
         self.parent = node
 
-    def getParrent(self):
+    def getParent(self):
         return self.parent
 
     def setPathCost(self, value):
@@ -132,107 +142,120 @@ class Node:
     def getF(self):
         return self.f
 
-    # a function that add neighbour cell to tempFrontier if they not in frontier and
-    # not in visited and not in tempFrontier
-    def expandFrontierCell(self, cell, BFSvisited, BFSfrontier, BFStempFrontier):
+    def expandFrontierCell(self,cell,BFSvisited,BFSfrontier,BFStempFrontier):
         floor_no = cell.floor_no
-
+        
         # add N cell to tempFrontier
         if (
-                cell.y > 0 and
-                not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isWall() and
-                self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x) not in BFSvisited and
-                self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x) not in BFSfrontier and
-                self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x) not in BFStempFrontier
+            cell.y > 0 and
+            not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isWall() and
+            self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x) not in BFSvisited and
+            self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x) not in BFSfrontier and 
+            self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x) not in BFStempFrontier
         ):
             northCell = self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x)
             BFStempFrontier.append(northCell)
+            cell.children.append(northCell)
+            northCell.parent = cell
 
         # add W cell to tempFrontier
         if (
-                cell.x > 0 and
-                not self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1).isWall() and
-                self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1) not in BFSvisited and
-                self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1) not in BFSfrontier and
-                self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1) not in BFStempFrontier
+            cell.x > 0 and
+            not self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1).isWall() and
+            self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1) not in BFSvisited and
+            self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1) not in BFSfrontier and 
+            self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1) not in BFStempFrontier
         ):
             westCell = self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1)
             BFStempFrontier.append(westCell)
+            cell.children.append(westCell)
+            westCell.parent = cell
 
         # add S cell to tempFrontier
         if (
-                cell.y < self.belongTo.floors[floor_no].rows - 1 and
-                not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x).isWall() and
-                self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x) not in BFSvisited and
-                self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x) not in BFSfrontier and
-                self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x) not in BFStempFrontier
+            cell.y < self.belongTo.floors[floor_no].rows - 1 and
+            not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x).isWall() and
+            self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x) not in BFSvisited and
+            self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x) not in BFSfrontier and
+            self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x) not in BFStempFrontier
         ):
             southCell = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x)
             BFStempFrontier.append(southCell)
+            cell.children.append(southCell)
+            southCell.parent = cell
 
         # add E cell to tempFrontier
         if (
-                cell.x < self.belongTo.floors[floor_no].cols - 1 and
-                not self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1).isWall() and
-                self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1) not in BFSvisited and
-                self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1) not in BFSfrontier and
-                self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1) not in BFStempFrontier
+            cell.x < self.belongTo.floors[floor_no].cols - 1 and
+            not self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1).isWall() and
+            self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1) not in BFSvisited and
+            self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1) not in BFSfrontier and
+            self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1) not in BFStempFrontier
         ):
             eastCell = self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1)
             BFStempFrontier.append(eastCell)
+            cell.children.append(eastCell)
+            eastCell.parent = cell
 
         # add NE cell to tempFrontier
         if (
-                cell.y > 0 and cell.x < self.belongTo.floors[floor_no].cols - 1 and
-                not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isWall() and
-                not self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1).isWall() and
-                not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1).isWall() and
-                self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1) not in BFSvisited and
-                self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1) not in BFSfrontier and
-                self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1) not in BFStempFrontier
+            cell.y > 0 and cell.x < self.belongTo.floors[floor_no].cols - 1 and
+            not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isWall() and
+            not self.belongTo.floors[floor_no].getCell(cell.y,cell.x + 1).isWall() and
+            not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1).isWall() and
+            self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1) not in BFSvisited and
+            self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1) not in BFSfrontier and
+            self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1) not in BFStempFrontier
         ):
             neCell = self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1)
             BFStempFrontier.append(neCell)
+            cell.children.append(neCell)
+            neCell.parent = cell
 
         # Add NW cell to tempFrontier
         if (
-                cell.y > 0 and cell.x > 0 and
-                not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isWall() and
-                not self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1).isWall() and
-                not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1).isWall() and
-                self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1) not in BFSvisited and
-                self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1) not in BFSfrontier and
-                self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1) not in BFStempFrontier
+            cell.y > 0 and cell.x > 0 and
+            not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isWall() and
+            not self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1).isWall() and
+            not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1).isWall() and
+            self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1) not in BFSvisited and
+            self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1) not in BFSfrontier and
+            self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1) not in BFStempFrontier
         ):
             nwCell = self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1)
             BFStempFrontier.append(nwCell)
+            cell.children.append(nwCell)
+            nwCell.parent = cell
 
         # Add SW cell to tempFrontier
         if (
-                cell.y < self.belongTo.floors[floor_no].rows - 1 and cell.x > 0 and
-                not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x).isWall() and
-                not self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1).isWall() and
-                not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1).isWall() and
-                self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1) not in BFSvisited and
-                self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1) not in BFSfrontier and
-                self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1) not in BFStempFrontier
+            cell.y < self.belongTo.floors[floor_no].rows - 1 and cell.x > 0 and
+            not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x).isWall() and
+            not self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1).isWall() and
+            not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1).isWall() and
+            self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1) not in BFSvisited and
+            self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1) not in BFSfrontier and
+            self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1) not in BFStempFrontier
         ):
             swCell = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1)
             BFStempFrontier.append(swCell)
+            cell.children.append(swCell)
+            swCell.parent = cell
 
         # Add SE cell to tempFrontier
         if (
-                cell.y < self.belongTo.floors[floor_no].rows - 1 and cell.x < self.belongTo.floors[
-            floor_no].cols - 1 and
-                not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x).isWall() and
-                not self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1).isWall() and
-                not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1).isWall() and
-                self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1) not in BFSvisited and
-                self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1) not in BFSfrontier and
-                self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1) not in BFStempFrontier
+            cell.y < self.belongTo.floors[floor_no].rows - 1 and cell.x < self.belongTo.floors[floor_no].cols - 1 and
+            not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x).isWall() and
+            not self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1).isWall() and
+            not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1).isWall() and
+            self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1) not in BFSvisited and
+            self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1) not in BFSfrontier and
+            self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1) not in BFStempFrontier
         ):
             seCell = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1)
             BFStempFrontier.append(seCell)
+            cell.children.append(seCell)
+            seCell.parent = cell
 
     def expand(self,agent_no):
         BFSfrontier = []
@@ -283,6 +306,12 @@ class Node:
                                 newNode.appendKey(eachKey)  # keep track of collected keys
                             newNode.appendKey(cell_tag)  # add current key
 
+                            # get path from parent to this node
+                            tempCell = cell
+                            while (tempCell):
+                                self.path.append(tempCell)
+                                tempCell = tempCell.parent
+
                             # expand this cell
                             self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
 
@@ -308,6 +337,12 @@ class Node:
                             self.children.append(newNode)
                             newNode.parent = self
 
+                            #get path from parent to this node
+                            tempCell = cell
+                            while(tempCell):
+                                self.path.append(tempCell)
+                                tempCell=tempCell.parent
+
                             # if go through the same door with same keys,then delete this new node
                             tempNode = self
                             while (tempNode):
@@ -321,7 +356,7 @@ class Node:
                             door_no = str(cell_tag[1])
                             key_cell = self.belongTo.keys[door_no]
                             if key_cell.floor_no != self.cell.floor_no:  # key is in a different floor from the door
-                               self.belongTo.floor_priorities.append((self.cell.floor_no, key_cell.floor_no, 0)) # it should now try to go that key floor from this floor
+                               self.belongTo.floors_priorities.append((self.cell.floor_no, key_cell.floor_no, 0)) # it should now try to go that key floor from this floor
                             pass
 
 
@@ -335,6 +370,12 @@ class Node:
                     # append new node to tree
                     self.children.append(newNode)
                     newNode.parent = self
+
+                    #get path from parent to this node
+                    tempCell = cell
+                    while(tempCell):
+                        self.path.append(tempCell)
+                        tempCell=tempCell.parent
 
                 # stairs
                 elif cell_tag == "UP" or cell_tag == "DO":
@@ -478,6 +519,8 @@ class SearchTree:
             self.frontier[1].sort(key=lambda x: x.getF())  # priority queue
             self.currentNode[1] = self.frontier[1].pop(0)
 
+            print(f"{self.currentNode[1].cell.x} {self.currentNode[1].cell.y} {self.currentNode[1].cell.floor_no}")
+
             special = self.currentNode[1].cell.getSpecialValue()
             if special == "UP" or special == "DO":
                 if len(self.floor_priorities) == 0: # không có priority
@@ -503,6 +546,7 @@ class SearchTree:
                 while (tempNode):
                     print(tempNode.cell.getSpecialValue())
                     tempNode = tempNode.parent
+                self.visualize()
                 return self.MainStatus.REACHED
 
             self.currentNode[1].expand(1)
@@ -526,6 +570,61 @@ class SearchTree:
                 return self.MainStatus.IN_PROGRESS
         else:
             return self.MainStatus.UNSOLVABLE
+
+    def visualize(self):
+        # Create the main window
+        root = tk.Tk()
+        root.title("Search Tree Visualization")
+
+        # Calculate the canvas width and height based on the maximum rows and columns among all floors
+        max_rows = max(floor.rows for floor in self.floors.values())
+        max_cols = max(floor.cols for floor in self.floors.values())
+        canvas_width = max_cols * 50
+        canvas_height = max_rows * 50 * len(self.floors)  # Adjusting height to accommodate multiple floors
+        canvas = tk.Canvas(root, width=canvas_width, height=canvas_height)
+        canvas.pack()
+
+        # Draw each floor
+        for floor_no, floor in self.floors.items():
+            for i in range(floor.rows):
+                for j in range(floor.cols):
+                    x0, y0 = j * 20, (i + (floor_no - 1) * max_rows) * 20  # Adjusting y-coordinate for multiple floors
+                    x1, y1 = (j + 1) * 20, (i + 1 + (floor_no - 1) * max_rows) * 20  # Adjusting y-coordinate
+
+                    # Set color for cells with value "-1" to black
+                    if floor.table[i][j].checkValue("-1"):
+                        canvas.create_rectangle(x0, y0, x1, y1, fill="black", outline="grey")
+                    else:
+                        canvas.create_rectangle(x0, y0, x1, y1, fill="white", outline="grey")
+
+        tempNode = self.currentNode[1]
+        while tempNode:
+            for floor_no, floor in self.floors.items():
+                for i in range(floor.rows):
+                    for j in range(floor.cols):
+                        x0, y0 = j * 20, (i + (floor_no - 1) * max_rows) * 20
+                        x1, y1 = (j + 1) * 20, (i + 1 + (floor_no - 1) * max_rows) * 20
+
+                        if floor.table[i][j] in tempNode.path:
+                            canvas.create_rectangle(x0, y0, x1, y1, fill="green")
+
+            tempNode = tempNode.parent
+
+        tempNode = self.currentNode[1]
+        while tempNode:
+            for floor_no, floor in self.floors.items():
+                for i in range(floor.rows):
+                    for j in range(floor.cols):
+                        x0, y0 = j * 20, (i + (floor_no - 1) * max_rows) * 20
+                        x1, y1 = (j + 1) * 20, (i + 1 + (floor_no - 1) * max_rows) * 20
+
+                        if tempNode.cell and floor.table[i][j] == tempNode.cell:
+                            canvas.create_rectangle(x0, y0, x1, y1, fill="red")
+
+            tempNode = tempNode.parent
+
+        # Run the GUI
+        root.mainloop()
 
     def agent_turn_based_movement(self):
         current_agent = 1  # Initialize the index to track the current agent
