@@ -8,7 +8,7 @@ class Cell:
         self.values = []
         self.belongTo = None
         self.children = []
-        self.parent = None
+        self.parrent = None
 
     def setBelongTo(self, value):
         self.belongTo = value
@@ -64,12 +64,12 @@ class Floor:
             for j in range(self.cols):
                 self.table[i][j].setBelongTo(self)
 
-    # function that set children and parent of every cell to empty
+    # function that set children and parrent of every cell to empty
     def clearAllRelation(self):
         for i in range(self.rows):
             for j in range(self.cols):
                 self.table[i][j].children = []
-                self.table[i][j].parent = None
+                self.table[i][j].parrent = None
         
     def getTagCell(self, stringTag):
         return next((cell for spread in self.listOfSpreads for cell in spread.tags if cell.checkValue(stringTag)), None)
@@ -97,17 +97,17 @@ class Node:
         self.keys=[]
         self.children=[]
         self.parent=None
-        # attribute that is array of cell leads from parent node to self
+        # attribute that is array of cell leads from parrent node to self
         self.path=[]
 
     def appendKey(self,value):
         if value not in self.keys:
             self.keys.append(value)
 
-    def setParent(self, node):
+    def setParrent(self, node):
         self.parent=node   
 
-    def getParent(self):
+    def getParrent(self):
         return self.parent
     
     def setPathCost(self, value):
@@ -141,7 +141,7 @@ class Node:
             northCell = self.belongTo.floor.getCell(cell.y - 1, cell.x)
             BFStempFrontier.append(northCell)
             cell.children.append(northCell)
-            northCell.parent = cell
+            northCell.parrent = cell
 
         # add W cell to tempFrontier
         if (
@@ -154,7 +154,7 @@ class Node:
             westCell = self.belongTo.floor.getCell(cell.y, cell.x - 1)
             BFStempFrontier.append(westCell)
             cell.children.append(westCell)
-            westCell.parent = cell
+            westCell.parrent = cell
 
         # add S cell to tempFrontier
         if (
@@ -167,7 +167,7 @@ class Node:
             southCell = self.belongTo.floor.getCell(cell.y + 1, cell.x)
             BFStempFrontier.append(southCell)
             cell.children.append(southCell)
-            southCell.parent = cell
+            southCell.parrent = cell
 
         # add E cell to tempFrontier
         if (
@@ -180,7 +180,7 @@ class Node:
             eastCell = self.belongTo.floor.getCell(cell.y, cell.x + 1)
             BFStempFrontier.append(eastCell)
             cell.children.append(eastCell)
-            eastCell.parent = cell
+            eastCell.parrent = cell
 
         # add NE cell to tempFrontier
         if (
@@ -195,7 +195,7 @@ class Node:
             neCell = self.belongTo.floor.getCell(cell.y - 1, cell.x + 1)
             BFStempFrontier.append(neCell)
             cell.children.append(neCell)
-            neCell.parent = cell
+            neCell.parrent = cell
 
         # Add NW cell to tempFrontier
         if (
@@ -210,7 +210,7 @@ class Node:
             nwCell = self.belongTo.floor.getCell(cell.y - 1, cell.x - 1)
             BFStempFrontier.append(nwCell)
             cell.children.append(nwCell)
-            nwCell.parent = cell
+            nwCell.parrent = cell
 
         # Add SW cell to tempFrontier
         if (
@@ -225,7 +225,7 @@ class Node:
             swCell = self.belongTo.floor.getCell(cell.y + 1, cell.x - 1)
             BFStempFrontier.append(swCell)
             cell.children.append(swCell)
-            swCell.parent = cell
+            swCell.parrent = cell
 
         # Add SE cell to tempFrontier
         if (
@@ -240,7 +240,7 @@ class Node:
             seCell = self.belongTo.floor.getCell(cell.y + 1, cell.x + 1)
             BFStempFrontier.append(seCell)
             cell.children.append(seCell)
-            seCell.parent = cell
+            seCell.parrent = cell
         
 
     def expand(self):
@@ -295,11 +295,11 @@ class Node:
                                 newNode.appendKey(eachKey)
                             newNode.appendKey(cell_tag)
 
-                            #get path from parent to this node
+                            #get path from parrent to this node
                             tempCell = cell
                             while(tempCell):
                                 self.path.append(tempCell)
-                                tempCell=tempCell.parent
+                                tempCell=tempCell.parrent
 
                             #expand this cell
                             self.expandFrontierCell(cell,BFSvisited,BFSfrontier,BFStempFrontier)
@@ -325,11 +325,11 @@ class Node:
                             self.children.append(newNode)
                             newNode.parent=self
 
-                            #get path from parent to this node
+                            #get path from parrent to this node
                             tempCell = cell
                             while(tempCell):
                                 self.path.append(tempCell)
-                                tempCell=tempCell.parent
+                                tempCell=tempCell.parrent
 
                             # if go through the same door with same keys,then delete this new node
                             tempNode = self
@@ -354,11 +354,11 @@ class Node:
                     self.children.append(newNode)
                     newNode.parent=self
 
-                    #get path from parent to this node
+                    #get path from parrent to this node
                     tempCell = cell
                     while(tempCell):
                         self.path.append(tempCell)
-                        tempCell=tempCell.parent
+                        tempCell=tempCell.parrent
 
                 BFSvisited.append(cell)
             pass
@@ -461,9 +461,9 @@ class SearchTree:
 
                     # Set color for cells with value "-1" to black
                     if self.floor.table[i][j].checkValue("-1"):
-                        canvas.create_rectangle(x0, y0, x1, y1, fill="black", outline="grey")
+                        canvas.create_rectangle(x0, y0, x1, y1, fill="black")
                     else:
-                        canvas.create_rectangle(x0, y0, x1, y1, fill="white", outline="grey")
+                        canvas.create_rectangle(x0, y0, x1, y1, fill="white")
 
         tempNode = self.currentNode
         while tempNode:
@@ -503,6 +503,6 @@ class SearchTree:
 
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input2-level2.txt")
+searchTree2.getInputFile("input//input4-level2.txt")
 searchTree2.AStar()
 pass
