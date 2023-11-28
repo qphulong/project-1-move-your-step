@@ -89,6 +89,12 @@ class Floor:
     def getCell(self, row, col):
         return self.table[row][col]
 
+    def findStair(self, direction):
+        for i in range(self.rows):
+            for j in range(self.cols):
+                if self.table[i][j].checkValue(direction):
+                    return self.table[i][j]
+        return None
 
 class Node:
     def __init__(self, Cell, SearchTree):
@@ -473,8 +479,13 @@ class SearchTree:
     def AStar(self):
         finding_custom_goal = False
 
-        if len(self.custom_goals) > 0:
+        if len(self.custom_goals) > 0 and len(self.frontier[1]) > 0 and (
+                self.frontier[1][-1].cell.getSpecialValue() == "UP"  # mới lên tầng xong
+                or self.frontier[1][-1].cell.getSpecialValue() == "DO"
+                or self.frontier[1][-1].cell.floor_no ==
+                self.custom_goals[-1].floor_no):
             goal = self.custom_goals[-1]
+
             finding_custom_goal = True
         else:
             goal = self.goals[1]
@@ -483,8 +494,23 @@ class SearchTree:
 
         if self.frontier[1]:
             # self.visualize()
+            if (len(self.custom_goals) == 0) or (
+                    len(self.frontier[1]) > 0 and self.frontier[1][-1].cell.floor_no == self.custom_goals[
+                -1].floor_no):  # đang đi trong tầng
+                self.currentNode[1] = self.frontier[1].pop(0)
+            else:  # tìm đường lên / xuống
+                from_to_floor = self.floor_priorities[-1]
+
+                floor_table = self.floors[self.currentNode[1].cell.floor_no]
+                if from_to_floor[0] > from_to_floor[1]:  # đi xuống
+                    stairs = floor_table.findStair("DO")
+                elif from_to_floor[0] < from_to_floor[1]:  # đi lên
+                    stairs = floor_table.findStair("UP")
+                self.currentNode[1] = Node(stairs, self)
+
+            print(
+                f"{self.currentNode[1].cell.y} {self.currentNode[1].cell.x} {self.currentNode[1].cell.floor_no} {self.currentNode[1].cell.getSpecialValue()}")
             self.frontier[1].sort(key=lambda x: x.getF())  # priority queue
-            self.currentNode[1] = self.frontier[1].pop(0)
 
             special = self.currentNode[1].cell.getSpecialValue()
             if special == "UP" or special == "DO":
@@ -496,8 +522,7 @@ class SearchTree:
                     if from_to_floor[2] == 0:  # = 0 thì tức là mới một chiều xong, 1 là khứ hồi xong
                         from_to_floor[2] += 1  # increase to 1
                         from_to_floor[0], from_to_floor[1] = from_to_floor[1], from_to_floor[0]  # swap
-
-                        # khám phá tìm chìa khoá ở tầng này
+                        # bây giờ ta đi tìm chìa khoá ở tầng này
                     else:  # xong đi lên và đi xuống
                         self.floor_priorities.pop()  # pop stack
                 else:
@@ -518,6 +543,16 @@ class SearchTree:
                     return self.MainStatus.REACHED
                 else:  # đang đi kiếm chìa khoá và kiếm được rồi
                     self.custom_goals.pop()
+                    # bây giờ là kiếm đường đi khỏi tầng này
+                    # find UP / DO cell on this floor
+                    from_to_floor = self.floor_priorities[-1]
+
+                    floor_table = self.floors[self.currentNode[1].cell.floor_no]
+                    if from_to_floor[0] > from_to_floor[1]:  # đi xuống
+                        stairs = floor_table.findStair("DO")
+                    elif from_to_floor[0] < from_to_floor[1]:  # đi lên
+                        stairs = floor_table.findStair("UP")
+                    self.currentNode[1] = Node(stairs, self)
 
             self.currentNode[1].expand(1)
             for eachChild in self.currentNode[1].children:
