@@ -398,6 +398,7 @@ class SearchTree:
         print("No path found")
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input3-level2.txt")
+
+searchTree2.getInputFile("input//input4-level2.txt")
 searchTree2.AStar()
 pass
