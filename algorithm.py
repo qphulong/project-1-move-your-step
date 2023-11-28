@@ -65,7 +65,6 @@ class Algorithm:
 
             # check goal
             if current_state.checkGoal(goal):
-                print("Found goal")
                 current_path.append(current_state.agents[current_agent])
                 print(current_state.agents[current_agent])
                 previous = current_state.previous
@@ -83,8 +82,6 @@ class Algorithm:
 
                 if successor is None:
                     continue
-
-                print(f'Successor agent {successor.agents[1].x} {successor.agents[1].y} {successor.agents[1].floor}')
 
                 total_cost = successor.moves[current_agent] + successor.heuristic_lvl4(current_agent)
                 if successor.floor_rep() not in visited and not any(successor == s for _, s in frontier):
