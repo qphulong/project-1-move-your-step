@@ -334,12 +334,13 @@ class Node:
                                 tempCell = tempCell.parrent
 
                             # if go through the same door with same keys,then delete this new node
-                            tempNode = self
+                            tempNode = self.parent
                             while (tempNode):
-                                if len(newNode.keys) == (tempNode.keys):
+                                if len(newNode.keys) == len(tempNode.keys) and newNode.cell==tempNode.cell:
                                     self.children.remove(newNode)
                                     newNode.parent = None
                                     del newNode
+                                    break
                                 tempNode = tempNode.parent
                         # if does not have key
                         else:
@@ -431,6 +432,7 @@ class SearchTree:
             # self.visualize()
             self.frontier.sort(key=lambda x: x.getF())
             self.currentNode = self.frontier.pop(0)
+            print(self.currentNode.cell.getSpecialValue())
 
             # if path found
             if self.currentNode.cell == self.goalCell:
