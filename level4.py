@@ -124,8 +124,8 @@ class Node:
         self.heuristic = 0
         self.f = 0
         self.keys = []
-        self.children = []
-        self.parent = None
+        self.children = [] # những con (successor) của node này
+        self.parent = None # cha của node này
 
     def appendKey(self, value):
         if value not in self.keys:
@@ -313,7 +313,7 @@ class Node:
                 if cell is None:
                     continue
                 # analyze cell
-                cell_tag = cell.getSpecialValue()
+                cell_tag = cell.getSpecialValue() # special value của cell
 
                 # normal cell
                 if cell_tag == "" or cell_tag[0] == "A":
@@ -411,51 +411,38 @@ class Node:
                     self.children.append(newNode)
                     newNode.parent = self
 
+
                 # stairs
                 elif cell_tag == "UP" or cell_tag == "DO":
-                    if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
-                        self.expandFrontierCell(
-                            cell, BFSvisited, BFSfrontier, BFStempFrontier
+                    if len(BFSfrontier) > 1 and (
+                            (BFSfrontier[-2].getSpecialValue() == "UP" and self.cell.getSpecialValue() == "DO") or
+                            (BFSfrontier[-2].getSpecialValue() == "DO" and self.cell.getSpecialValue() == "UP")):
+                        continue
+
+                    newNode = Node(cell, self.belongTo) # tạo node mới từ cell (duyệt BFSFrontier)
+                    newNode.setPathCost(self.pathCost + steps)
+                    newNode.saveHeuristic(self.belongTo.goals[agent_no])
+                    newNode.saveF()
+
+                    # append new node to tree
+                    self.children.append(newNode) # children của node hiện tại là thêm node mới
+                    newNode.parent = self
+
+                    if cell_tag == "UP":
+                        copyCell = self.belongTo.floors[cell.floor_no + 1].getCell(
+                            cell.y, cell.x
                         )
                     else:
-                        if len(BFSfrontier) > 1 and (
-                                (BFSfrontier[-2].getSpecialValue() == "UP" and self.cell.getSpecialValue() == "DO") or
-                                (BFSfrontier[-2].getSpecialValue() == "DO" and self.cell.getSpecialValue() == "UP")):
-                            continue
-                        newNode = Node(cell, self.belongTo)
-                        newNode.setPathCost(self.pathCost + steps)
-                        newNode.saveHeuristic(self.belongTo.goals[1])
-                        newNode.saveF()
-
-                        # append new node to tree
-                        self.children.append(newNode)
-                        newNode.parent = self
-
-                        if cell_tag == "UP":
-                            copyCell = self.belongTo.floors[cell.floor_no + 1].getCell(
-                                cell.y, cell.x
-                            )
-                        else:
-                            copyCell = self.belongTo.floors[cell.floor_no - 1].getCell(
-                                cell.y, cell.x
-                            )
-
-                        # Create a new node with the updated cell
-                        newNode = Node(copyCell, self.belongTo)
-                        newNode.setPathCost(self.pathCost + steps)
-                        newNode.saveHeuristic(self.belongTo.goals[1])
-                        newNode.saveF()
-
-                        # Append new node to tree
-                        self.children.append(newNode)
-                        newNode.parent = self
-
-                        # Expand the neighbors of the updated cell
-                        self.expandFrontierCell(
-                            copyCell, BFSvisited, BFSfrontier, BFStempFrontier
+                        copyCell = self.belongTo.floors[cell.floor_no - 1].getCell(
+                            cell.y, cell.x
                         )
 
-                        BFSvisited.append(copyCell)
+                    # Expand the neighbors of the updated cell
+                    self.expandFrontierCell(
+                        copyCell, BFSvisited, BFSfrontier, BFStempFrontier
+                    )
+
+                    BFSvisited.append(copyCell)
 
                 BFSvisited.append(cell)
             pass
@@ -661,6 +648,6 @@ class SearchTree:
 
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input1-level4.txt")
+searchTree2.getInputFile("input//input2-level4.txt")
 searchTree2.agent_turn_based_movement()
 pass
