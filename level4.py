@@ -46,7 +46,7 @@ class Cell:
         return max(abs(self.x - Cell.x), abs(self.y - Cell.y))
 
     def isWall(self):
-        return "-1" in self.values or any("A" in value for value in self.values) or any("D" in value for value in self.values)
+        return "-1" in self.values or any("A" in value for value in self.values)
 
     def getY(self):
         return self.y
@@ -124,7 +124,7 @@ class Node:
         self.heuristic = 0
         self.f = 0
         self.keys = [] # obtained keys
-        self.stairs = [] # stairs that have been used
+        self.stairs = {} # stairs that have been used
         self.children = [] # những con (successor) của node này
         self.parent = None # cha của node này
 
@@ -318,6 +318,10 @@ class Node:
 
                 # normal cell
                 if cell_tag == "" or cell_tag[0] == "A":
+                    if self.cell.floor_no != cell.floor_no:
+                        if self.stairs.get(self.cell.floor_no, cell.floor_no) is None:
+                            continue
+
                     self.expandFrontierCell(
                         cell, BFSvisited, BFSfrontier, BFStempFrontier
                     )
@@ -348,6 +352,10 @@ class Node:
                             newNode.setPathCost(self.pathCost + steps)
                             newNode.saveHeuristic(self.belongTo.goals[agent_no])
                             newNode.saveF()
+
+                            if self.cell.floor_no != cell.floor_no:
+                                if self.stairs.get(self.cell.floor_no, cell.floor_no) is None:
+                                    continue
 
                             # append new node to tree
                             self.children.append(newNode)
@@ -385,6 +393,10 @@ class Node:
                             for eachKey in self.keys:
                                 newNode.appendKey(eachKey)
 
+                            if self.cell.floor_no != cell.floor_no:
+                                if self.stairs.get(self.cell.floor_no, cell.floor_no) is None:
+                                    continue
+
                             # append new node to tree
                             self.children.append(newNode)
                             newNode.parent = self
@@ -408,6 +420,10 @@ class Node:
                     newNode.saveHeuristic(self.belongTo.goals[agent_no])
                     newNode.saveF()
 
+                    if self.cell.floor_no != cell.floor_no:
+                        if self.stairs.get(self.cell.floor_no, cell.floor_no) is None:
+                            continue
+
                     # append new node to tree
                     self.children.append(newNode)
                     newNode.parent = self
@@ -424,14 +440,20 @@ class Node:
                     newNode.saveHeuristic(self.belongTo.goals[agent_no])
                     newNode.saveF()
 
+                    if self.cell.floor_no != cell.floor_no:
+                        if self.stairs.get(self.cell.floor_no, cell.floor_no) is None:
+                            continue
+
                     # append new node to tree
                     self.children.append(newNode) # children của node hiện tại là thêm node mới
                     newNode.parent = self
 
                     # inherit collected stairs so far
-                    for eachStair in self.stairs:
-                        newNode.stairs.append(eachStair)  # add previously collected stairs
-                    newNode.stairs.append(cell)  # add current stair
+                    newNode.stairs.update(self.stairs)
+                    next_floor = cell.floor_no + 1 if cell_tag == "UP" else cell.floor_no - 1
+                    if newNode.stairs.get((cell.floor_no, next_floor)) is None:
+                        newNode.stairs[(cell.floor_no, next_floor)] = []
+                    newNode.stairs[(cell.floor_no, next_floor)].append(cell)
 
                     if cell_tag == "UP":
                         copyCell = self.belongTo.floors[cell.floor_no + 1].getCell(
