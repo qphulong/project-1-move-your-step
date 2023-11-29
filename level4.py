@@ -46,7 +46,7 @@ class Cell:
         return max(abs(self.x - Cell.x), abs(self.y - Cell.y))
 
     def isWall(self):
-        return "-1" in self.values or any("A" in value for value in self.values)
+        return "-1" in self.values or any("A" in value for value in self.values) or any("D" in value for value in self.values)
 
     def getY(self):
         return self.y
@@ -123,7 +123,8 @@ class Node:
         self.pathCost = 0
         self.heuristic = 0
         self.f = 0
-        self.keys = []
+        self.keys = [] # obtained keys
+        self.stairs = [] # stairs that have been used
         self.children = [] # những con (successor) của node này
         self.parent = None # cha của node này
 
@@ -356,7 +357,7 @@ class Node:
                             for eachKey in self.keys:
                                 newNode.appendKey(
                                     eachKey
-                                )  # keep track of collected keys
+                                )  # add previously collected keys
                             newNode.appendKey(cell_tag)  # add current key
 
                             # expand this cell
@@ -426,6 +427,11 @@ class Node:
                     # append new node to tree
                     self.children.append(newNode) # children của node hiện tại là thêm node mới
                     newNode.parent = self
+
+                    # inherit collected stairs so far
+                    for eachStair in self.stairs:
+                        newNode.stairs.append(eachStair)  # add previously collected stairs
+                    newNode.stairs.append(cell)  # add current stair
 
                     if cell_tag == "UP":
                         copyCell = self.belongTo.floors[cell.floor_no + 1].getCell(
