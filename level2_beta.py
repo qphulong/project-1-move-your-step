@@ -496,6 +496,6 @@ class SearchTree:
 
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input3-level2.txt")
+searchTree2.getInputFile("input//input5-level2.txt")
 searchTree2.AStar()
 pass
