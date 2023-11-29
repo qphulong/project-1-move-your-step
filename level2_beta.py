@@ -266,6 +266,7 @@ class Node:
                 # normal cell
                 if cell_tag == "" or cell_tag[0] == "A":
                     self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
+                #key cell
                 elif cell_tag[0] == "K":
                     # first expand, cause it will not expand since first cell in frontier and dup key
                     if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
@@ -296,10 +297,10 @@ class Node:
                                 newNode.appendKey(eachKey)
                             newNode.appendKey(cell_tag)
 
-                            # get path from parrent to this node
+                            # get path from parrent to new node
                             tempCell = cell
                             while (tempCell):
-                                self.path.append(tempCell)
+                                newNode.path.append(tempCell)
                                 tempCell = tempCell.parrent
 
                             # expand this cell
@@ -326,10 +327,10 @@ class Node:
                             self.children.append(newNode)
                             newNode.parent = self
 
-                            # get path from parrent to this node
+                            # get path from parrent to new node
                             tempCell = cell
                             while (tempCell):
-                                self.path.append(tempCell)
+                                newNode.path.append(tempCell)
                                 tempCell = tempCell.parrent
 
                             # if go through the same door with same keys,then delete this new node
@@ -355,10 +356,10 @@ class Node:
                     self.children.append(newNode)
                     newNode.parent = self
 
-                    # get path from parrent to this node
+                    # get path from parrent to new node
                     tempCell = cell
                     while (tempCell):
-                        self.path.append(tempCell)
+                        newNode.path.append(tempCell)
                         tempCell = tempCell.parrent
 
                 BFSvisited.append(cell)
