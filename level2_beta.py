@@ -22,7 +22,7 @@ class Cell:
             for value in self.values:
                 if value not in ["0", "-1"]:
                     return value
-            return ""  # Or return a default value if all values are "0" or "-1"
+            return ""  # Or return a empty string
 
     def appendValue(self, value):
         self.values.append(value)
@@ -305,7 +305,7 @@ class Node:
 
                             # expand this cell
                             self.expandFrontierCell(cell, BFSvisited, BFSfrontier, BFStempFrontier)
-
+                # door cell
                 elif cell_tag[0] == "D":
                     # first expand, cause it will not expand since first cell in frontier and dup key
                     if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
@@ -345,7 +345,7 @@ class Node:
                         # if does not have key
                         else:
                             pass
-
+                # goal cell
                 elif cell_tag[0] == "T":
                     # create new node
                     newNode = Node(cell, self.belongTo)
@@ -377,7 +377,6 @@ class SearchTree:
     def __init__(self):
         self.root = None
         self.frontier = []
-        self.visited = []
         self.currentNode = None
         self.goalCell = None
         self.floor = None
@@ -429,17 +428,15 @@ class SearchTree:
         self.root.saveHeuristic(self.goalCell)
         self.root.saveF()
         while (self.frontier):
-            # self.visualize()
             self.frontier.sort(key=lambda x: x.getF())
             self.currentNode = self.frontier.pop(0)
-            print(self.currentNode.cell.getSpecialValue())
 
             # if path found
             if self.currentNode.cell == self.goalCell:
-                tempNode = self.currentNode
-                while (tempNode):
-                    print(tempNode.cell.getSpecialValue())
-                    tempNode = tempNode.parent
+                # tempNode = self.currentNode
+                # while (tempNode):
+                #     print(tempNode.cell.getSpecialValue())
+                #     tempNode = tempNode.parent
                 self.visualize()
                 return
 
