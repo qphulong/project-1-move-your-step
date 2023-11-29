@@ -456,6 +456,7 @@ class SearchTree:
         canvas = tk.Canvas(root, width=self.floor.cols * 50, height=self.floor.rows * 50)
         canvas.pack()
 
+        # basic map
         for i in range(self.floor.rows):
             for j in range(self.floor.cols):
                 x0, y0 = j * 20, i * 20
@@ -466,7 +467,11 @@ class SearchTree:
                     canvas.create_rectangle(x0, y0, x1, y1, fill="black")
                 else:
                     canvas.create_rectangle(x0, y0, x1, y1, fill="white")
-
+                    # print special value
+                    specialValue = self.floor.table[i][j].getSpecialValue()
+                    canvas.create_text(x0 + 10, y0 + 10, text=specialValue, fill="black")
+        
+        # draw path
         tempNode = self.currentNode
         while tempNode:
             # Draw rectangles for each cell
@@ -481,25 +486,11 @@ class SearchTree:
                     # Set color for cells pointed by tempNode to red
                     if tempNode.cell and self.floor.table[i][j] == tempNode.cell:
                         canvas.create_rectangle(x0, y0, x1, y1, fill="red")
+                        specialValue = self.floor.table[i][j].getSpecialValue()
+                        canvas.create_text(x0 + 10, y0 + 10, text=specialValue, fill="black")
 
             # Move to the parent node
             tempNode = tempNode.parent
-
-        tempNode = self.currentNode
-        while tempNode:
-            # Draw rectangles for each cell
-            for i in range(self.floor.rows):
-                for j in range(self.floor.cols):
-                    x0, y0 = j * 20, i * 20
-                    x1, y1 = (j + 1) * 20, (i + 1) * 20
-
-                    # Set color for cells pointed by tempNode to red
-                    if tempNode.cell and self.floor.table[i][j] == tempNode.cell:
-                        canvas.create_rectangle(x0, y0, x1, y1, fill="red")
-
-            # Move to the parent node
-            tempNode = tempNode.parent
-
         # Run the GUI
         root.mainloop()
 
