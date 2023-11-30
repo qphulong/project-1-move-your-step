@@ -49,7 +49,8 @@ class Cell:
         return "-1" in self.values
 
     def isAgent(self):
-        return any("A" in value for value in self.values)
+        special = self.getSpecialValue()
+        return special and special[0] == "A"
 
     def getY(self):
         return self.y
@@ -165,10 +166,9 @@ class Node:
         floor_no = cell.floor_no
 
         possible_moves = 0
-        waiting_moves = 0 # number of moves that need to wait for other agents to move
+        waiting_moves = 0  # number of moves that need to wait for other agents to move
 
         # add N cell to tempFrontier
-
 
         if (
                 cell.y > 0
@@ -180,7 +180,7 @@ class Node:
                 and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x)
                 not in BFStempFrontier
         ):
-            possible_moves+=1
+            possible_moves += 1
 
             northCell = self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x)
 
@@ -197,9 +197,10 @@ class Node:
                 and self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1)
                 not in BFStempFrontier
         ):
-            possible_moves+=1
-            if self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isAgent():  # wait for this other agent to move
-                waiting_moves+=1
+            possible_moves += 1
+            if self.belongTo.floors[floor_no].getCell(cell.y - 1,
+                                                      cell.x).isAgent():  # wait for this other agent to move
+                waiting_moves += 1
 
             westCell = self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1)
 
@@ -321,22 +322,30 @@ class Node:
         BFSfrontier.append(self.cell)
         steps = -1
 
-        if self.cell.getSpecialValue() == "UP" or self.cell.getSpecialValue() == "DO":
-            print(f"Cell: {self.cell.getSpecialValue()} Floor: {self.cell.floor_no}")
-
         while BFSfrontier:
             steps += 1
 
             for cell in BFSfrontier:
                 if cell is None:
                     continue
+
                 # analyze cell
                 cell_tag = cell.getSpecialValue()  # special value của cell
 
                 # normal cell
                 if cell_tag == "" or cell_tag[0] == "A":
                     if self.cell.floor_no != cell.floor_no:
-                        if self.stairs.get(self.cell.floor_no, cell.floor_no) is None:
+                        has_stairs = True
+                        change = 1 if self.cell.floor_no < cell.floor_no else -1
+                        i = self.cell.floor_no
+                        while i != cell.floor_no:
+                            if self.stairs.get((i, i + change)) is None:
+                                BFSvisited.append(cell)
+                                has_stairs = False
+                                break
+                            i = i + change
+
+                        if has_stairs:
                             continue
 
                     self.expandFrontierCell(
@@ -345,6 +354,21 @@ class Node:
 
                 # key
                 elif cell_tag[0] == "K":
+
+                    if self.cell.floor_no != cell.floor_no:
+                        has_stairs = True
+                        change = 1 if self.cell.floor_no < cell.floor_no else -1
+                        i = self.cell.floor_no
+                        while i != cell.floor_no:
+                            if self.stairs.get((i, i + change)) is None:
+                                BFSvisited.append(cell)
+                                has_stairs = False
+                                break
+                            i = i + change
+
+                        if has_stairs:
+                            continue
+
                     # first expand (not worry about duplicates)
                     if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
                         self.expandFrontierCell(
@@ -370,19 +394,9 @@ class Node:
                             newNode.saveHeuristic(self.belongTo.goals[agent_no])
                             newNode.saveF()
 
-                            if self.cell.floor_no != cell.floor_no:
-                                if self.stairs.get(self.cell.floor_no, cell.floor_no) is None:
-                                    continue
-
                             # append new node to tree
                             self.children.append(newNode)
                             newNode.parent = self
-
-                            if (
-                                    self.cell.getSpecialValue() == "UP" or self.cell.getSpecialValue() == "DO") and cell.getSpecialValue() != "":
-                                print(
-                                    f"Currently expanded cell: {cell.getSpecialValue()} {cell.floor_no} - Parent: {newNode.parent.cell.getSpecialValue()} {newNode.parent.cell.floor_no}")
-
                             # inherit collected keys so far
                             for eachKey in self.keys:
                                 newNode.appendKey(
@@ -397,6 +411,20 @@ class Node:
 
                 # door
                 elif cell_tag[0] == "D" and cell_tag[1] != "O":
+                    if self.cell.floor_no != cell.floor_no:
+                        has_stairs = True
+                        change = 1 if self.cell.floor_no < cell.floor_no else -1
+                        i = self.cell.floor_no
+                        while i != cell.floor_no:
+                            if self.stairs.get((i, i + change)) is None:
+                                BFSvisited.append(cell)
+                                has_stairs = False
+                                break
+                            i = i + change
+
+                        if has_stairs:
+                            continue
+
                     # first expand, cause it will not expand since first cell in frontier and dup key
                     if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
                         self.expandFrontierCell(
@@ -415,18 +443,9 @@ class Node:
                             for eachKey in self.keys:
                                 newNode.appendKey(eachKey)
 
-                            if self.cell.floor_no != cell.floor_no:
-                                if self.stairs.get(self.cell.floor_no, cell.floor_no) is None:
-                                    continue
-
                             # append new node to tree
                             self.children.append(newNode)
                             newNode.parent = self
-
-                            if (
-                                    self.cell.getSpecialValue() == "UP" or self.cell.getSpecialValue() == "DO") and cell.getSpecialValue() != "":
-                                print(
-                                    f"Currently expanded cell: {cell.getSpecialValue()} {cell.floor_no} - Parent: {newNode.parent.cell.getSpecialValue()} {newNode.parent.cell.floor_no}")
 
                             # if go through the same door with same keys,then delete this new node
                             tempNode = self
@@ -441,28 +460,46 @@ class Node:
                             pass
 
                 elif cell_tag[0] == "T":
+                    if self.cell.floor_no != cell.floor_no:
+                        has_stairs = True
+                        change = 1 if self.cell.floor_no < cell.floor_no else -1
+                        i = self.cell.floor_no
+                        while i != cell.floor_no:
+                            if self.stairs.get((i, i + change)) is None:
+                                BFSvisited.append(cell)
+                                has_stairs = False
+                                break
+                            i = i + change
+
+                        if has_stairs:
+                            continue
+
                     # create new node
                     newNode = Node(cell, self.belongTo)
                     newNode.setPathCost(self.pathCost + steps)
                     newNode.saveHeuristic(self.belongTo.goals[agent_no])
                     newNode.saveF()
 
-                    if self.cell.floor_no != cell.floor_no:
-                        if self.stairs.get(self.cell.floor_no, cell.floor_no) is None:
-                            continue
-
                     # append new node to tree
                     self.children.append(newNode)
                     newNode.parent = self
 
-                    if (
-                            self.cell.getSpecialValue() == "UP" or self.cell.getSpecialValue() == "DO") and cell.getSpecialValue() != "":
-                        print(
-                            f"Currently expanded cell: {cell.getSpecialValue()} {cell.floor_no} - Parent: {newNode.parent.cell.getSpecialValue()} {newNode.parent.cell.floor_no}")
-
-
                 # stairs
                 elif cell_tag == "UP" or cell_tag == "DO":
+                    if self.cell.floor_no != cell.floor_no:
+                        has_stairs = True
+                        change = 1 if self.cell.floor_no < cell.floor_no else -1
+                        i = self.cell.floor_no
+                        while i != cell.floor_no:
+                            if self.stairs.get((i, i + change)) is None:
+                                BFSvisited.append(cell)
+                                has_stairs = False
+                                break
+                            i = i + change
+
+                        if has_stairs:
+                            continue
+
                     if len(BFSfrontier) > 1 and (
                             (BFSfrontier[-1].getSpecialValue() == "UP" and self.cell.getSpecialValue() == "DO") or
                             (BFSfrontier[-1].getSpecialValue() == "DO" and self.cell.getSpecialValue() == "UP")):
@@ -473,25 +510,16 @@ class Node:
                     newNode.saveHeuristic(self.belongTo.goals[agent_no])
                     newNode.saveF()
 
-                    if self.cell.floor_no != cell.floor_no:
-                        if self.stairs.get(self.cell.floor_no, cell.floor_no) is None:
-                            continue
-
-                    # append new node to tree
-                    self.children.append(newNode)  # children của node hiện tại là thêm node mới
-                    newNode.parent = self
-
-                    if (
-                            self.cell.getSpecialValue() == "UP" or self.cell.getSpecialValue() == "DO") and cell.getSpecialValue() != "":
-                        print(
-                            f"Currently expanded cell: {cell.getSpecialValue()} {cell.floor_no} - Parent: {newNode.parent.cell.getSpecialValue()} {newNode.parent.cell.floor_no}")
-
                     # inherit collected stairs so far
                     newNode.stairs.update(self.stairs)
                     next_floor = cell.floor_no + 1 if cell_tag == "UP" else cell.floor_no - 1
                     if newNode.stairs.get((cell.floor_no, next_floor)) is None:
                         newNode.stairs[(cell.floor_no, next_floor)] = []
                     newNode.stairs[(cell.floor_no, next_floor)].append(cell)
+
+                    # append new node to tree
+                    self.children.append(newNode)  # children của node hiện tại là thêm node mới
+                    newNode.parent = self
 
                     if cell_tag == "UP":
                         copyCell = self.belongTo.floors[cell.floor_no + 1].getCell(
@@ -505,6 +533,12 @@ class Node:
                     self.expandFrontierCell(
                         copyCell, BFSvisited, BFSfrontier, BFStempFrontier
                     )
+
+                    self.expandFrontierCell(
+                        cell, BFSvisited, BFSfrontier, BFStempFrontier
+                    )
+
+                    BFSvisited.append(copyCell)
 
                 BFSvisited.append(cell)
 
@@ -525,7 +559,7 @@ class SearchTree:
         self.visited = {}
         self.root = {}
         self.keys = {}
-        self.upcoming = {} # save next cells of agents
+        self.upcoming = {}  # save next cells of agents
 
         self.number_agents = 0  # số agent
 
@@ -633,18 +667,36 @@ class SearchTree:
 
         return (self.MainStatus.UNSOLVABLE, None)
 
+    def AStar_CustomGoal(self, goal):
+        self.root[1].saveHeuristic(goal)
+        self.root[1].saveF()
+        if (self.frontier[1]):
+            # self.visualize()
+            self.frontier[1].sort(key=lambda x: x.getF())
+            self.currentNode[1] = self.frontier[1].pop(0)
+
+            # if path found
+            if self.currentNode[1].cell == goal:
+                tempNode = self.currentNode[1]
+                while (tempNode):
+                    print(f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}")
+                    tempNode = tempNode.parent
+                # self.visualize()
+                return (self.MainStatus.REACHED, None)
+
+            self.currentNode[1].expand(1)
+            for eachChild in self.currentNode[1].children:
+                self.frontier[1].append(eachChild)
+            return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
+
+        return (self.MainStatus.UNSOLVABLE, None)
+
     def BFS(self):
         # self.root[1].saveHeuristic(self.goals[1])
         # self.root[1].saveF()
         if (self.frontier[1]):
             # self.visualize()
             # self.frontier[1].sort(key=lambda x: x.getF())
-            if self.frontier[1][0].cell.isAgent(): # đợi agent khác di chuyển
-                if len(self.frontier[1]) > 1:
-                    self.frontier[1][0], self.frontier[1][1] = self.frontier[1][1], self.frontier[1][0] # đi node khác trước
-                else:
-                    return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
-
             self.currentNode[1] = self.frontier[1].pop(0)
 
             # if path found
@@ -761,8 +813,6 @@ class SearchTree:
         higher_priority = agent_1 if agent_1 < agent_2 else agent_2  # agent thấp hơn thì ưu tiên hơn
 
         return higher_priority
-
-
 
 
 searchTree2 = SearchTree()
