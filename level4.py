@@ -511,6 +511,7 @@ class SearchTree:
         self.visited = {}
         self.root = {}
         self.keys = {}
+        self.upcoming = {} # save next cells of agents
 
         self.number_agents = 0  # số agent
 
@@ -609,14 +610,14 @@ class SearchTree:
                     print(f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}")
                     tempNode = tempNode.parent
                 # self.visualize()
-                return self.MainStatus.REACHED
+                return (self.MainStatus.REACHED, None)
 
             self.currentNode[1].expand(1)
             for eachChild in self.currentNode[1].children:
                 self.frontier[1].append(eachChild)
-            return self.MainStatus.IN_PROGRESS
+            return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
 
-        return self.MainStatus.UNSOLVABLE
+        return (self.MainStatus.UNSOLVABLE, None)
 
     def BFS(self):
         # self.root[1].saveHeuristic(self.goals[1])
@@ -630,17 +631,16 @@ class SearchTree:
             if self.currentNode[1].cell == self.goals[1]:
                 tempNode = self.currentNode[1]
                 while (tempNode):
-                    print(f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}")
                     tempNode = tempNode.parent
                 # self.visualize()
-                return self.MainStatus.REACHED
+                return (self.MainStatus.REACHED, None)
 
             self.currentNode[1].expand(1)
             for eachChild in self.currentNode[1].children:
                 self.frontier[1].append(eachChild)
-            return self.MainStatus.IN_PROGRESS
+            return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
 
-        return self.MainStatus.UNSOLVABLE
+        return (self.MainStatus.UNSOLVABLE, None)
 
     def BFS_CustomGoal(self, goal):
         # self.root[1].saveHeuristic(self.goals[1])
@@ -656,21 +656,22 @@ class SearchTree:
                 while (tempNode):
                     print(f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}")
                     tempNode = tempNode.parent
-                # self.visualize()
-                return self.MainStatus.REACHED
+                    # self.visualize()
+                    return (self.MainStatus.REACHED, None)
 
-            self.currentNode[1].expand(1)
-            for eachChild in self.currentNode[1].children:
-                self.frontier[1].append(eachChild)
-            return self.MainStatus.IN_PROGRESS
+                self.currentNode[1].expand(1)
+                for eachChild in self.currentNode[1].children:
+                    self.frontier[1].append(eachChild)
+                return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
 
-        return self.MainStatus.UNSOLVABLE
+            return (self.MainStatus.UNSOLVABLE, None)
 
-    def BFS_OtherAgents(self, agent_no, waiting = False):
+    def BFS_OtherAgents(self, agent_no):
         # self.root[agent_no].saveHeuristic(self.goals[agent_no])
         # self.root[agent_no].saveF()
         if (self.frontier[agent_no]):
-            if waiting: # đợi nên bỏ qua lượt này, không đi
+            if self.upcoming[agent_no] is None:  # đợi nên bỏ qua lượt này, không đi
+                self.upcoming[agent_no] = self.frontier[agent_no][0] # đưa lại vào upcoming sau khi đợi
                 return self.MainStatus.IN_PROGRESS
             # self.visualize()
             # self.frontier[agent_no].sort(key=lambda x: x.getF())
@@ -678,32 +679,46 @@ class SearchTree:
 
             # if path found
             if self.currentNode[agent_no].cell == self.goals[agent_no]:
-                return self.MainStatus.REACHED
+                return (self.MainStatus.REACHED, None)
 
             self.currentNode[agent_no].expand(agent_no)
             for eachChild in self.currentNode[agent_no].children:
-                self.frontier[agent_no].append(eachChild)
-            return self.MainStatus.IN_PROGRESS
+                self.frontier[1].append(eachChild)
+            return (self.MainStatus.IN_PROGRESS, self.frontier[agent_no][0])
 
-        return self.MainStatus.UNSOLVABLE
+        return (self.MainStatus.UNSOLVABLE, None)
 
     def agent_turn_based_movement(self):
         current_agent = 1  # Initialize the index to track the current agent
 
         while True:
-
             if current_agent == 1:  # A1
                 res = self.BFS()
-                if res != self.MainStatus.IN_PROGRESS:  # reached goal or unsolvable
-                    if res == self.MainStatus.REACHED:
+                if res[0] != self.MainStatus.IN_PROGRESS:  # reached goal or unsolvable
+                    if res[0] == self.MainStatus.REACHED:
                         print("Found goal")
-                    elif res == self.MainStatus.UNSOLVABLE:
+                    elif res[0] == self.MainStatus.UNSOLVABLE:
                         print("Cannot solve")
                     break
+                else:
+                    self.upcoming[current_agent] = res[1].cell
+                    for agent, upcoming in self.upcoming.values():
+                        if upcoming == res[1].cell:
+                            win_agent = self.competing_cell(agent, current_agent)
+                            lose_agent = agent if agent != win_agent else current_agent
+                            self.upcoming[lose_agent] = None
+
             else:  # other agents
                 res = self.BFS_OtherAgents(current_agent)  # other agents reached their goals
-                if res != self.MainStatus.IN_PROGRESS:  # reached goal or unsolvable
+                if res[0] != self.MainStatus.IN_PROGRESS:  # reached goal or unsolvable
                     self.goals[current_agent] = self.generate_goal()  # generate new goal for this agent
+                else:
+                    self.upcoming[current_agent] = res[1].cell
+                    for agent, upcoming in self.upcoming.values():
+                        if upcoming == res[1].cell:
+                            win_agent = self.competing_cell(agent, current_agent)
+                            lose_agent = agent if agent != win_agent else current_agent
+                            self.upcoming[lose_agent] = None
 
             current_agent += 1
 
@@ -720,20 +735,10 @@ class SearchTree:
             random_goal = self.floors[random_floor].getCell(random_y, random_x)
         return random_goal
 
-    def competing_cell(self, agent_1, agent_2, upcoming_cell_1, upcoming_cell_2):
-        if upcoming_cell_1 is None or upcoming_cell_2 is None:
-            return
-
-        if upcoming_cell_1 != upcoming_cell_2: # không tranh giành
-            return
-
+    def competing_cell(self, agent_1, agent_2):
         higher_priority = agent_1 if agent_1 < agent_2 else agent_2  # agent thấp hơn thì ưu tiên hơn
 
-        if agent_1 != higher_priority: # agent này phải nhường
-            self.BFS_OtherAgents(agent_1,True)
-        else:
-            self.BFS_OtherAgents(agent_2,True)
-
+        return higher_priority
 
 
 searchTree2 = SearchTree()
