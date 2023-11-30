@@ -631,6 +631,7 @@ class SearchTree:
             if self.currentNode[1].cell == self.goals[1]:
                 tempNode = self.currentNode[1]
                 while (tempNode):
+                    print(tempNode.cell.getSpecialValue())
                     tempNode = tempNode.parent
                 # self.visualize()
                 return (self.MainStatus.REACHED, None)
@@ -670,9 +671,8 @@ class SearchTree:
         # self.root[agent_no].saveHeuristic(self.goals[agent_no])
         # self.root[agent_no].saveF()
         if (self.frontier[agent_no]):
-            if self.upcoming[agent_no] is None:  # đợi nên bỏ qua lượt này, không đi
-                self.upcoming[agent_no] = self.frontier[agent_no][0] # đưa lại vào upcoming sau khi đợi
-                return self.MainStatus.IN_PROGRESS
+            if self.upcoming.get(agent_no) is None:  # đợi nên bỏ qua lượt này, không đi
+                return (self.MainStatus.IN_PROGRESS, self.frontier[agent_no][0])  # đưa lại vào upcoming sau khi đợi
             # self.visualize()
             # self.frontier[agent_no].sort(key=lambda x: x.getF())
             self.currentNode[agent_no] = self.frontier[agent_no].pop(0)
@@ -702,8 +702,9 @@ class SearchTree:
                     break
                 else:
                     self.upcoming[current_agent] = res[1].cell
-                    for agent, upcoming in self.upcoming.values():
-                        if upcoming == res[1].cell:
+
+                    for agent, upcoming_cell in self.upcoming.items():
+                        if upcoming_cell is not None and upcoming_cell == res[1].cell:
                             win_agent = self.competing_cell(agent, current_agent)
                             lose_agent = agent if agent != win_agent else current_agent
                             self.upcoming[lose_agent] = None
@@ -714,8 +715,9 @@ class SearchTree:
                     self.goals[current_agent] = self.generate_goal()  # generate new goal for this agent
                 else:
                     self.upcoming[current_agent] = res[1].cell
-                    for agent, upcoming in self.upcoming.values():
-                        if upcoming == res[1].cell:
+
+                    for agent, upcoming_cell in self.upcoming.items():
+                        if upcoming_cell is not None and upcoming_cell == res[1].cell:
                             win_agent = self.competing_cell(agent, current_agent)
                             lose_agent = agent if agent != win_agent else current_agent
                             self.upcoming[lose_agent] = None
