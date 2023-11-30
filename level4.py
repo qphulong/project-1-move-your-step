@@ -46,7 +46,10 @@ class Cell:
         return max(abs(self.x - Cell.x), abs(self.y - Cell.y))
 
     def isWall(self):
-        return "-1" in self.values or any("A" in value for value in self.values)
+        return "-1" in self.values
+
+    def isAgent(self):
+        return any("A" in value for value in self.values)
 
     def getY(self):
         return self.y
@@ -161,7 +164,12 @@ class Node:
     def expandFrontierCell(self, cell, BFSvisited, BFSfrontier, BFStempFrontier):
         floor_no = cell.floor_no
 
+        possible_moves = 0
+        waiting_moves = 0 # number of moves that need to wait for other agents to move
+
         # add N cell to tempFrontier
+
+
         if (
                 cell.y > 0
                 and not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isWall()
@@ -172,6 +180,8 @@ class Node:
                 and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x)
                 not in BFStempFrontier
         ):
+            possible_moves+=1
+
             northCell = self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x)
 
             BFStempFrontier.append(northCell)
@@ -187,6 +197,10 @@ class Node:
                 and self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1)
                 not in BFStempFrontier
         ):
+            possible_moves+=1
+            if self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isAgent():  # wait for this other agent to move
+                waiting_moves+=1
+
             westCell = self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1)
 
             BFStempFrontier.append(westCell)
@@ -625,6 +639,12 @@ class SearchTree:
         if (self.frontier[1]):
             # self.visualize()
             # self.frontier[1].sort(key=lambda x: x.getF())
+            if self.frontier[1][0].cell.isAgent(): # đợi agent khác di chuyển
+                if len(self.frontier[1]) > 1:
+                    self.frontier[1][0], self.frontier[1][1] = self.frontier[1][1], self.frontier[1][0] # đi node khác trước
+                else:
+                    return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
+
             self.currentNode[1] = self.frontier[1].pop(0)
 
             # if path found
@@ -655,7 +675,7 @@ class SearchTree:
             if self.currentNode[1].cell == goal:
                 tempNode = self.currentNode[1]
                 while (tempNode):
-                    print(f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}")
+                    print(tempNode.cell.getSpecialValue())
                     tempNode = tempNode.parent
                     # self.visualize()
                     return (self.MainStatus.REACHED, None)
@@ -741,6 +761,8 @@ class SearchTree:
         higher_priority = agent_1 if agent_1 < agent_2 else agent_2  # agent thấp hơn thì ưu tiên hơn
 
         return higher_priority
+
+
 
 
 searchTree2 = SearchTree()
