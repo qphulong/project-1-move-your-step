@@ -48,10 +48,6 @@ class Cell:
     def isWall(self):
         return "-1" in self.values
 
-    def isAgent(self):
-        special = self.getSpecialValue()
-        return special and special[0] == "A"
-
     def getY(self):
         return self.y
 
@@ -99,13 +95,6 @@ class Floor:
 
     def getCell(self, row, col):
         return self.table[row][col]
-
-    def findStair(self, direction):
-        for i in range(self.rows):
-            for j in range(self.cols):
-                if self.table[i][j].checkValue(direction):
-                    return self.table[i][j]
-        return None
 
 
 custom_goals = []

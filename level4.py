@@ -52,6 +52,10 @@ class Cell:
         special = self.getSpecialValue()
         return special and special[0] == "A"
 
+    def isOtherAgent(self,agent_no):
+        special = self.getSpecialValue()
+        return special and special[0] == "A" and special[1] != str(agent_no)
+
     def getY(self):
         return self.y
 
@@ -99,13 +103,6 @@ class Floor:
 
     def getCell(self, row, col):
         return self.table[row][col]
-
-    def findStair(self, direction):
-        for i in range(self.rows):
-            for j in range(self.cols):
-                if self.table[i][j].checkValue(direction):
-                    return self.table[i][j]
-        return None
 
 
 custom_goals = []
@@ -165,11 +162,7 @@ class Node:
     def expandFrontierCell(self, cell, BFSvisited, BFSfrontier, BFStempFrontier):
         floor_no = cell.floor_no
 
-        possible_moves = 0
-        waiting_moves = 0  # number of moves that need to wait for other agents to move
-
         # add N cell to tempFrontier
-
         if (
                 cell.y > 0
                 and not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isWall()
@@ -180,7 +173,6 @@ class Node:
                 and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x)
                 not in BFStempFrontier
         ):
-            possible_moves += 1
 
             northCell = self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x)
 
@@ -197,10 +189,6 @@ class Node:
                 and self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1)
                 not in BFStempFrontier
         ):
-            possible_moves += 1
-            if self.belongTo.floors[floor_no].getCell(cell.y - 1,
-                                                      cell.x).isAgent():  # wait for this other agent to move
-                waiting_moves += 1
 
             westCell = self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1)
 
@@ -328,7 +316,6 @@ class Node:
             for cell in BFSfrontier:
                 if cell is None:
                     continue
-
                 # analyze cell
                 cell_tag = cell.getSpecialValue()  # special value của cell
 
@@ -559,7 +546,9 @@ class SearchTree:
         self.visited = {}
         self.root = {}
         self.keys = {}
-        self.upcoming = {}  # save next cells of agents
+        self.upcoming = {}  # save next cells of each agent
+
+        self.waiting = [] # save waiting cells (occupied by other agents) by the main agent
 
         self.number_agents = 0  # số agent
 
@@ -697,6 +686,20 @@ class SearchTree:
         if (self.frontier[1]):
             # self.visualize()
             # self.frontier[1].sort(key=lambda x: x.getF())
+
+            floor = self.frontier[1][0].cell.floor_no
+            y = self.frontier[1][0].cell.y
+            x = self.frontier[1][0].cell.x
+            if self.floors[floor].getCell(y, x).isOtherAgent(1):  # meet other agent
+                print(f"Agent {self.floors[floor].getCell(y, x).getSpecialValue()} is the other agent")
+                if len(self.frontier[1]) > 1:
+                    i = 1
+                    while self.floors[floor].getCell(self.frontier[1][i].cell.y, self.frontier[1][i].cell.x).isOtherAgent(1):
+                        self.frontier[1][i-1], self.frontier[1][i] = self.frontier[1][i], self.frontier[1][i-1]
+                        i+=1
+                else:
+                    return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
+
             self.currentNode[1] = self.frontier[1].pop(0)
 
             # if path found
@@ -711,7 +714,7 @@ class SearchTree:
             self.currentNode[1].expand(1)
             for eachChild in self.currentNode[1].children:
                 self.frontier[1].append(eachChild)
-            return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
+            return (self.MainStatus.IN_PROGRESS, self.frontier[1][0] if len(self.frontier[1]) > 0 else None)
 
         return (self.MainStatus.UNSOLVABLE, None)
 
@@ -745,6 +748,8 @@ class SearchTree:
         if (self.frontier[agent_no]):
             if self.upcoming.get(agent_no) is None:  # đợi nên bỏ qua lượt này, không đi
                 return (self.MainStatus.IN_PROGRESS, self.frontier[agent_no][0])  # đưa lại vào upcoming sau khi đợi
+
+                
             # self.visualize()
             # self.frontier[agent_no].sort(key=lambda x: x.getF())
             self.currentNode[agent_no] = self.frontier[agent_no].pop(0)
@@ -755,8 +760,8 @@ class SearchTree:
 
             self.currentNode[agent_no].expand(agent_no)
             for eachChild in self.currentNode[agent_no].children:
-                self.frontier[1].append(eachChild)
-            return (self.MainStatus.IN_PROGRESS, self.frontier[agent_no][0])
+                self.frontier[agent_no].append(eachChild)
+            return (self.MainStatus.IN_PROGRESS, self.frontier[agent_no][0] if len(self.frontier[agent_no]) > 0 else None)
 
         return (self.MainStatus.UNSOLVABLE, None)
 
@@ -773,23 +778,31 @@ class SearchTree:
                         print("Cannot solve")
                     break
                 else:
+                    if res[1] is None:
+                        print("Cannot solve")
+                        break
+
                     self.upcoming[current_agent] = res[1].cell
 
-                    for agent, upcoming_cell in self.upcoming.items():
-                        if upcoming_cell is not None and upcoming_cell == res[1].cell:
+                    for agent, upcoming_cell in self.upcoming.items(): # competing for a cell
+                        if upcoming_cell is not None and upcoming_cell == res[1].cell and agent != 1: # if there is a cell that is upcoming for other agent
                             win_agent = self.competing_cell(agent, current_agent)
                             lose_agent = agent if agent != win_agent else current_agent
-                            self.upcoming[lose_agent] = None
+                            self.upcoming[lose_agent] = None # lose agent will wait
 
             else:  # other agents
                 res = self.BFS_OtherAgents(current_agent)  # other agents reached their goals
                 if res[0] != self.MainStatus.IN_PROGRESS:  # reached goal or unsolvable
                     self.goals[current_agent] = self.generate_goal()  # generate new goal for this agent
                 else:
+                    if res[1] is None:
+                        self.goals[current_agent] = self.generate_goal()  # generate new goal for this agent
+                        continue
+
                     self.upcoming[current_agent] = res[1].cell
 
                     for agent, upcoming_cell in self.upcoming.items():
-                        if upcoming_cell is not None and upcoming_cell == res[1].cell:
+                        if upcoming_cell is not None and upcoming_cell == res[1].cell and agent!=current_agent:
                             win_agent = self.competing_cell(agent, current_agent)
                             lose_agent = agent if agent != win_agent else current_agent
                             self.upcoming[lose_agent] = None
