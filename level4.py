@@ -123,10 +123,10 @@ class Node:
         self.pathCost = 0
         self.heuristic = 0
         self.f = 0
-        self.keys = [] # obtained keys
-        self.stairs = {} # stairs that have been used
-        self.children = [] # những con (successor) của node này
-        self.parent = None # cha của node này
+        self.keys = []  # obtained keys
+        self.stairs = {}  # stairs that have been used
+        self.children = []  # những con (successor) của node này
+        self.parent = None  # cha của node này
 
     def appendKey(self, value):
         if value not in self.keys:
@@ -144,7 +144,7 @@ class Node:
     def getPathCost(self):
         return self.pathCost
 
-    def saveHeuristic(self, GoalCell):  # calculate heuristic of the current cell
+    def saveHeuristic(self, GoalCell):  # calculate heuristic of the current cell to the goal (can be any goal)
         self.heuristic = self.cell.getFloorsHeuristic(GoalCell)
         return self.heuristic
 
@@ -161,7 +161,7 @@ class Node:
     def expandFrontierCell(self, cell, BFSvisited, BFSfrontier, BFStempFrontier):
         floor_no = cell.floor_no
 
-            # add N cell to tempFrontier
+        # add N cell to tempFrontier
         if (
                 cell.y > 0
                 and not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isWall()
@@ -307,6 +307,9 @@ class Node:
         BFSfrontier.append(self.cell)
         steps = -1
 
+        if self.cell.getSpecialValue() == "UP" or self.cell.getSpecialValue() == "DO":
+            print(f"Cell: {self.cell.getSpecialValue()} Floor: {self.cell.floor_no}")
+
         while BFSfrontier:
             steps += 1
 
@@ -314,7 +317,7 @@ class Node:
                 if cell is None:
                     continue
                 # analyze cell
-                cell_tag = cell.getSpecialValue() # special value của cell
+                cell_tag = cell.getSpecialValue()  # special value của cell
 
                 # normal cell
                 if cell_tag == "" or cell_tag[0] == "A":
@@ -361,6 +364,11 @@ class Node:
                             self.children.append(newNode)
                             newNode.parent = self
 
+                            if (
+                                    self.cell.getSpecialValue() == "UP" or self.cell.getSpecialValue() == "DO") and cell.getSpecialValue() != "":
+                                print(
+                                    f"Currently expanded cell: {cell.getSpecialValue()} {cell.floor_no} - Parent: {newNode.parent.cell.getSpecialValue()} {newNode.parent.cell.floor_no}")
+
                             # inherit collected keys so far
                             for eachKey in self.keys:
                                 newNode.appendKey(
@@ -401,6 +409,11 @@ class Node:
                             self.children.append(newNode)
                             newNode.parent = self
 
+                            if (
+                                    self.cell.getSpecialValue() == "UP" or self.cell.getSpecialValue() == "DO") and cell.getSpecialValue() != "":
+                                print(
+                                    f"Currently expanded cell: {cell.getSpecialValue()} {cell.floor_no} - Parent: {newNode.parent.cell.getSpecialValue()} {newNode.parent.cell.floor_no}")
+
                             # if go through the same door with same keys,then delete this new node
                             tempNode = self
                             while tempNode:
@@ -428,14 +441,20 @@ class Node:
                     self.children.append(newNode)
                     newNode.parent = self
 
+                    if (
+                            self.cell.getSpecialValue() == "UP" or self.cell.getSpecialValue() == "DO") and cell.getSpecialValue() != "":
+                        print(
+                            f"Currently expanded cell: {cell.getSpecialValue()} {cell.floor_no} - Parent: {newNode.parent.cell.getSpecialValue()} {newNode.parent.cell.floor_no}")
+
+
                 # stairs
                 elif cell_tag == "UP" or cell_tag == "DO":
                     if len(BFSfrontier) > 1 and (
-                            (BFSfrontier[-2].getSpecialValue() == "UP" and self.cell.getSpecialValue() == "DO") or
-                            (BFSfrontier[-2].getSpecialValue() == "DO" and self.cell.getSpecialValue() == "UP")):
+                            (BFSfrontier[-1].getSpecialValue() == "UP" and self.cell.getSpecialValue() == "DO") or
+                            (BFSfrontier[-1].getSpecialValue() == "DO" and self.cell.getSpecialValue() == "UP")):
                         continue
 
-                    newNode = Node(cell, self.belongTo) # tạo node mới từ cell (đang duyệt BFSFrontier)
+                    newNode = Node(cell, self.belongTo)  # tạo node mới từ cell (đang duyệt BFSFrontier)
                     newNode.setPathCost(self.pathCost + steps)
                     newNode.saveHeuristic(self.belongTo.goals[agent_no])
                     newNode.saveF()
@@ -445,8 +464,13 @@ class Node:
                             continue
 
                     # append new node to tree
-                    self.children.append(newNode) # children của node hiện tại là thêm node mới
+                    self.children.append(newNode)  # children của node hiện tại là thêm node mới
                     newNode.parent = self
+
+                    if (
+                            self.cell.getSpecialValue() == "UP" or self.cell.getSpecialValue() == "DO") and cell.getSpecialValue() != "":
+                        print(
+                            f"Currently expanded cell: {cell.getSpecialValue()} {cell.floor_no} - Parent: {newNode.parent.cell.getSpecialValue()} {newNode.parent.cell.floor_no}")
 
                     # inherit collected stairs so far
                     newNode.stairs.update(self.stairs)
@@ -463,13 +487,10 @@ class Node:
                         copyCell = self.belongTo.floors[cell.floor_no - 1].getCell(
                             cell.y, cell.x
                         )
-
                     # Expand the neighbors of the updated cell
                     self.expandFrontierCell(
                         copyCell, BFSvisited, BFSfrontier, BFStempFrontier
                     )
-
-                    BFSvisited.append(copyCell)
 
                 BFSvisited.append(cell)
 
@@ -574,6 +595,30 @@ class SearchTree:
         IN_PROGRESS = 0
 
     def AStar(self):
+        self.root[1].saveHeuristic(self.goals[1])
+        self.root[1].saveF()
+        if (self.frontier[1]):
+            # self.visualize()
+            self.frontier[1].sort(key=lambda x: x.getF())
+            self.currentNode[1] = self.frontier[1].pop(0)
+
+            # if path found
+            if self.currentNode[1].cell == self.goals[1]:
+                tempNode = self.currentNode[1]
+                while (tempNode):
+                    print(f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}")
+                    tempNode = tempNode.parent
+                # self.visualize()
+                return self.MainStatus.REACHED
+
+            self.currentNode[1].expand(1)
+            for eachChild in self.currentNode[1].children:
+                self.frontier[1].append(eachChild)
+            return self.MainStatus.IN_PROGRESS
+
+        return self.MainStatus.UNSOLVABLE
+
+    def BFS(self):
         # self.root[1].saveHeuristic(self.goals[1])
         # self.root[1].saveF()
         if (self.frontier[1]):
@@ -621,46 +666,48 @@ class SearchTree:
 
         return self.MainStatus.UNSOLVABLE
 
-    def BFS_OtherAgents(self, agent_no):
-        if self.frontier[agent_no]:  # changed to if for turn by turn
+    def BFS_OtherAgents(self, agent_no, waiting = False):
+        # self.root[agent_no].saveHeuristic(self.goals[agent_no])
+        # self.root[agent_no].saveF()
+        if (self.frontier[agent_no]):
+            if waiting: # đợi nên bỏ qua lượt này, không đi
+                return self.MainStatus.IN_PROGRESS
+            # self.visualize()
+            # self.frontier[agent_no].sort(key=lambda x: x.getF())
             self.currentNode[agent_no] = self.frontier[agent_no].pop(0)
 
             # if path found
-            if self.currentNode[agent_no].cell == self.goals[agent_no]:  # goal node
+            if self.currentNode[agent_no].cell == self.goals[agent_no]:
                 return self.MainStatus.REACHED
 
             self.currentNode[agent_no].expand(agent_no)
             for eachChild in self.currentNode[agent_no].children:
                 self.frontier[agent_no].append(eachChild)
             return self.MainStatus.IN_PROGRESS
-        else:
-            return self.MainStatus.UNSOLVABLE
+
+        return self.MainStatus.UNSOLVABLE
 
     def agent_turn_based_movement(self):
         current_agent = 1  # Initialize the index to track the current agent
 
         while True:
+
             if current_agent == 1:  # A1
-                res = self.AStar()
+                res = self.BFS()
                 if res != self.MainStatus.IN_PROGRESS:  # reached goal or unsolvable
                     if res == self.MainStatus.REACHED:
                         print("Found goal")
-                        break
                     elif res == self.MainStatus.UNSOLVABLE:
                         print("Cannot solve")
-                        break
+                    break
             else:  # other agents
-                res = self.BFS_OtherAgents(
-                    current_agent
-                )  # other agents reached their goals
+                res = self.BFS_OtherAgents(current_agent)  # other agents reached their goals
                 if res != self.MainStatus.IN_PROGRESS:  # reached goal or unsolvable
-                    self.goals[
-                        current_agent
-                    ] = self.generate_goal()  # generate new goal for this agent
+                    self.goals[current_agent] = self.generate_goal()  # generate new goal for this agent
 
             current_agent += 1
 
-            if current_agent >= self.number_agents:
+            if current_agent > self.number_agents:
                 current_agent = 1
 
     def generate_goal(self):
@@ -668,11 +715,25 @@ class SearchTree:
 
         while random_goal is None or random_goal.isWall():
             random_floor = random.randint(1, len(self.floors))
-            random_x = random.randint(0, self.floors[random_floor].rows - 1)
-            random_y = random.randint(0, self.floors[random_floor].cols - 1)
-            random_goal = self.floors[random_floor].getCell(random_x, random_y)
-
+            random_y = random.randint(0, self.floors[random_floor].rows - 1)
+            random_x = random.randint(0, self.floors[random_floor].cols - 1)
+            random_goal = self.floors[random_floor].getCell(random_y, random_x)
         return random_goal
+
+    def competing_cell(self, agent_1, agent_2, upcoming_cell_1, upcoming_cell_2):
+        if upcoming_cell_1 is None or upcoming_cell_2 is None:
+            return
+
+        if upcoming_cell_1 != upcoming_cell_2: # không tranh giành
+            return
+
+        higher_priority = agent_1 if agent_1 < agent_2 else agent_2  # agent thấp hơn thì ưu tiên hơn
+
+        if agent_1 != higher_priority: # agent này phải nhường
+            self.BFS_OtherAgents(agent_1,True)
+        else:
+            self.BFS_OtherAgents(agent_2,True)
+
 
 
 searchTree2 = SearchTree()
