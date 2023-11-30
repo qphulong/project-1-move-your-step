@@ -334,19 +334,19 @@ class Node:
 
                 # normal cell
                 if cell_tag == "" or cell_tag[0] == "A":
-                    if self.cell.floor_no != cell.floor_no:
-                        has_stairs = True
-                        change = 1 if self.cell.floor_no < cell.floor_no else -1
-                        i = self.cell.floor_no
-                        while i != cell.floor_no:
-                            if self.stairs.get((i, i + change)) is None:
-                                BFSvisited.append(cell)
-                                has_stairs = False
-                                break
-                            i = i + change
-
-                        if has_stairs:
-                            continue
+                    # if self.cell.floor_no != cell.floor_no:
+                    #     has_stairs = True
+                    #     change = 1 if self.cell.floor_no < cell.floor_no else -1
+                    #     i = self.cell.floor_no
+                    #     while i != cell.floor_no:
+                    #         if self.stairs.get((i, i + change)) is None:
+                    #             BFSvisited.append(cell)
+                    #             has_stairs = False
+                    #             break
+                    #         i = i + change
+                    #
+                    #     if has_stairs:
+                    #         continue
 
                     self.expandFrontierCell(
                         cell, BFSvisited, BFSfrontier, BFStempFrontier
@@ -354,20 +354,20 @@ class Node:
 
                 # key
                 elif cell_tag[0] == "K":
-
-                    if self.cell.floor_no != cell.floor_no:
-                        has_stairs = True
-                        change = 1 if self.cell.floor_no < cell.floor_no else -1
-                        i = self.cell.floor_no
-                        while i != cell.floor_no:
-                            if self.stairs.get((i, i + change)) is None:
-                                BFSvisited.append(cell)
-                                has_stairs = False
-                                break
-                            i = i + change
-
-                        if has_stairs:
-                            continue
+                    #
+                    # if self.cell.floor_no != cell.floor_no:
+                    #     has_stairs = True
+                    #     change = 1 if self.cell.floor_no < cell.floor_no else -1
+                    #     i = self.cell.floor_no
+                    #     while i != cell.floor_no:
+                    #         if self.stairs.get((i, i + change)) is None:
+                    #             BFSvisited.append(cell)
+                    #             has_stairs = False
+                    #             break
+                    #         i = i + change
+                    #
+                    #     if has_stairs:
+                    #         continue
 
                     # first expand (not worry about duplicates)
                     if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
@@ -411,19 +411,19 @@ class Node:
 
                 # door
                 elif cell_tag[0] == "D" and cell_tag[1] != "O":
-                    if self.cell.floor_no != cell.floor_no:
-                        has_stairs = True
-                        change = 1 if self.cell.floor_no < cell.floor_no else -1
-                        i = self.cell.floor_no
-                        while i != cell.floor_no:
-                            if self.stairs.get((i, i + change)) is None:
-                                BFSvisited.append(cell)
-                                has_stairs = False
-                                break
-                            i = i + change
-
-                        if has_stairs:
-                            continue
+                    # if self.cell.floor_no != cell.floor_no:
+                    #     has_stairs = True
+                    #     change = 1 if self.cell.floor_no < cell.floor_no else -1
+                    #     i = self.cell.floor_no
+                    #     while i != cell.floor_no:
+                    #         if self.stairs.get((i, i + change)) is None:
+                    #             BFSvisited.append(cell)
+                    #             has_stairs = False
+                    #             break
+                    #         i = i + change
+                    #
+                    #     if has_stairs:
+                    #         continue
 
                     # first expand, cause it will not expand since first cell in frontier and dup key
                     if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
@@ -460,19 +460,19 @@ class Node:
                             pass
 
                 elif cell_tag[0] == "T":
-                    if self.cell.floor_no != cell.floor_no:
-                        has_stairs = True
-                        change = 1 if self.cell.floor_no < cell.floor_no else -1
-                        i = self.cell.floor_no
-                        while i != cell.floor_no:
-                            if self.stairs.get((i, i + change)) is None:
-                                BFSvisited.append(cell)
-                                has_stairs = False
-                                break
-                            i = i + change
-
-                        if has_stairs:
-                            continue
+                    # if self.cell.floor_no != cell.floor_no:
+                    #     has_stairs = True
+                    #     change = 1 if self.cell.floor_no < cell.floor_no else -1
+                    #     i = self.cell.floor_no
+                    #     while i != cell.floor_no:
+                    #         if self.stairs.get((i, i + change)) is None:
+                    #             BFSvisited.append(cell)
+                    #             has_stairs = False
+                    #             break
+                    #         i = i + change
+                    #
+                    #     if has_stairs:
+                    #         continue
 
                     # create new node
                     newNode = Node(cell, self.belongTo)
@@ -486,19 +486,19 @@ class Node:
 
                 # stairs
                 elif cell_tag == "UP" or cell_tag == "DO":
-                    if self.cell.floor_no != cell.floor_no:
-                        has_stairs = True
-                        change = 1 if self.cell.floor_no < cell.floor_no else -1
-                        i = self.cell.floor_no
-                        while i != cell.floor_no:
-                            if self.stairs.get((i, i + change)) is None:
-                                BFSvisited.append(cell)
-                                has_stairs = False
-                                break
-                            i = i + change
-
-                        if has_stairs:
-                            continue
+                    # if self.cell.floor_no != cell.floor_no:
+                    #     has_stairs = True
+                    #     change = 1 if self.cell.floor_no < cell.floor_no else -1
+                    #     i = self.cell.floor_no
+                    #     while i != cell.floor_no:
+                    #         if self.stairs.get((i, i + change)) is None:
+                    #             BFSvisited.append(cell)
+                    #             has_stairs = False
+                    #             break
+                    #         i = i + change
+                    #
+                    #     if has_stairs:
+                    #         continue
 
                     if len(BFSfrontier) > 1 and (
                             (BFSfrontier[-1].getSpecialValue() == "UP" and self.cell.getSpecialValue() == "DO") or
