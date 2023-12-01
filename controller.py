@@ -37,6 +37,21 @@ def handle_Button_Level1():
     newWindow_Level1.geometry('500x500')
     newWindow_Level1.attributes('-topmost', True)  # Cố định window
 
+    nameLevel1 = tk.Label(newWindow_Level1, font=('Arial', 25), text='Level 1', fg='Black')
+    nameLevel1.pack()
+
+    button_level1_astar = tk.Button(newWindow_Level1, font=('Arial', 15), text='A star', width=20, height=1,
+                              bg='Brown')
+    button_level1_astar.place(x=137, y=130)
+
+    button_level1_bfs = tk.Button(newWindow_Level1, font=('Arial', 15), text='BFS', width=20, height=1,
+                              bg='Brown')
+    button_level1_bfs.place(x=137, y=230)
+
+    button_level1_dfs = tk.Button(newWindow_Level1, font=('Arial', 15), text='DFS', width=20, height=1,
+                              bg='Brown')
+    button_level1_dfs.place(x=137, y=330)
+
     # CODE TEST
 
     # def handle():
