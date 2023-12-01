@@ -1,5 +1,6 @@
 import re
 import tkinter as tk
+from collections import Counter
 
 
 class Cell:
@@ -437,7 +438,7 @@ class SearchTree:
                 # while (tempNode):
                 #     print(tempNode.cell.getSpecialValue())
                 #     tempNode = tempNode.parent
-                self.visualize()
+                self.heatMap()
                 return
 
             self.currentNode.expand()
@@ -494,8 +495,63 @@ class SearchTree:
         # Run the GUI
         root.mainloop()
 
+    def heatMap(self):
+        # Create the main window
+        root = tk.Tk()
+        root.title("Search Tree Visualization")
 
+        # Create a canvas to draw on
+        canvas = tk.Canvas(root, width=self.floor.cols * 50, height=self.floor.rows * 50)
+        canvas.pack()
+
+        # basic map
+        for i in range(self.floor.rows):
+            for j in range(self.floor.cols):
+                x0, y0 = j * 20, i * 20
+                x1, y1 = (j + 1) * 20, (i + 1) * 20
+
+                # Set color for cells with value "-1" to black
+                if self.floor.table[i][j].checkValue("-1"):
+                    canvas.create_rectangle(x0, y0, x1, y1, fill="black")
+                else:
+                    canvas.create_rectangle(x0, y0, x1, y1, fill="white")
+                    # print special value
+                    specialValue = self.floor.table[i][j].getSpecialValue()
+                    canvas.create_text(x0 + 10, y0 + 10, text=specialValue, fill="black")
+        
+        # draw path
+        tempNode = self.currentNode
+        generalPath = []
+        while tempNode:
+            for eachCell in tempNode.path:
+                generalPath.append(eachCell)
+            tempNode = tempNode.parent
+
+        for eachCell in generalPath:
+            for i in range(self.floor.rows):
+                for j in range(self.floor.cols):
+                    x0, y0 = j * 20, i * 20
+                    x1, y1 = (j + 1) * 20, (i + 1) * 20
+
+                    # Set color for cells in the path to green
+                    if self.floor.table[i][j] in generalPath:
+                        if Counter(generalPath)[self.floor.table[i][j]] == 1:
+                            canvas.create_rectangle(x0, y0, x1, y1, fill="#ff8888")
+                        elif Counter(generalPath)[self.floor.table[i][j]] == 2:
+                            canvas.create_rectangle(x0, y0, x1, y1, fill="#ff4b4b")
+                        elif Counter(generalPath)[self.floor.table[i][j]] == 3:
+                            canvas.create_rectangle(x0, y0, x1, y1, fill="#ff0000")
+                        elif Counter(generalPath)[self.floor.table[i][j]] == 4:
+                            canvas.create_rectangle(x0, y0, x1, y1, fill="#cb0000")
+                    #Set color for cells pointed by tempNode to red
+                    if self.floor.table[i][j].getSpecialValue() != "":
+                        canvas.create_rectangle(x0, y0, x1, y1, fill="#2ad500")
+                        specialValue = self.floor.table[i][j].getSpecialValue()
+                        canvas.create_text(x0 + 10, y0 + 10, text=specialValue, fill="black")
+            pass
+        # Run the GUI
+        root.mainloop()
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input5-level2.txt")
+searchTree2.getInputFile("input//input4-level2.txt")
 searchTree2.AStar()
 pass
