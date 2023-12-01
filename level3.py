@@ -411,22 +411,22 @@ class Node:
                             cell, BFSvisited, BFSfrontier, BFStempFrontier
                         )
                     else:
+                        newNode = Node(cell, self.belongTo)
+                        newNode.setPathCost(self.pathCost + steps)
+                        newNode.saveHeuristic(self.belongTo.goals[agent_no])
+                        newNode.saveF()
+
+                        # inherit key
+                        for eachKey in self.keys:
+                            newNode.appendKey(eachKey)
+
+                        # append new node to tree
+                        self.children.append(newNode)
+                        newNode.parent = self
+
                         # if has key
                         if str("K" + str(cell_tag[1])) in self.keys:
                             # create new node
-                            newNode = Node(cell, self.belongTo)
-                            newNode.setPathCost(self.pathCost + steps)
-                            newNode.saveHeuristic(self.belongTo.goals[agent_no])
-                            newNode.saveF()
-
-                            # inherit key
-                            for eachKey in self.keys:
-                                newNode.appendKey(eachKey)
-
-                            # append new node to tree
-                            self.children.append(newNode)
-                            newNode.parent = self
-
                             # if go through the same door with same keys,then delete this new node
                             tempNode = self
                             while tempNode:
@@ -532,17 +532,13 @@ class Node:
 class SearchTree:
     def __init__(self):
         self.floors = {}
-        self.agents = {}
-        self.goals = {}
-        self.currentNode = {}  # save for all agents
-        self.frontier = {}
-        self.visited = {}
-        self.root = {}
-        self.keys = {}
-        self.upcoming = {}  # save next cells of agents
+        self.agent = None
+        self.currentNode = None # save for all agents
+        self.frontier = []
+        self.visited = []
+        self.root = None
 
-        self.number_agents = 0  # số agent
-
+        self.goals = []
     def getInputFile(self, filePath):
         with open(filePath, "r") as file:
             lines = file.readlines()
@@ -575,11 +571,6 @@ class SearchTree:
                     # Extract the character and integer parts from the cell value
                     char_part, num_part = re.match(r"([KD])(\d+)", cell_value).groups()
 
-                    if char_part == "K":
-                        self.keys[int(num_part)] = self.floors[current_floor].getCell(
-                            i, j
-                        )
-
                 # if goalCell show up
                 if re.match(r"[T]\d+", cell_value):
                     self.floors[current_floor].appendToCell(i, j, "0")
@@ -589,8 +580,7 @@ class SearchTree:
                         r"([AKTD])(\d+)", cell_value
                     ).groups()
 
-                    agent_no = int(cell_value[1])
-                    self.goals[agent_no] = self.floors[current_floor].getCell(i, j)
+                    self.goals.append(self.floors[current_floor].getCell(i, j))
 
                 # if startCell show up
                 if re.match(r"[A]\d+", cell_value):
@@ -602,15 +592,12 @@ class SearchTree:
                     ).groups()
 
                     current = Node(self.floors[current_floor].getCell(i, j), self)
-                    agent_no = int(cell_value[1])
-                    self.frontier[agent_no] = [current]
-                    self.currentNode[agent_no] = current
-                    self.visited[agent_no] = []
-                    self.root[agent_no] = current
+                    self.frontier = [current]
+                    self.currentNode = current
+                    self.visited = []
+                    self.root = current
 
-                    self.agents[agent_no] = self.floors[current_floor].getCell(i, j)
-
-                    self.number_agents += 1
+                    self.agent = self.floors[current_floor].getCell(i, j)
 
                 if cell_value == "UP" or cell_value == "DO":  # for stairs
                     self.floors[current_floor].appendToCell(i, j, "0")
@@ -624,72 +611,72 @@ class SearchTree:
         IN_PROGRESS = 0
 
     def AStar(self):
-        self.root[1].saveHeuristic(self.goals[1])
+        self.root[1].saveHeuristic(self.goals[0])
         self.root[1].saveF()
-        while (self.frontier[1]):
+        while (self.frontier):
             # self.visualize()
-            self.frontier[1].sort(key=lambda x: x.getF())
-            self.currentNode[1] = self.frontier[1].pop(0)
+            self.frontier.sort(key=lambda x: x.getF())
+            self.currentNode = self.frontier.pop(0)
 
             # if path found
-            if self.currentNode[1].cell == self.goals[1]:
-                tempNode = self.currentNode[1]
+            if self.currentNode.cell == self.goals[0]:
+                tempNode = self.currentNode
                 while (tempNode):
                     print(f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}")
                     tempNode = tempNode.parent
                 # self.visualize()
                 return
 
-            self.currentNode[1].expand(1)
-            for eachChild in self.currentNode[1].children:
-                self.frontier[1].append(eachChild)
+            self.currentNode.expand(1)
+            for eachChild in self.currentNode.children:
+                self.frontier.append(eachChild)
 
         print("No solution found")
 
 
     def AStar_CustomGoal(self, goal):
-        self.root[1].saveHeuristic(goal)
-        self.root[1].saveF()
-        while (self.frontier[1]):
+        self.root.saveHeuristic(goal)
+        self.root.saveF()
+        while (self.frontier):
             # self.visualize()
-            self.frontier[1].sort(key=lambda x: x.getF())
-            self.currentNode[1] = self.frontier[1].pop(0)
+            self.frontier.sort(key=lambda x: x.getF())
+            self.currentNode = self.frontier.pop(0)
 
             # if path found
-            if self.currentNode[1].cell == goal:
-                tempNode = self.currentNode[1]
+            if self.currentNode.cell == goal:
+                tempNode = self.currentNode
                 while (tempNode):
                     print(f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}")
                     tempNode = tempNode.parent
                 # self.visualize()
                 return
 
-            self.currentNode[1].expand(1)
-            for eachChild in self.currentNode[1].children:
-                self.frontier[1].append(eachChild)
+            self.currentNode.expand(1)
+            for eachChild in self.currentNode.children:
+                self.frontier.append(eachChild)
 
         print("No solution found")
 
     def BFS(self):
         # self.root[1].saveHeuristic(self.goals[1])
         # self.root[1].saveF()
-        while (self.frontier[1]):
+        while (self.frontier):
             # self.visualize()
             # self.frontier[1].sort(key=lambda x: x.getF())
-            self.currentNode[1] = self.frontier[1].pop(0)
+            self.currentNode = self.frontier.pop(0)
 
             # if path found
-            if self.currentNode[1].cell == self.goals[1]:
-                tempNode = self.currentNode[1]
+            if self.currentNode.cell == self.goals[0]:
+                tempNode = self.currentNode
                 while (tempNode):
                     print(tempNode.cell.getSpecialValue())
                     tempNode = tempNode.parent
                 # self.visualize()
                 return
 
-            self.currentNode[1].expand(1)
-            for eachChild in self.currentNode[1].children:
-                self.frontier[1].append(eachChild)
+            self.currentNode.expand(1)
+            for eachChild in self.currentNode.children:
+                self.frontier.append(eachChild)
 
         print("No solution found")
 
@@ -697,23 +684,23 @@ class SearchTree:
     def BFS_CustomGoal(self, goal):
         # self.root[1].saveHeuristic(self.goals[1])
         # self.root[1].saveF()
-        while (self.frontier[1]):
+        while (self.frontier):
             # self.visualize()
             # self.frontier[1].sort(key=lambda x: x.getF())
-            self.currentNode[1] = self.frontier[1].pop(0)
+            self.currentNode = self.frontier.pop(0)
 
             # if path found
             if self.currentNode[1].cell == goal:
-                tempNode = self.currentNode[1]
+                tempNode = self.currentNode
                 while (tempNode):
                     print(tempNode.cell.getSpecialValue())
                     tempNode = tempNode.parent
                     # self.visualize()
-                    return
+                return
 
-                self.currentNode[1].expand(1)
-                for eachChild in self.currentNode[1].children:
-                    self.frontier[1].append(eachChild)
+            self.currentNode.expand(1)
+            for eachChild in self.currentNode.children:
+                self.frontier.append(eachChild)
 
         print("No solution found")
 

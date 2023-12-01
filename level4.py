@@ -806,14 +806,14 @@ class SearchTree:
                     print(tempNode.cell.getSpecialValue())
                     tempNode = tempNode.parent
                     # self.visualize()
-                    return (self.MainStatus.REACHED, None)
+                return (self.MainStatus.REACHED, None)
 
-                self.currentNode[1].expand(1)
-                for eachChild in self.currentNode[1].children:
-                    self.frontier[1].append(eachChild)
-                return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
+            self.currentNode[1].expand(1)
+            for eachChild in self.currentNode[1].children:
+                self.frontier[1].append(eachChild)
+            return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
 
-            return (self.MainStatus.UNSOLVABLE, None)
+        return (self.MainStatus.UNSOLVABLE, None)
 
     def BFS_OtherAgents(self, agent_no):
         # self.root[agent_no].saveHeuristic(self.goals[agent_no])
