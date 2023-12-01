@@ -717,6 +717,10 @@ class SearchTree:
 
         print("No solution found")
 
+    def Divide_and_Conquer(self, goal):
+        pass
+
+
 
 
 searchTree2 = SearchTree()
