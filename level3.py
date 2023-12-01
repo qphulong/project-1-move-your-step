@@ -578,7 +578,7 @@ class SearchTree:
                     if char_part == "K":
                         self.keys[int(num_part)] = self.floors[current_floor].getCell(
                             i, j
-                        )
+                        ) # add key to list of keys
 
                 # if goalCell show up
                 if re.match(r"[T]\d+", cell_value):
