@@ -1,6 +1,6 @@
-
 import tkinter as tk
 from graphical import root
+
 
 class Cell:
     def __init__(self, y, x):
@@ -13,23 +13,49 @@ class Cell:
 
     def removeValue(self, value):
         self.values.remove(value)
-        
+
     def checkValue(self, value):
         return value in self.values
-    
+
     def getManhattanFrom(self, Cell):
         return abs(self.x - Cell.x) + abs(self.y - Cell.y)
-    
+
+    def getValue(self):
+        return self.values[len(self.values) - 1]
+
     def isWall(self):
         return "-1" in self.values
+
+    def isAgent(self):
+        return any("A" in value for value in self.values)
+
+    def isGoal(self):
+        return "T1" in self.values
+
+    def isKey(self):
+        return any("K" in value for value in self.values)
+
+    def getKeyNo(self):
+        if self.isKey() == True:
+            return int(self.values[len(self.values) - 1][1])
+        return -1
+
+    def isDoor(self):
+        return any("D" in value for value in self.values)
+
+    def getDoorNo(self):
+        if self.isDoor() == True:
+            return int(self.values[len(self.values) - 1][1])
+        return -1
 
     def __del__(self):
         pass
 
+
 class Floor:
-    def __init__(self,rows,cols):
-        self.rows=rows
-        self.cols=cols
+    def __init__(self, rows, cols):
+        self.rows = rows
+        self.cols = cols
         self.table = [[Cell(i, j) for j in range(cols)] for i in range(rows)]
 
     def appendToCell(self, row, col, value):
@@ -41,24 +67,25 @@ class Floor:
 
     def checkValueInCell(self, row, col, value):
         return self.table[row][col].checkValue(value)
-    
+
     def getCell(self, row, col):
         return self.table[row][col]
-    
-    #console
+
+    # console
     def printTable(self):
         for i in range(self.rows):
             for j in range(self.cols):
                 print(self.table[i][j].values, end=" ")
             print()
 
-
     # cai function nay de debug trong console thoi
     def printSelf(self):
         board_size = 8  # Define the size of the board
         cell_size = 50  # Define the size of each cell in pixels
 
-        canvas = tk.Canvas(root, width=board_size * cell_size, height=board_size * cell_size)
+        canvas = tk.Canvas(
+            root, width=board_size * cell_size, height=board_size * cell_size
+        )
         canvas.pack()
 
         # Draw the board
@@ -70,18 +97,33 @@ class Floor:
                 y2 = y1 + cell_size
 
                 canvas.create_rectangle(
-                    x1, y1, x2, y2,
+                    x1,
+                    y1,
+                    x2,
+                    y2,
                     fill=("black" if self.table[i][j] == "-1" else "white"),
-                    outline="grey"  # Specify the color of the border (here, "grey")
+                    outline="grey",  # Specify the color of the border (here, "grey")
                 )
 
                 text_x = x1 + cell_size // 2
                 text_y = y1 + cell_size // 2
 
-                canvas.create_text(text_x, text_y,
-                                   text=(self.table[i][j] if self.table[i][j].__contains__("A") or self.table[i][j] == "T1" else "")
-                                   , fill=(
-                        "blue" if self.table[i][j] == "T1" else "red" if self.table[i][j].__contains__("A") else "white")
-                                   , font=("Arial", 25))
+                canvas.create_text(
+                    text_x,
+                    text_y,
+                    text=(
+                        self.table[i][j]
+                        if self.table[i][j].checkValue() or self.table[i][j] == "T1"
+                        else ""
+                    ),
+                    fill=(
+                        "blue"
+                        if self.table[i][j] == "T1"
+                        else "red"
+                        if self.table[i][j].__contains__("A")
+                        else "white"
+                    ),
+                    font=("Arial", 25),
+                )
 
         root.mainloop()
