@@ -720,6 +720,6 @@ class SearchTree:
 
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input1-level3.txt")
+searchTree2.getInputFile("input//input2-level3.txt")
 searchTree2.BFS()
 pass
