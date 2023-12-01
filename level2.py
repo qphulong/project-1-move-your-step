@@ -552,6 +552,6 @@ class SearchTree:
         # Run the GUI
         root.mainloop()
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input4-level2.txt")
+searchTree2.getInputFile("input//input4-level1.txt")
 searchTree2.AStar()
 pass
