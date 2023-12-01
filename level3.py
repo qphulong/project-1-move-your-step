@@ -438,7 +438,8 @@ class Node:
                         # if does not have key
                         else:
                             if cell == self.cell: # if the door (locked) has the lowest heuristic
-                                self.belongTo.goals.append(self.belongTo.goals[int(cell_tag[1])]) # add as subgoal
+                                print("Locked door has the lowest heuristic")
+                                self.belongTo.goals.append(self.belongTo.keys[int(cell_tag[1])]) # add as subgoal
                             pass
 
                 elif cell_tag[0] == "T":
@@ -544,6 +545,8 @@ class SearchTree:
         self.root = None
         self.root_subgoal = None
 
+        self.keys = {}
+
         self.goals = []
     def getInputFile(self, filePath):
         with open(filePath, "r") as file:
@@ -576,6 +579,9 @@ class SearchTree:
 
                     # Extract the character and integer parts from the cell value
                     char_part, num_part = re.match(r"([KD])(\d+)", cell_value).groups()
+
+                    if (char_part == "K"):
+                         self.keys[int(num_part)] = self.floors[current_floor].getCell(i, j)
 
                 # if goalCell show up
                 if re.match(r"[T]\d+", cell_value):
@@ -632,7 +638,7 @@ class SearchTree:
                 # self.visualize()
                 return self.MainStatus.REACHED
 
-            self.currentNode.expand(1)
+            self.currentNode.expand(self.goals[0])
             for eachChild in self.currentNode.children:
                 self.frontier.append(eachChild)
 
@@ -657,7 +663,7 @@ class SearchTree:
                 # self.visualize()
                 return self.MainStatus.REACHED
 
-            self.currentNode_subgoal.expand(1)
+            self.currentNode_subgoal.expand(self.goals[-1])
             for eachChild in self.currentNode.children:
                 self.frontier_subgoal.append(eachChild)
             return self.MainStatus.IN_PROGRESS
@@ -748,5 +754,5 @@ class SearchTree:
 
 searchTree2 = SearchTree()
 searchTree2.getInputFile("input//input2-level3.txt")
-searchTree2.BFS()
+searchTree2.Divide_and_Conquer()
 pass
