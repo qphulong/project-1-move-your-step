@@ -738,8 +738,6 @@ class SearchTree:
             self.currentNode[1] = self.frontier[1].pop(0)
 
             self.agents[1] = self.currentNode[1].cell
-            print(f"Agent {1} move to {self.currentNode[1].cell.y},{self.currentNode[1].cell.x} Floor: {self.currentNode[1].cell.floor_no}")
-
             # if path found
             if self.currentNode[1].cell == self.goals[1]:
                 tempNode = self.currentNode[1]
@@ -790,8 +788,6 @@ class SearchTree:
             self.currentNode[agent_no] = self.frontier[agent_no].pop(0)
 
             self.agents[agent_no] = self.currentNode[agent_no].cell
-            print(f"Agent {agent_no} move to {self.currentNode[agent_no].cell.y},{self.currentNode[agent_no].cell.x} Floor: {self.currentNode[agent_no].cell.floor_no}")
-
             # if path found
             if self.currentNode[agent_no].cell == self.goals[agent_no]:
                 return (self.MainStatus.REACHED, None)
@@ -799,8 +795,7 @@ class SearchTree:
             self.currentNode[agent_no].expand(agent_no)
             for eachChild in self.currentNode[agent_no].children:
                 self.frontier[agent_no].append(eachChild)
-            return (
-            self.MainStatus.IN_PROGRESS, self.frontier[agent_no][0] if len(self.frontier[agent_no]) > 0 else None)
+            return (self.MainStatus.IN_PROGRESS, self.frontier[agent_no][0] if len(self.frontier[agent_no]) > 0 else None)
 
         return (self.MainStatus.UNSOLVABLE, None)
 
@@ -872,6 +867,6 @@ class SearchTree:
 
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input2-level4.txt")
+searchTree2.getInputFile("input//input1-level3.txt")
 searchTree2.agent_turn_based_movement()
 pass

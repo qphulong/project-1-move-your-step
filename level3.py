@@ -154,9 +154,6 @@ class Node:
     def expandFrontierCell(self, cell, BFSvisited, BFSfrontier, BFStempFrontier):
         floor_no = cell.floor_no
 
-        possible_moves = 0
-        waiting_moves = 0  # number of moves that need to wait for other agents to move
-
         # add N cell to tempFrontier
 
         if (
@@ -169,7 +166,6 @@ class Node:
                 and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x)
                 not in BFStempFrontier
         ):
-            possible_moves += 1
 
             northCell = self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x)
 
@@ -186,11 +182,6 @@ class Node:
                 and self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1)
                 not in BFStempFrontier
         ):
-            possible_moves += 1
-            if self.belongTo.floors[floor_no].getCell(cell.y - 1,
-                                                      cell.x).isAgent():  # wait for this other agent to move
-                waiting_moves += 1
-
             westCell = self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1)
 
             BFStempFrontier.append(westCell)
@@ -653,6 +644,9 @@ class SearchTree:
             for eachChild in self.currentNode[1].children:
                 self.frontier[1].append(eachChild)
 
+        print("No solution found")
+
+
     def AStar_CustomGoal(self, goal):
         self.root[1].saveHeuristic(goal)
         self.root[1].saveF()
@@ -674,6 +668,8 @@ class SearchTree:
             for eachChild in self.currentNode[1].children:
                 self.frontier[1].append(eachChild)
 
+        print("No solution found")
+
     def BFS(self):
         # self.root[1].saveHeuristic(self.goals[1])
         # self.root[1].saveF()
@@ -694,6 +690,8 @@ class SearchTree:
             self.currentNode[1].expand(1)
             for eachChild in self.currentNode[1].children:
                 self.frontier[1].append(eachChild)
+
+        print("No solution found")
 
 
     def BFS_CustomGoal(self, goal):
@@ -717,11 +715,11 @@ class SearchTree:
                 for eachChild in self.currentNode[1].children:
                     self.frontier[1].append(eachChild)
 
-
+        print("No solution found")
 
 
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input2-level4.txt")
-searchTree2.AStar()
+searchTree2.getInputFile("input//input1-level3.txt")
+searchTree2.BFS()
 pass
