@@ -1,11 +1,11 @@
 from tkinter import *
 import tkinter as tk
 #python controller.py
-def create_first_window():
+def create_first_window(length_var, width_var):
     global window
     window = tk.Tk()
     window.title('Project AI')
-    window.geometry('500x500')
+    window.geometry(f"{length_var}x{width_var}")
     window.attributes('-topmost', True)  # Cố định window
 
     # Menu setup
@@ -36,12 +36,18 @@ def handle_Button_Level1():
     newWindow_Level1.title('Project AI')
     newWindow_Level1.geometry('500x500')
     newWindow_Level1.attributes('-topmost', True)  # Cố định window
-    def handle():
-        newWindow_Level1.destroy()
-        create_first_window()
-    button = tk.Button(newWindow_Level1, font=('Arial', 15), text='Level 3', width=20, height=1,
-                              bg='Brown', command=handle)
-    button.place(x=137, y=240)
+
+    # CODE TEST
+
+    # def handle():
+    #     newWindow_Level1.destroy()
+    #     create_first_window()
+    # button = tk.Button(newWindow_Level1, font=('Arial', 15), text='Level 3', width=20, height=1,
+    #                           bg='Brown', command=handle)
+    # button.place(x=137, y=240)
+
+    ################################
+
     newWindow_Level1.mainloop()
 
 def handle_Button_Level2():
@@ -53,4 +59,4 @@ def handle_Button_Level3():
 def handle_Button_Level4():
     print(4)
 
-create_first_window()
+create_first_window(500,500)
