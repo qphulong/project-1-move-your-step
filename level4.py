@@ -693,8 +693,8 @@ class SearchTree:
         return False
 
     def AStar(self):
-        self.root[1].saveHeuristic(self.goals[1])
-        self.root[1].saveF()
+        # self.root[1].saveHeuristic(self.goals[1])
+        # self.root[1].saveF()
         if self.frontier[1]:
             # self.visualize()
             self.frontier[1].sort(key=lambda x: x.getF())
@@ -719,8 +719,8 @@ class SearchTree:
         return (self.MainStatus.UNSOLVABLE, None)
 
     def AStar_CustomGoal(self, goal):
-        self.root[1].saveHeuristic(goal)
-        self.root[1].saveF()
+        # self.root[1].saveHeuristic(goal)
+        # self.root[1].saveF()
         if self.frontier[1]:
             # self.visualize()
             self.frontier[1].sort(key=lambda x: x.getF())

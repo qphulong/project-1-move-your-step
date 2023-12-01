@@ -294,7 +294,7 @@ class Node:
 
             BFStempFrontier.append(seCell)
 
-    def expand(self, agent_no):
+    def expand(self, goal):
         BFSfrontier = []
         BFStempFrontier = []
         BFSvisited = []
@@ -371,7 +371,7 @@ class Node:
                             # create new node
                             newNode = Node(cell, self.belongTo)
                             newNode.setPathCost(self.pathCost + steps)
-                            newNode.saveHeuristic(self.belongTo.goals[agent_no])
+                            newNode.saveHeuristic(goal)
                             newNode.saveF()
 
                             # append new node to tree
@@ -413,7 +413,7 @@ class Node:
                     else:
                         newNode = Node(cell, self.belongTo)
                         newNode.setPathCost(self.pathCost + steps)
-                        newNode.saveHeuristic(self.belongTo.goals[agent_no])
+                        newNode.saveHeuristic(goal)
                         newNode.saveF()
 
                         # inherit key
@@ -437,6 +437,8 @@ class Node:
                                 tempNode = tempNode.parent
                         # if does not have key
                         else:
+                            if cell == self.cell: # if the door (locked) has the lowest heuristic
+                                self.belongTo.goals.append(self.belongTo.goals[int(cell_tag[1])]) # add as subgoal
                             pass
 
                 elif cell_tag[0] == "T":
@@ -457,7 +459,7 @@ class Node:
                     # create new node
                     newNode = Node(cell, self.belongTo)
                     newNode.setPathCost(self.pathCost + steps)
-                    newNode.saveHeuristic(self.belongTo.goals[agent_no])
+                    newNode.saveHeuristic(goal)
                     newNode.saveF()
 
                     # append new node to tree
@@ -487,7 +489,7 @@ class Node:
 
                     newNode = Node(cell, self.belongTo)  # tạo node mới từ cell (đang duyệt BFSFrontier)
                     newNode.setPathCost(self.pathCost + steps)
-                    newNode.saveHeuristic(self.belongTo.goals[agent_no])
+                    newNode.saveHeuristic(goal)
                     newNode.saveF()
 
                     # inherit collected stairs so far
@@ -533,10 +535,14 @@ class SearchTree:
     def __init__(self):
         self.floors = {}
         self.agent = None
-        self.currentNode = None # save for all agents
+        self.currentNode = None
+        self.currentNode_subgoal = None
         self.frontier = []
+        self.frontier_subgoal = []
         self.visited = []
+        self.visited_subgoal = []
         self.root = None
+        self.root_subgoal = None
 
         self.goals = []
     def getInputFile(self, filePath):
@@ -611,9 +617,8 @@ class SearchTree:
         IN_PROGRESS = 0
 
     def AStar(self):
-        self.root[1].saveHeuristic(self.goals[0])
-        self.root[1].saveF()
-        while (self.frontier):
+
+        if (self.frontier):
             # self.visualize()
             self.frontier.sort(key=lambda x: x.getF())
             self.currentNode = self.frontier.pop(0)
@@ -625,38 +630,72 @@ class SearchTree:
                     print(f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}")
                     tempNode = tempNode.parent
                 # self.visualize()
-                return
+                return self.MainStatus.REACHED
 
             self.currentNode.expand(1)
             for eachChild in self.currentNode.children:
                 self.frontier.append(eachChild)
 
-        print("No solution found")
+            return self.MainStatus.IN_PROGRESS
+
+        return self.MainStatus.UNSOLVABLE
 
 
-    def AStar_CustomGoal(self, goal):
-        self.root.saveHeuristic(goal)
-        self.root.saveF()
-        while (self.frontier):
+    def AStar_CustomGoal(self):
+
+        if (self.frontier_subgoal):
             # self.visualize()
-            self.frontier.sort(key=lambda x: x.getF())
-            self.currentNode = self.frontier.pop(0)
+            self.frontier_subgoal.sort(key=lambda x: x.getF())
+            self.currentNode_subgoal = self.frontier_subgoal.pop(0)
 
             # if path found
-            if self.currentNode.cell == goal:
-                tempNode = self.currentNode
+            if self.currentNode_subgoal.cell == self.goals[-1]:
+                tempNode = self.currentNode_subgoal
                 while (tempNode):
                     print(f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}")
                     tempNode = tempNode.parent
                 # self.visualize()
-                return
+                return self.MainStatus.REACHED
 
-            self.currentNode.expand(1)
+            self.currentNode_subgoal.expand(1)
             for eachChild in self.currentNode.children:
-                self.frontier.append(eachChild)
+                self.frontier_subgoal.append(eachChild)
+            return self.MainStatus.IN_PROGRESS
 
-        print("No solution found")
+        return self.MainStatus.UNSOLVABLE
 
+
+    def Divide_and_Conquer(self):
+        self.root.saveHeuristic(self.goals[0]) # save heuristic for root
+        self.root.saveF()
+        while True:
+            if len(self.goals) > 1:
+                if self.root_subgoal is None:
+                    self.root_subgoal = self.currentNode
+                    self.root_subgoal.saveHeuristic(self.goals[-1])
+                    self.root_subgoal.saveF()
+
+                res = self.AStar_CustomGoal()  # find path to the peek goal in stack
+                if res != self.MainStatus.IN_PROGRESS:
+                    if res == self.MainStatus.REACHED:
+                        print("Reached")
+
+                        subgoal = self.goals[-1]
+
+                        self.frontier.insert(0, subgoal) # insert root_subgoal to frontier
+
+                        self.goals.pop() # pop custom goal from stack
+                    else:
+                        print("Unsolvable")
+                        break
+            else:
+                res = self.AStar()
+                if res != self.MainStatus.IN_PROGRESS:
+                    if res == self.MainStatus.REACHED:
+                        print("Reached")
+                    else:
+                        print("Unsolvable")
+                    break
     def BFS(self):
         # self.root[1].saveHeuristic(self.goals[1])
         # self.root[1].saveF()
@@ -703,9 +742,6 @@ class SearchTree:
                 self.frontier.append(eachChild)
 
         print("No solution found")
-
-    def Divide_and_Conquer(self, goal):
-        pass
 
 
 
