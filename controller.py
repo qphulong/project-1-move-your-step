@@ -18,15 +18,15 @@ def create_first_window(length_var, width_var,win):
     button_level1.place(x=137, y=100)
 
     button_level2 = tk.Button(window, font=('Arial', 15), text='Level 2', width=20, height=1,
-                              bg='Brown', command=handle_Button_Level2)
+                              bg='Brown', command=lambda: handle_Button_Level2(window))
     button_level2.place(x=137, y=170)
 
     button_level3 = tk.Button(window, font=('Arial', 15), text='Level 3', width=20, height=1,
-                              bg='Brown', command=handle_Button_Level3)
+                              bg='Brown', command=lambda: handle_Button_Level3(window))
     button_level3.place(x=137, y=240)
 
     button_level4 = tk.Button(window, font=('Arial', 15), text='Level 4', width=20, height=1,
-                              bg='Brown', command=handle_Button_Level4)
+                              bg='Brown', command=lambda: handle_Button_Level4(window))
     button_level4.place(x=137, y=310)
 
     window.mainloop()
@@ -42,8 +42,6 @@ def testcase_level1(win,str):
 
     testCase = tk.Label(newWindow_TestCaseScreen1, font=('Arial', 25), text='Case Menu', fg='Black')
     testCase.pack()
-    def solve_level1(str):
-        print("CODE HERE")
 
     button_testcase1 = tk.Button(newWindow_TestCaseScreen1, font=('Arial', 15), text='Test case 1', width=20, height=1,
                               bg='Brown',command = lambda: solve_level1(str))
@@ -71,11 +69,11 @@ def testcase_level1(win,str):
 
     newWindow_TestCaseScreen1.mainloop()
 
-
+def solve_level1(str):
+    print("CODE HERE")
 
 def handle_Button_Level1(win):
     win.destroy()
-
     newWindow_Level1 = tk.Tk()
     newWindow_Level1.title('Project AI')
     newWindow_Level1.geometry('500x500')
@@ -86,15 +84,19 @@ def handle_Button_Level1(win):
 
     button_level1_astar = tk.Button(newWindow_Level1, font=('Arial', 15), text='A star', width=20, height=1,
                               bg='Brown', command = lambda: testcase_level1(newWindow_Level1,"astar"))
-    button_level1_astar.place(x=137, y=130)
+    button_level1_astar.place(x=137, y=100)
 
     button_level1_bfs = tk.Button(newWindow_Level1, font=('Arial', 15), text='BFS', width=20, height=1,
                               bg='Brown', command = lambda: testcase_level1(newWindow_Level1,"bfs"))
-    button_level1_bfs.place(x=137, y=230)
+    button_level1_bfs.place(x=137, y=170)
 
     button_level1_dfs = tk.Button(newWindow_Level1, font=('Arial', 15), text='DFS', width=20, height=1,
                               bg='Brown', command = lambda: testcase_level1(newWindow_Level1,"dfs"))
-    button_level1_dfs.place(x=137, y=330)
+    button_level1_dfs.place(x=137, y=240)
+
+    back = tk.Button(newWindow_Level1, font=('Arial', 15), text='Back', width=20, height=1,
+                                  bg='Brown', command=lambda: create_first_window(500,500,newWindow_Level1))
+    back.place(x=137, y=310)
 
     # CODE TEST
 
@@ -109,14 +111,56 @@ def handle_Button_Level1(win):
 
     newWindow_Level1.mainloop()
 
-def handle_Button_Level2():
-    print(2)
+#UI MENU LEVEL 2,3,4
 
-def handle_Button_Level3():
-    print(3)
+def testcase_level234(win,level):
+    win.destroy()
+    newWindow_TestCaseScreen1 = tk.Tk()
+    newWindow_TestCaseScreen1.title('Project AI')
+    newWindow_TestCaseScreen1.geometry('500x500')
+    newWindow_TestCaseScreen1.attributes('-topmost', True)  # Cố định window
 
-def handle_Button_Level4():
-    print(4)
+    testCase = tk.Label(newWindow_TestCaseScreen1, font=('Arial', 25), text='Case Menu', fg='Black')
+    testCase.pack()
+
+    button_testcase1 = tk.Button(newWindow_TestCaseScreen1, font=('Arial', 15), text='Test case 1', width=20, height=1,
+                              bg='Brown',command = lambda: solve_level(level))
+    button_testcase1.place(x=137, y=100)
+
+    button_testcase2 = tk.Button(newWindow_TestCaseScreen1, font=('Arial', 15), text='Test case 2', width=20, height=1,
+                              bg='Brown',command = lambda: solve_level(level))
+    button_testcase2.place(x=137, y=170)
+
+    button_testcase3 = tk.Button(newWindow_TestCaseScreen1, font=('Arial', 15), text='Test case 3', width=20, height=1,
+                              bg='Brown',command = lambda: solve_level(level))
+    button_testcase3.place(x=137, y=240)
+
+    button_testcase4 = tk.Button(newWindow_TestCaseScreen1, font=('Arial', 15), text='Test case 4', width=20, height=1,
+                              bg='Brown',command = lambda: solve_level(level))
+    button_testcase4.place(x=137, y=310)
+
+    button_testcase5 = tk.Button(newWindow_TestCaseScreen1, font=('Arial', 15), text='Test case 5', width=20, height=1,
+                                 bg='Brown',command = lambda: solve_level(level))
+    button_testcase5.place(x=137, y=380)
+
+    back_to_menu = tk.Button(newWindow_TestCaseScreen1, font=('Arial', 15), text='Back to menu', width=20, height=1,
+                                 bg='Brown', command=lambda: create_first_window(500,500,newWindow_TestCaseScreen1))
+    back_to_menu.place(x=137, y=450)
+
+    newWindow_TestCaseScreen1.mainloop()
+
+def solve_level(level):
+    print(f"Solving level {level}")
+
+
+def handle_Button_Level2(win):
+    testcase_level234(win,2)
+
+def handle_Button_Level3(win):
+    testcase_level234(win,3)
+
+def handle_Button_Level4(win):
+    testcase_level234(win,4)
 
 w = tk.Tk()
 create_first_window(500,500,w)
