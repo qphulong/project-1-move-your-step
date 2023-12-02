@@ -542,6 +542,13 @@ class SearchTree:
         )
         canvas.pack()
 
+        #theo nut back
+        def goback():
+            root.destroy()
+
+        back_button = tk.Button(root, text="Back", height = 1, width = 20, bg = 'brown',command = goback)
+        back_button.place(x=self.floor.cols * 25, y=self.floor.rows * 15)
+
         # basic map
         for i in range(self.floor.rows):
             for j in range(self.floor.cols):
@@ -592,6 +599,7 @@ class SearchTree:
                         )
             pass
         # Run the GUI
+
         root.mainloop()
 
 
