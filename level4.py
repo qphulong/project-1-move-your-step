@@ -693,8 +693,8 @@ class SearchTree:
         return False
 
     def AStar(self):
-        # self.root[1].saveHeuristic(self.goals[1])
-        # self.root[1].saveF()
+        self.root[1].saveHeuristic(self.goals[1])
+        self.root[1].saveF()
         if self.frontier[1]:
             # self.visualize()
             self.frontier[1].sort(key=lambda x: x.getF())
@@ -719,8 +719,8 @@ class SearchTree:
         return (self.MainStatus.UNSOLVABLE, None)
 
     def AStar_CustomGoal(self, goal):
-        # self.root[1].saveHeuristic(goal)
-        # self.root[1].saveF()
+        self.root[1].saveHeuristic(goal)
+        self.root[1].saveF()
         if self.frontier[1]:
             # self.visualize()
             self.frontier[1].sort(key=lambda x: x.getF())
@@ -752,7 +752,7 @@ class SearchTree:
             # self.frontier[1].sort(key=lambda x: x.getF())
 
             if self.isOtherAgent(self.frontier[1][0].cell, 1):  # meet other agent
-                # print(f"Agent 1 meet other agent {self.frontier[1][0].cell.getSpecialValue()}")
+                print(f"Meet other agent at {self.frontier[1][0].cell.y} {self.frontier[1][0].cell.x}")
                 frontier_length = len(self.frontier[1])
                 if frontier_length > 1:
                     i = 1
@@ -772,6 +772,7 @@ class SearchTree:
             self.currentNode[1] = self.frontier[1].pop(0)
 
             self.agents[1] = self.currentNode[1].cell
+
             # if path found
             if self.currentNode[1].cell == self.goals[1]:
                 tempNode = self.currentNode[1]
@@ -791,39 +792,19 @@ class SearchTree:
 
         return (self.MainStatus.UNSOLVABLE, None)
 
-    def BFS_CustomGoal(self, goal):
-        # self.root[1].saveHeuristic(self.goals[1])
-        # self.root[1].saveF()
-        if self.frontier[1]:
-            # self.visualize()
-            # self.frontier[1].sort(key=lambda x: x.getF())
-            self.currentNode[1] = self.frontier[1].pop(0)
-
-            # if path found
-            if self.currentNode[1].cell == goal:
-                tempNode = self.currentNode[1]
-                while tempNode:
-                    print(tempNode.cell.getSpecialValue())
-                    tempNode = tempNode.parent
-                    # self.visualize()
-                return (self.MainStatus.REACHED, None)
-
-            self.currentNode[1].expand(1)
-            for eachChild in self.currentNode[1].children:
-                self.frontier[1].append(eachChild)
-            return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
-
-        return (self.MainStatus.UNSOLVABLE, None)
-
     def BFS_OtherAgents(self, agent_no):
         # self.root[agent_no].saveHeuristic(self.goals[agent_no])
         # self.root[agent_no].saveF()
         if self.frontier[agent_no]:
             # self.visualize()
             # self.frontier[agent_no].sort(key=lambda x: x.getF())
+            if self.isOtherAgent(self.frontier[agent_no][0].cell, agent_no):  # meet other agent
+                return (self.MainStatus.IN_PROGRESS, self.frontier[agent_no][0])
+
             self.currentNode[agent_no] = self.frontier[agent_no].pop(0)
 
             self.agents[agent_no] = self.currentNode[agent_no].cell
+
             # if path found
             if self.currentNode[agent_no].cell == self.goals[agent_no]:
                 return (self.MainStatus.REACHED, None)
@@ -914,6 +895,6 @@ class SearchTree:
 
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input1-level3.txt")
+searchTree2.getInputFile("input//input2-level4.txt")
 searchTree2.agent_turn_based_movement()
 pass
