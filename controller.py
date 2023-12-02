@@ -119,7 +119,11 @@ def handle_Button_Level1(win):
 #UI MENU LEVEL 2,3,4
 
 def testcase_level234(win,level):
-    win.destroy()
+    if(win.winfo_exists()):
+        print("Tkinter root window exists.")
+        win.destroy()
+    else:
+        print("Tkinter root window not exists.")
     newWindow_TestCaseScreen1 = tk.Tk()
     newWindow_TestCaseScreen1.title('Project AI')
     newWindow_TestCaseScreen1.geometry('500x500')
@@ -165,6 +169,12 @@ def solve_level(level,win,testcase):
         if testcase == 4: searchTree2.getInputFile("input//input4-level2.txt")
         if testcase == 5: searchTree2.getInputFile("input//input5-level2.txt")
         searchTree2.AStar()
+
+        if(searchTree2.getCheckRoot() == False):
+            print('false')
+            testcase_level234(tk.Tk(),level)
+
+
 
 def handle_Button_Level2(win):
     testcase_level234(win,2)
