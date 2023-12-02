@@ -411,22 +411,22 @@ class Node:
                             cell, BFSvisited, BFSfrontier, BFStempFrontier
                         )
                     else:
-                        newNode = Node(cell, self.belongTo)
-                        newNode.setPathCost(self.pathCost + steps)
-                        newNode.saveHeuristic(goal)
-                        newNode.saveF()
-
-                        # inherit key
-                        for eachKey in self.keys:
-                            newNode.appendKey(eachKey)
-
-                        # append new node to tree
-                        self.children.append(newNode)
-                        newNode.parent = self
-
                         # if has key
                         if str("K" + str(cell_tag[1])) in self.keys:
                             # create new node
+                            newNode = Node(cell, self.belongTo)
+                            newNode.setPathCost(self.pathCost + steps)
+                            newNode.saveHeuristic(goal)
+                            newNode.saveF()
+
+                            # inherit key
+                            for eachKey in self.keys:
+                                newNode.appendKey(eachKey)
+
+                            # append new node to tree
+                            self.children.append(newNode)
+                            newNode.parent = self
+
                             # if go through the same door with same keys,then delete this new node
                             tempNode = self
                             while tempNode:
@@ -437,9 +437,6 @@ class Node:
                                 tempNode = tempNode.parent
                         # if does not have key
                         else:
-                            if cell == self.cell: # if the door (locked) has the lowest heuristic
-                                print("Locked door has the lowest heuristic")
-                                self.belongTo.goals.append(self.belongTo.keys[int(cell_tag[1])]) # add as subgoal
                             pass
 
                 elif cell_tag[0] == "T":
@@ -624,10 +621,12 @@ class SearchTree:
 
     def AStar(self):
 
-        if (self.frontier):
+        while (self.frontier):
             # self.visualize()
             self.frontier.sort(key=lambda x: x.getF())
             self.currentNode = self.frontier.pop(0)
+
+            self.visited.append((self.currentNode.cell.y, self.currentNode.cell.x, self.currentNode.cell.floor_no))
 
             # if path found
             if self.currentNode.cell == self.goals[0]:
@@ -636,15 +635,17 @@ class SearchTree:
                     print(f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}")
                     tempNode = tempNode.parent
                 # self.visualize()
-                return self.MainStatus.REACHED
+                return # self.MainStatus.REACHED
 
             self.currentNode.expand(self.goals[0])
             for eachChild in self.currentNode.children:
-                self.frontier.append(eachChild)
+                special = eachChild.cell.getSpecialValue()
+                if (special[0] == "D" and special[1] != "O") or (eachChild.cell.y, eachChild.cell.x, eachChild.cell.floor_no) not in self.visited:
+                    self.frontier.append(eachChild)
 
-            return self.MainStatus.IN_PROGRESS
 
-        return self.MainStatus.UNSOLVABLE
+        print("No solution found")
+        # return self.MainStatus.UNSOLVABLE
 
 
     def AStar_CustomGoal(self):
@@ -719,33 +720,9 @@ class SearchTree:
                 # self.visualize()
                 return
 
-            self.currentNode.expand(1)
+            self.currentNode.expand(self.goals[0])
             for eachChild in self.currentNode.children:
-                self.frontier.append(eachChild)
-
-        print("No solution found")
-
-
-    def BFS_CustomGoal(self, goal):
-        # self.root[1].saveHeuristic(self.goals[1])
-        # self.root[1].saveF()
-        while (self.frontier):
-            # self.visualize()
-            # self.frontier[1].sort(key=lambda x: x.getF())
-            self.currentNode = self.frontier.pop(0)
-
-            # if path found
-            if self.currentNode[1].cell == goal:
-                tempNode = self.currentNode
-                while (tempNode):
-                    print(tempNode.cell.getSpecialValue())
-                    tempNode = tempNode.parent
-                    # self.visualize()
-                return
-
-            self.currentNode.expand(1)
-            for eachChild in self.currentNode.children:
-                self.frontier.append(eachChild)
+                     self.frontier.append(eachChild)
 
         print("No solution found")
 
@@ -754,5 +731,5 @@ class SearchTree:
 
 searchTree2 = SearchTree()
 searchTree2.getInputFile("input//input2-level3.txt")
-searchTree2.Divide_and_Conquer()
+searchTree2.AStar()
 pass
