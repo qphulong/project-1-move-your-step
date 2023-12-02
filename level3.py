@@ -637,6 +637,9 @@ class SearchTree:
         IN_PROGRESS = 0
 
     def AStar(self):
+        self.root.saveHeuristic(self.goals[0])  # save heuristic for root
+        self.root.saveF()
+
         while self.frontier:
             # self.visualize()
             self.frontier.sort(key=lambda x: x.getF())
@@ -675,6 +678,9 @@ class SearchTree:
         # return self.MainStatus.UNSOLVABLE
 
     def AStar_CustomGoal(self):
+        self.root.saveHeuristic(self.goals[0])  # save heuristic for root
+        self.root.saveF()
+
         if self.frontier_subgoal:
             # self.visualize()
             self.frontier_subgoal.sort(key=lambda x: x.getF())
@@ -744,7 +750,9 @@ class SearchTree:
             if self.currentNode.cell == self.goals[0]:
                 tempNode = self.currentNode
                 while tempNode:
-                    print(tempNode.cell.getSpecialValue())
+                    print(
+                        f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}"
+                    )
                     tempNode = tempNode.parent
                 # self.visualize()
                 return
@@ -758,5 +766,5 @@ class SearchTree:
 
 searchTree2 = SearchTree()
 searchTree2.getInputFile("input//input3-level3.txt")
-searchTree2.AStar()
+searchTree2.BFS()
 pass

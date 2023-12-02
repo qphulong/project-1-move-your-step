@@ -861,6 +861,7 @@ class SearchTree:
                         )
                         i += 1
                     if i == frontier_length:
+                        # return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
                         # nếu hết lựa chọn checkpoint thì ta chọn những chỗ bth để đi
                         tempFrontier = []
                         self.frontier[1][0].expandAround(self.agents[1], tempFrontier, self, 1)
@@ -870,6 +871,14 @@ class SearchTree:
                     return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
 
             self.currentNode[1] = self.frontier[1].pop(0)
+
+            self.visited[1].append(
+                (
+                    self.currentNode[1].cell.y,
+                    self.currentNode[1].cell.x,
+                    self.currentNode[1].cell.floor_no,
+                )
+            )
 
             self.agents[1] = self.currentNode[1].cell
 
@@ -884,7 +893,14 @@ class SearchTree:
 
             self.currentNode[1].expand(1)
             for eachChild in self.currentNode[1].children:
-                self.frontier[1].append(eachChild)
+                special = eachChild.cell.getSpecialValue()
+                if (special[0] == "D" and special[1] != "O") or (special == "UP" or special == "DO") or (
+                    eachChild.cell.y,
+                    eachChild.cell.x,
+                    eachChild.cell.floor_no,
+                ) not in self.visited[1]:
+                    self.frontier[1].append(eachChild)
+
             return (
                 self.MainStatus.IN_PROGRESS,
                 self.frontier[1][0] if len(self.frontier[1]) > 0 else None,
@@ -921,6 +937,7 @@ class SearchTree:
                     return (self.MainStatus.IN_PROGRESS, self.frontier[agent_no][0])
 
             self.currentNode[agent_no] = self.frontier[agent_no].pop(0)
+
 
             self.agents[agent_no] = self.currentNode[agent_no].cell
 
@@ -989,8 +1006,6 @@ class SearchTree:
                     #         lose_agent = agent if agent != win_agent else current_agent
                     #         self.upcoming[lose_agent] = None
 
-            print(
-                f"Current agent {current_agent}: {self.agents[current_agent].y} {self.agents[current_agent].x} {self.agents[current_agent].floor_no}")
 
             current_agent += 1
 
