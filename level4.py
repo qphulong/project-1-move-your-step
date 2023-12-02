@@ -361,7 +361,7 @@ class Node:
                         and self.belongTo.agents[int(cell_tag[1])].x == cell.x
                         and self.belongTo.agents[int(cell_tag[1])].floor_no
                         == cell.floor_no
-                    ):
+                    ): # meet other agent and wait
                         # create new node
                         newNode = Node(cell, self.belongTo)
                         newNode.setPathCost(self.pathCost + steps)
@@ -371,7 +371,9 @@ class Node:
                         # append new node to tree
                         self.children.append(newNode)
                         newNode.parent = self
-                    else:
+
+                        # wait
+                    else: # expand now
                         self.expandFrontierCell(
                             cell, BFSvisited, BFSfrontier, BFStempFrontier
                         )
@@ -751,8 +753,7 @@ class SearchTree:
             # self.visualize()
             # self.frontier[1].sort(key=lambda x: x.getF())
 
-            if self.isOtherAgent(self.frontier[1][0].cell, 1):  # meet other agent
-                print(f"Meet other agent at {self.frontier[1][0].cell.y} {self.frontier[1][0].cell.x}")
+            if self.isOtherAgent(self.frontier[1][0].cell, 1):  # meet other agentß
                 frontier_length = len(self.frontier[1])
                 if frontier_length > 1:
                     i = 1
@@ -798,8 +799,23 @@ class SearchTree:
         if self.frontier[agent_no]:
             # self.visualize()
             # self.frontier[agent_no].sort(key=lambda x: x.getF())
-            if self.isOtherAgent(self.frontier[agent_no][0].cell, agent_no):  # meet other agent
-                return (self.MainStatus.IN_PROGRESS, self.frontier[agent_no][0])
+
+            if self.isOtherAgent(self.frontier[agent_no][0].cell, agent_no):  # meet other agentß
+                frontier_length = len(self.frontier[agent_no])
+                if frontier_length > 1:
+                    i = 1
+                    while i < frontier_length and self.isOtherAgent(
+                        self.frontier[agent_no][i].cell, 1
+                    ):
+                        self.frontier[agent_no][i - 1], self.frontier[agent_no][i] = (
+                            self.frontier[agent_no][i],
+                            self.frontier[agent_no][i - 1],
+                        )
+                        i += 1
+                    if i == frontier_length:
+                        return (self.MainStatus.IN_PROGRESS, self.frontier[agent_no][0])
+                else:
+                    return (self.MainStatus.IN_PROGRESS, self.frontier[agent_no][0])
 
             self.currentNode[agent_no] = self.frontier[agent_no].pop(0)
 
@@ -861,7 +877,6 @@ class SearchTree:
                         self.goals[
                             current_agent
                         ] = self.generate_goal()  # generate new goal for this agent
-                        continue
 
                     # self.upcoming[current_agent] = res[1].cell
                     #
@@ -870,6 +885,8 @@ class SearchTree:
                     #         win_agent = self.competing_cell(agent, current_agent)
                     #         lose_agent = agent if agent != win_agent else current_agent
                     #         self.upcoming[lose_agent] = None
+
+            print(f"Current agent {current_agent}: {self.agents[current_agent].y} {self.agents[current_agent].x} {self.agents[current_agent].floor_no}")
 
             current_agent += 1
 
@@ -895,6 +912,6 @@ class SearchTree:
 
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input2-level4.txt")
+searchTree2.getInputFile("input//input3-level4.txt")
 searchTree2.agent_turn_based_movement()
 pass
