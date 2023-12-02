@@ -538,7 +538,7 @@ class SearchTree:
 
         # Create a canvas to draw on
         canvas = tk.Canvas(
-            root, width=self.floor.cols * 50, height=self.floor.rows * 50
+            root, width=self.floor.cols * 40, height=self.floor.rows * 35
         )
         canvas.pack()
 
