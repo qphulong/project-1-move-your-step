@@ -1,5 +1,6 @@
 from tkinter import *
 import tkinter as tk
+from level2 import SearchTree
 # import level3
 # import level1
 # import level2
@@ -128,23 +129,23 @@ def testcase_level234(win,level):
     testCase.pack()
 
     button_testcase1 = tk.Button(newWindow_TestCaseScreen1, font=('Arial', 15), text='Test case 1', width=20, height=1,
-                              bg='Brown',command = lambda: solve_level(level))
+                              bg='Brown',command = lambda: solve_level(level,newWindow_TestCaseScreen1,1))
     button_testcase1.place(x=137, y=100)
 
     button_testcase2 = tk.Button(newWindow_TestCaseScreen1, font=('Arial', 15), text='Test case 2', width=20, height=1,
-                              bg='Brown',command = lambda: solve_level(level))
+                              bg='Brown',command = lambda: solve_level(level,newWindow_TestCaseScreen1,2))
     button_testcase2.place(x=137, y=170)
 
     button_testcase3 = tk.Button(newWindow_TestCaseScreen1, font=('Arial', 15), text='Test case 3', width=20, height=1,
-                              bg='Brown',command = lambda: solve_level(level))
+                              bg='Brown',command = lambda: solve_level(level,newWindow_TestCaseScreen1,3))
     button_testcase3.place(x=137, y=240)
 
     button_testcase4 = tk.Button(newWindow_TestCaseScreen1, font=('Arial', 15), text='Test case 4', width=20, height=1,
-                              bg='Brown',command = lambda: solve_level(level))
+                              bg='Brown',command = lambda: solve_level(level,newWindow_TestCaseScreen1,4))
     button_testcase4.place(x=137, y=310)
 
     button_testcase5 = tk.Button(newWindow_TestCaseScreen1, font=('Arial', 15), text='Test case 5', width=20, height=1,
-                                 bg='Brown',command = lambda: solve_level(level))
+                                 bg='Brown',command = lambda: solve_level(level,newWindow_TestCaseScreen1,5))
     button_testcase5.place(x=137, y=380)
 
     back_to_menu = tk.Button(newWindow_TestCaseScreen1, font=('Arial', 15), text='Back to menu', width=20, height=1,
@@ -153,13 +154,21 @@ def testcase_level234(win,level):
 
     newWindow_TestCaseScreen1.mainloop()
 
-def solve_level(level):
+def solve_level(level,win,testcase):
+    win.destroy()
     print(f"Solving level {level}")
+    if level == 2:
+        searchTree2 = SearchTree()
+        if testcase == 1: searchTree2.getInputFile("input//input1-level2.txt")
+        if testcase == 2: searchTree2.getInputFile("input//input2-level2.txt")
+        if testcase == 3: searchTree2.getInputFile("input//input3-level2.txt")
+        if testcase == 4: searchTree2.getInputFile("input//input4-level2.txt")
+        if testcase == 5: searchTree2.getInputFile("input//input5-level2.txt")
+        searchTree2.AStar()
 
-    # myLevel1.getInputFile("input//input1-level1.txt")
-    # print(myLevel1)
 def handle_Button_Level2(win):
     testcase_level234(win,2)
+
 
 def handle_Button_Level3(win):
     testcase_level234(win,3)
