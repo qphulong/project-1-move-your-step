@@ -869,7 +869,7 @@ class SearchTree:
             if self.currentNode[1].cell == self.goals[1]:
                 tempNode = self.currentNode[1]
                 while tempNode:
-                    print(tempNode.cell.getSpecialValue())
+                    print(f"{tempNode.cell.y} {tempNode.cell.x} Floor: {tempNode.cell.floor_no}")
                     tempNode = tempNode.parent
                 # self.visualize()
                 return (self.MainStatus.REACHED, None)
