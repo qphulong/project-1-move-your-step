@@ -302,6 +302,115 @@ class Node:
 
             BFStempFrontier.append(seCell)
 
+    def expandAround(self, cell, TempFrontier, SearchTree):
+        floor_no = cell.floor_no
+
+        # add N cell to tempFrontier
+        if (
+            cell.y > 0
+            and not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isWall()
+            and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x)
+            not in TempFrontier
+        ):
+            northCell = self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x)
+
+            TempFrontier.append(Node(northCell, SearchTree))
+
+        # add W cell to tempFrontier
+        if (
+            cell.x > 0
+            and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1).isWall()
+            and self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1)
+            not in TempFrontier
+        ):
+            westCell = self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1)
+
+            TempFrontier.append(Node(westCell, SearchTree))
+
+        # add S cell to tempFrontier
+        if (
+            cell.y < self.belongTo.floors[floor_no].rows - 1
+            and not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x).isWall()
+            and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x)
+            not in TempFrontier
+        ):
+            southCell = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x)
+
+            TempFrontier.append(Node(southCell, SearchTree))
+
+        # add E cell to tempFrontier
+        if (
+            cell.x < self.belongTo.floors[floor_no].cols - 1
+            and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1).isWall()
+            and self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1)
+            not in TempFrontier
+        ):
+            eastCell = self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1)
+
+            TempFrontier.append(Node(eastCell, SearchTree))
+
+        # add NE cell to tempFrontier
+        if (
+            cell.y > 0
+            and cell.x < self.belongTo.floors[floor_no].cols - 1
+            and not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isWall()
+            and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1).isWall()
+            and not self.belongTo.floors[floor_no]
+            .getCell(cell.y - 1, cell.x + 1)
+            .isWall()
+            and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1)
+            not in TempFrontier
+        ):
+            neCell = self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1)
+
+            TempFrontier.append(Node(neCell, SearchTree))
+        # Add NW cell to tempFrontier
+        if (
+            cell.y > 0
+            and cell.x > 0
+            and not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isWall()
+            and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1).isWall()
+            and not self.belongTo.floors[floor_no]
+            .getCell(cell.y - 1, cell.x - 1)
+            .isWall()
+            and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1)
+            not in TempFrontier
+        ):
+            nwCell = self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1)
+
+            TempFrontier.append(Node(nwCell, SearchTree))
+
+        # Add SW cell to tempFrontier
+        if (
+            cell.y < self.belongTo.floors[floor_no].rows - 1
+            and cell.x > 0
+            and not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x).isWall()
+            and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1).isWall()
+            and not self.belongTo.floors[floor_no]
+            .getCell(cell.y + 1, cell.x - 1)
+            .isWall()
+            and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1)
+            not in TempFrontier
+        ):
+            swCell = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1)
+
+            TempFrontier.append(Node(swCell, SearchTree))
+        # Add SE cell to tempFrontier
+        if (
+            cell.y < self.belongTo.floors[floor_no].rows - 1
+            and cell.x < self.belongTo.floors[floor_no].cols - 1
+            and not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x).isWall()
+            and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1).isWall()
+            and not self.belongTo.floors[floor_no]
+            .getCell(cell.y + 1, cell.x + 1)
+            .isWall()
+            and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1)
+            not in TempFrontier
+        ):
+            seCell = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1)
+
+            TempFrontier.append(Node(seCell, SearchTree))
+
     def expand(self, agent_no):
         BFSfrontier = []
         BFStempFrontier = []
@@ -316,12 +425,27 @@ class Node:
             for cell in BFSfrontier:
                 if cell is None:
                     continue
+
+                if self.belongTo.isOtherAgent(cell, agent_no):
+                    # create new node
+                    newNode = Node(cell, self.belongTo)
+                    newNode.setPathCost(self.pathCost + steps)
+                    newNode.saveHeuristic(self.belongTo.goals[agent_no])
+                    newNode.saveF()
+
+                    # append new node to tree
+                    self.children.append(newNode)
+                    newNode.parent = self
+
+                    #wait here
+                    continue
+
                 # analyze cell
                 cell_tag = cell.getSpecialValue()  # special value của cell
 
                 # normal cell
                 if cell_tag == "" or (
-                    cell_tag[0] == "A" and int(cell_tag[1]) == agent_no
+                    cell_tag[0] == "A"
                 ):
                     # if self.cell.floor_no != cell.floor_no:
                     #     has_stairs = True
@@ -336,47 +460,10 @@ class Node:
                     #
                     #     if has_stairs:
                     #         continue
-
                     self.expandFrontierCell(
                         cell, BFSvisited, BFSfrontier, BFStempFrontier
                     )
 
-                elif cell_tag[0] == "A" and int(cell_tag[1]) != agent_no:
-                    # if self.cell.floor_no != cell.floor_no:
-                    #     has_stairs = True
-                    #     change = 1 if self.cell.floor_no < cell.floor_no else -1
-                    #     i = self.cell.floor_no
-                    #     while i != cell.floor_no:
-                    #         if self.stairs.get((i, i + change)) is None:
-                    #             BFSvisited.append(cell)
-                    #             has_stairs = False
-                    #             break
-                    #         i = i + change
-                    #
-                    #     if has_stairs:
-                    #         continue
-
-                    if (
-                        self.belongTo.agents[int(cell_tag[1])].y == cell.y
-                        and self.belongTo.agents[int(cell_tag[1])].x == cell.x
-                        and self.belongTo.agents[int(cell_tag[1])].floor_no
-                        == cell.floor_no
-                    ): # meet other agent and wait
-                        # create new node
-                        newNode = Node(cell, self.belongTo)
-                        newNode.setPathCost(self.pathCost + steps)
-                        newNode.saveHeuristic(self.belongTo.goals[agent_no])
-                        newNode.saveF()
-
-                        # append new node to tree
-                        self.children.append(newNode)
-                        newNode.parent = self
-
-                        # wait
-                    else: # expand now
-                        self.expandFrontierCell(
-                            cell, BFSvisited, BFSfrontier, BFStempFrontier
-                        )
 
                 # key
                 elif cell_tag[0] == "K":
@@ -766,7 +853,11 @@ class SearchTree:
                         )
                         i += 1
                     if i == frontier_length:
-                        return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
+                        # nếu hết lựa chọn checkpoint thì ta chọn những chỗ bth để đi
+                        tempFrontier = []
+                        self.frontier[1][0].expandAround(self.agents[1], tempFrontier, self)
+
+                        self.frontier[1] = tempFrontier + self.frontier[1]
                 else:
                     return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
 
@@ -813,7 +904,11 @@ class SearchTree:
                         )
                         i += 1
                     if i == frontier_length:
-                        return (self.MainStatus.IN_PROGRESS, self.frontier[agent_no][0])
+                        # nếu hết lựa chọn checkpoint thì ta chọn những chỗ bth để đi
+                        tempFrontier = []
+                        self.frontier[agent_no][0].expandAround(self.agents[agent_no], tempFrontier, self)
+
+                        self.frontier[agent_no] = tempFrontier + self.frontier[agent_no]
                 else:
                     return (self.MainStatus.IN_PROGRESS, self.frontier[agent_no][0])
 
