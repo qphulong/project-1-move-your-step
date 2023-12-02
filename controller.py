@@ -1,5 +1,8 @@
 from tkinter import *
 import tkinter as tk
+# import level3
+# import level1
+# import level2
 #python controller.py
 
 def create_first_window(length_var, width_var,win):
@@ -71,6 +74,7 @@ def testcase_level1(win,str):
 
 def solve_level1(str):
     print("CODE HERE")
+
 
 def handle_Button_Level1(win):
     win.destroy()
@@ -152,7 +156,8 @@ def testcase_level234(win,level):
 def solve_level(level):
     print(f"Solving level {level}")
 
-
+    # myLevel1.getInputFile("input//input1-level1.txt")
+    # print(myLevel1)
 def handle_Button_Level2(win):
     testcase_level234(win,2)
 
@@ -162,6 +167,6 @@ def handle_Button_Level3(win):
 def handle_Button_Level4(win):
     testcase_level234(win,4)
 
-w = tk.Tk()
+w = tk.Tk() # a little bit error voi cai nay nhma chua can thiet
 create_first_window(500,500,w)
 
