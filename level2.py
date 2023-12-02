@@ -407,7 +407,10 @@ class SearchTree:
         self.currentNode = None
         self.goalCell = None
         self.floor = None
+        self.checkRoot = False
 
+    def getCheckRoot(self):
+        return self.checkRoot
     def getInputFile(self, filePath):
         with open(filePath, "r") as file:
             lines = file.readlines()
@@ -534,13 +537,22 @@ class SearchTree:
     def heatMap(self):
         # Create the main window
         root = tk.Tk()
+        self.checkRoot = True
         root.title("Search Tree Visualization")
 
         # Create a canvas to draw on
         canvas = tk.Canvas(
-            root, width=self.floor.cols * 50, height=self.floor.rows * 50
+            root, width=self.floor.cols * 40, height=self.floor.rows * 35
         )
         canvas.pack()
+
+        #theo nut back
+        def goback():
+            self.checkRoot = False
+            root.destroy()
+
+        back_button = tk.Button(root, text="Back", height = 1, width = 20, bg = 'brown',command = goback)
+        back_button.place(x=self.floor.cols * 25, y=self.floor.rows * 15)
 
         # basic map
         for i in range(self.floor.rows):
@@ -592,10 +604,11 @@ class SearchTree:
                         )
             pass
         # Run the GUI
+
         root.mainloop()
 
 
-searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input4-level1.txt")
-searchTree2.AStar()
-pass
+# searchTree2 = SearchTree()
+# searchTree2.getInputFile("input//input4-level1.txt")
+# searchTree2.AStar()
+# pass

@@ -1,5 +1,9 @@
 from tkinter import *
 import tkinter as tk
+from level2 import SearchTree
+# import level3
+# import level1
+# import level2
 #python controller.py
 
 def create_first_window(length_var, width_var,win):
@@ -72,6 +76,7 @@ def testcase_level1(win,str):
 def solve_level1(str):
     print("CODE HERE")
 
+
 def handle_Button_Level1(win):
     win.destroy()
     newWindow_Level1 = tk.Tk()
@@ -114,7 +119,11 @@ def handle_Button_Level1(win):
 #UI MENU LEVEL 2,3,4
 
 def testcase_level234(win,level):
-    win.destroy()
+    if(win.winfo_exists()):
+        print("Tkinter root window exists.")
+        win.destroy()
+    else:
+        print("Tkinter root window not exists.")
     newWindow_TestCaseScreen1 = tk.Tk()
     newWindow_TestCaseScreen1.title('Project AI')
     newWindow_TestCaseScreen1.geometry('500x500')
@@ -124,23 +133,23 @@ def testcase_level234(win,level):
     testCase.pack()
 
     button_testcase1 = tk.Button(newWindow_TestCaseScreen1, font=('Arial', 15), text='Test case 1', width=20, height=1,
-                              bg='Brown',command = lambda: solve_level(level))
+                              bg='Brown',command = lambda: solve_level(level,newWindow_TestCaseScreen1,1))
     button_testcase1.place(x=137, y=100)
 
     button_testcase2 = tk.Button(newWindow_TestCaseScreen1, font=('Arial', 15), text='Test case 2', width=20, height=1,
-                              bg='Brown',command = lambda: solve_level(level))
+                              bg='Brown',command = lambda: solve_level(level,newWindow_TestCaseScreen1,2))
     button_testcase2.place(x=137, y=170)
 
     button_testcase3 = tk.Button(newWindow_TestCaseScreen1, font=('Arial', 15), text='Test case 3', width=20, height=1,
-                              bg='Brown',command = lambda: solve_level(level))
+                              bg='Brown',command = lambda: solve_level(level,newWindow_TestCaseScreen1,3))
     button_testcase3.place(x=137, y=240)
 
     button_testcase4 = tk.Button(newWindow_TestCaseScreen1, font=('Arial', 15), text='Test case 4', width=20, height=1,
-                              bg='Brown',command = lambda: solve_level(level))
+                              bg='Brown',command = lambda: solve_level(level,newWindow_TestCaseScreen1,4))
     button_testcase4.place(x=137, y=310)
 
     button_testcase5 = tk.Button(newWindow_TestCaseScreen1, font=('Arial', 15), text='Test case 5', width=20, height=1,
-                                 bg='Brown',command = lambda: solve_level(level))
+                                 bg='Brown',command = lambda: solve_level(level,newWindow_TestCaseScreen1,5))
     button_testcase5.place(x=137, y=380)
 
     back_to_menu = tk.Button(newWindow_TestCaseScreen1, font=('Arial', 15), text='Back to menu', width=20, height=1,
@@ -149,12 +158,27 @@ def testcase_level234(win,level):
 
     newWindow_TestCaseScreen1.mainloop()
 
-def solve_level(level):
+def solve_level(level,win,testcase):
+    win.destroy()
     print(f"Solving level {level}")
+    if level == 2:
+        searchTree2 = SearchTree()
+        if testcase == 1: searchTree2.getInputFile("input//input1-level2.txt")
+        if testcase == 2: searchTree2.getInputFile("input//input2-level2.txt")
+        if testcase == 3: searchTree2.getInputFile("input//input3-level2.txt")
+        if testcase == 4: searchTree2.getInputFile("input//input4-level2.txt")
+        if testcase == 5: searchTree2.getInputFile("input//input5-level2.txt")
+        searchTree2.AStar()
+
+        if(searchTree2.getCheckRoot() == False):
+            print('false')
+            testcase_level234(tk.Tk(),level)
+
 
 
 def handle_Button_Level2(win):
     testcase_level234(win,2)
+
 
 def handle_Button_Level3(win):
     testcase_level234(win,3)
@@ -162,6 +186,6 @@ def handle_Button_Level3(win):
 def handle_Button_Level4(win):
     testcase_level234(win,4)
 
-w = tk.Tk()
+w = tk.Tk() # a little bit error voi cai nay nhma chua can thiet
 create_first_window(500,500,w)
 
