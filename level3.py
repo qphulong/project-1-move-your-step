@@ -1,10 +1,6 @@
-import heapq
-import random
 import re
 import tkinter as tk
-from collections import Counter
 from enum import Enum
-import copy
 from collections import Counter
 
 
@@ -412,7 +408,7 @@ class Node:
                                 )  # add previously collected keys
                             newNode.appendKey(cell_tag)  # add current key
 
-                            # add to path
+                            # # add to path
                             tempCell = cell
                             while tempCell:
                                 newNode.path.append(tempCell)
@@ -461,7 +457,7 @@ class Node:
                             self.children.append(newNode)
                             newNode.parent = self
 
-                            # add to path
+                            # # add to path
                             tempCell = cell
                             while tempCell:
                                 newNode.path.append(tempCell)
@@ -508,7 +504,7 @@ class Node:
                     self.children.append(newNode)
                     newNode.parent = self
 
-                    # add to path
+                    # # add to path
                     tempCell = cell
                     while tempCell:
                         newNode.path.append(tempCell)
@@ -564,7 +560,7 @@ class Node:
                     )  # children của node hiện tại là thêm node mới
                     newNode.parent = self
 
-                    # add to path
+                    # # add to path
                     tempCell = cell
                     while tempCell:
                         newNode.path.append(tempCell)
@@ -597,7 +593,8 @@ class Node:
             BFSfrontier = BFStempFrontier
             BFStempFrontier = []
 
-        self.cell.belongTo.clearAllRelation()
+        for floor in self.belongTo.floors:
+            self.belongTo.floors[floor].clearAllRelation()
 
 
 class SearchTree:
@@ -812,7 +809,7 @@ class SearchTree:
                     )
                     tempNode = tempNode.parent
                 print("A")
-                self.visualize(1)
+                self.heatMap()
                 return
 
             self.currentNode.expand(self.goals[0])
@@ -883,88 +880,63 @@ class SearchTree:
         # Run the GUI
         root.mainloop()
 
-    def heatMap(self, indexOfFloor):
-        # Create the main window
+
+    def heatMap(self):
         root = tk.Tk()
         self.checkRoot = True
-        root.title("Search Tree Visualization")
+        root.title("Search Tree Visualization - All Floors")
 
-        # Create a canvas to draw on
-        canvas = tk.Canvas(
-            root,
-            width=self.floors[indexOfFloor].cols * 40,
-            height=self.floors[indexOfFloor].rows * 35,
-        )
+        canvas_width = max(self.floors[floor].cols for floor in self.floors) * 40
+        canvas_height = sum(self.floors[floor].rows for floor in self.floors) * 35
+        canvas = tk.Canvas(root, width=canvas_width, height=canvas_height)
         canvas.pack()
 
-        # them nut back
-        def goback():
-            self.checkRoot = False
-            root.destroy()
+        y_offset = 0
 
-        back_button = tk.Button(
-            root, text="Back", height=1, width=20, bg="brown", command=goback
-        )
-        back_button.place(
-            x=self.floors[indexOfFloor].cols * 25, y=self.floors[indexOfFloor].rows * 15
-        )
+        for floor_no in self.floors:
+            floor = self.floors[floor_no]
 
-        # basic map
-        for i in range(self.floors[indexOfFloor].rows):
-            for j in range(self.floors[indexOfFloor].cols):
-                x0, y0 = j * 20, i * 20
-                x1, y1 = (j + 1) * 20, (i + 1) * 20
+            for i in range(floor.rows):
+                for j in range(floor.cols):
+                    x0, y0 = j * 20, (i + y_offset) * 20
+                    x1, y1 = (j + 1) * 20, (i + 1 + y_offset) * 20
 
-                # Set color for cells with value "-1" to black
-                if self.floors[indexOfFloor].table[i][j].checkValue("-1"):
-                    canvas.create_rectangle(x0, y0, x1, y1, fill="black")
-                else:
-                    canvas.create_rectangle(x0, y0, x1, y1, fill="white")
-                    # print special value
-                    specialValue = (
-                        self.floors[indexOfFloor].table[i][j].getSpecialValue()
-                    )
-                    canvas.create_text(
-                        x0 + 10, y0 + 10, text=specialValue, fill="black"
-                    )
+                    if floor.table[i][j].checkValue("-1"):
+                        canvas.create_rectangle(x0, y0, x1, y1, fill="black")
+                    else:
+                        canvas.create_rectangle(x0, y0, x1, y1, fill="white")
+                        specialValue = floor.table[i][j].getSpecialValue()
+                        canvas.create_text(
+                            x0 + 10, y0 + 10, text=specialValue, fill="black"
+                        )
 
-        # draw path
-        tempNode = self.currentNode
-        generalPath = []
-        # TODO add path attribute to Node class, path is array of Cell that leads from parrent node to this node
-        # if done uncomment the below code
-        # while tempNode:
-        #     for eachCell in tempNode.path:
-        #         generalPath.append(eachCell)
-        #     tempNode = tempNode.parent
+            # draw path
+            tempNode = self.currentNode
+            generalPath = []
+            while tempNode:
+                for eachCell in tempNode.path:
+                    generalPath.append(eachCell)
+                tempNode = tempNode.parent
 
-        # for eachCell in generalPath:
-        #     for i in range(self.floors[indexOfFloor].rows):
-        #         for j in range(self.floors[indexOfFloor].cols):
-        #             x0, y0 = j * 20, i * 20
-        #             x1, y1 = (j + 1) * 20, (i + 1) * 20
+            for eachCell in generalPath:
+                for i in range(floor.rows):
+                    for j in range(floor.cols):
+                        x0, y0 = j * 20, (i + y_offset) * 20
+                        x1, y1 = (j + 1) * 20, (i + 1 + y_offset) * 20
 
-        #             # Set color for cells in the path to green
-        #             if self.floors[indexOfFloor].table[i][j] in generalPath:
-        #                 if Counter(generalPath)[self.floors[indexOfFloor].table[i][j]] == 1:
-        #                     canvas.create_rectangle(x0, y0, x1, y1, fill="#ff8888")
-        #                 elif Counter(generalPath)[self.floors[indexOfFloor].table[i][j]] == 2:
-        #                     canvas.create_rectangle(x0, y0, x1, y1, fill="#ff4b4b")
-        #                 elif Counter(generalPath)[self.floors[indexOfFloor].table[i][j]] == 3:
-        #                     canvas.create_rectangle(x0, y0, x1, y1, fill="#ff0000")
-        #                 elif Counter(generalPath)[self.floors[indexOfFloor].table[i][j]] == 4:
-        #                     canvas.create_rectangle(x0, y0, x1, y1, fill="#cb0000")
-        #             # Set color for cells pointed by tempNode to red
-        #             if self.floors[indexOfFloor].table[i][j].getSpecialValue() != "":
-        #                 canvas.create_rectangle(x0, y0, x1, y1, fill="#2ad500")
-        #                 specialValue = self.floors[indexOfFloor].table[i][j].getSpecialValue()
-        #                 canvas.create_text(
-        #                     x0 + 10, y0 + 10, text=specialValue, fill="black"
-        #                 )
-        #     pass
-        # # Run the GUI
+                        if floor.table[i][j] in generalPath:
+                            if Counter(generalPath)[floor.table[i][j]] == 1:
+                                canvas.create_rectangle(x0, y0, x1, y1, fill="#ff8888")
+                            elif Counter(generalPath)[floor.table[i][j]] == 2:
+                                canvas.create_rectangle(x0, y0, x1, y1, fill="#ff4b4b")
+                            elif Counter(generalPath)[floor.table[i][j]] == 3:
+                                canvas.create_rectangle(x0, y0, x1, y1, fill="#ff0000")
+                            elif Counter(generalPath)[floor.table[i][j]] == 4:
+                                canvas.create_rectangle(x0, y0, x1, y1, fill="#cb0000")
 
-        # root.mainloop()
+            y_offset += floor.rows * 20 + 20
+
+        root.mainloop()
 
 
 searchTree2 = SearchTree()
