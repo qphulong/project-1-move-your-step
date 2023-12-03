@@ -19,6 +19,9 @@ class Cell:
             self.y == other.y and self.x == other.x and self.floor_no == other.floor_no
         )
 
+    def __hash__(self):
+        return hash((self.y, self.x, self.floor_no))
+
     def setBelongTo(self, value):
         self.belongTo = value
 
@@ -107,10 +110,6 @@ class Floor:
 
     def getCell(self, row, col):
         return self.table[row][col]
-
-
-custom_goals = []
-floor_priorities = []
 
 
 class ClimbStatus(Enum):
