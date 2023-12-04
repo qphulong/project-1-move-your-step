@@ -397,8 +397,9 @@ class Node:
                             newNode.saveF()
 
                             # append new node to tree
-                            self.children.append(newNode)
-                            newNode.parent = self
+                            if self.cell != cell:
+                              self.children.append(newNode)
+                              newNode.parent = self
 
                             # inherit collected keys so far
                             for eachKey in self.keys:
@@ -453,8 +454,9 @@ class Node:
                                 newNode.appendKey(eachKey)
 
                             # append new node to tree
-                            self.children.append(newNode)
-                            newNode.parent = self
+                            if self.cell != cell:
+                                self.children.append(newNode)
+                                newNode.parent = self
 
                             # # add to path
                             tempCell = cell
@@ -500,8 +502,9 @@ class Node:
                     newNode.saveF()
 
                     # append new node to tree
-                    self.children.append(newNode)
-                    newNode.parent = self
+                    if self.cell != cell:
+                        self.children.append(newNode)
+                        newNode.parent = self
 
                     # # add to path
                     tempCell = cell
@@ -526,14 +529,14 @@ class Node:
                     #         continue
 
                     if len(BFSfrontier) > 1 and (
-                        (
-                            BFSfrontier[-1].getSpecialValue() == "UP"
-                            and self.cell.getSpecialValue() == "DO"
-                        )
-                        or (
-                            BFSfrontier[-1].getSpecialValue() == "DO"
-                            and self.cell.getSpecialValue() == "UP"
-                        )
+                            (
+                                    BFSfrontier[-1].getSpecialValue() == "UP"
+                                    and self.cell.getSpecialValue() == "DO"
+                            )
+                            or (
+                                    BFSfrontier[-1].getSpecialValue() == "DO"
+                                    and self.cell.getSpecialValue() == "UP"
+                            )
                     ):
                         continue
 
@@ -553,17 +556,8 @@ class Node:
                         newNode.stairs[(cell.floor_no, next_floor)] = []
                     newNode.stairs[(cell.floor_no, next_floor)].append(cell)
 
-                    # append new node to tree
-                    self.children.append(
-                        newNode
-                    )  # children của node hiện tại là thêm node mới
-                    newNode.parent = self
-
-                    # # add to path
-                    tempCell = cell
-                    while tempCell:
-                        newNode.path.append(tempCell)
-                        tempCell = tempCell.parrent
+                    if self.cell != cell:
+                      newNode.parent = self
 
                     if cell_tag == "UP":
                         copyCell = self.belongTo.floors[cell.floor_no + 1].getCell(
@@ -576,10 +570,6 @@ class Node:
                     # Expand the neighbors of the updated cell
                     self.expandFrontierCell(
                         copyCell, BFSvisited, BFSfrontier, BFStempFrontier
-                    )
-
-                    self.expandFrontierCell(
-                        cell, BFSvisited, BFSfrontier, BFStempFrontier
                     )
 
                     BFSvisited.append(copyCell)
@@ -689,22 +679,13 @@ class SearchTree:
         UNSOLVABLE = -1
         IN_PROGRESS = 0
 
-    def AStar(self):
+    def Greedy_BFS(self):
         self.root.saveHeuristic(self.goals[0])  # save heuristic for root
-        self.root.saveF()
 
         while self.frontier:
             # self.visualize()
-            self.frontier.sort(key=lambda x: x.getF())
+            self.frontier.sort(key=lambda x: x.heuristic)
             self.currentNode = self.frontier.pop(0)
-
-            self.visited.append(
-                (
-                    self.currentNode.cell.y,
-                    self.currentNode.cell.x,
-                    self.currentNode.cell.floor_no,
-                )
-            )
 
             # if path found
             if self.currentNode.cell == self.goals[0]:
@@ -714,82 +695,15 @@ class SearchTree:
                         f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}"
                     )
                     tempNode = tempNode.parent
-                # self.visualize()
+                self.heatMap()
                 return  # self.MainStatus.REACHED
 
             self.currentNode.expand(self.goals[0])
-            for eachChild in self.currentNode.children:
-                special = eachChild.cell.getSpecialValue()
-                if (special[0] == "D" and special[1] != "O") or (
-                    eachChild.cell.y,
-                    eachChild.cell.x,
-                    eachChild.cell.floor_no,
-                ) not in self.visited:
-                    self.frontier.append(eachChild)
+            for eachChild in set(self.currentNode.children):
+                self.frontier.append(eachChild)
 
         print("No solution found")
         # return self.MainStatus.UNSOLVABLE
-
-    def AStar_CustomGoal(self):
-        self.root.saveHeuristic(self.goals[0])  # save heuristic for root
-        self.root.saveF()
-
-        if self.frontier_subgoal:
-            # self.visualize()
-            self.frontier_subgoal.sort(key=lambda x: x.getF())
-            self.currentNode_subgoal = self.frontier_subgoal.pop(0)
-
-            # if path found
-            if self.currentNode_subgoal.cell == self.goals[-1]:
-                tempNode = self.currentNode_subgoal
-                while tempNode:
-                    print(
-                        f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}"
-                    )
-                    tempNode = tempNode.parent
-                # self.visualize()
-                return self.MainStatus.REACHED
-
-            self.currentNode_subgoal.expand(self.goals[-1])
-            for eachChild in self.currentNode.children:
-                self.frontier_subgoal.append(eachChild)
-            return self.MainStatus.IN_PROGRESS
-
-        return self.MainStatus.UNSOLVABLE
-
-    def Divide_and_Conquer(self):
-        self.root.saveHeuristic(self.goals[0])  # save heuristic for root
-        self.root.saveF()
-        while True:
-            if len(self.goals) > 1:
-                if self.root_subgoal is None:
-                    self.root_subgoal = self.currentNode
-                    self.root_subgoal.saveHeuristic(self.goals[-1])
-                    self.root_subgoal.saveF()
-
-                res = self.AStar_CustomGoal()  # find path to the peek goal in stack
-                if res != self.MainStatus.IN_PROGRESS:
-                    if res == self.MainStatus.REACHED:
-                        print("Reached")
-
-                        subgoal = self.goals[-1]
-
-                        self.frontier.insert(
-                            0, subgoal
-                        )  # insert root_subgoal to frontier
-
-                        self.goals.pop()  # pop custom goal from stack
-                    else:
-                        print("Unsolvable")
-                        break
-            else:
-                res = self.AStar()
-                if res != self.MainStatus.IN_PROGRESS:
-                    if res == self.MainStatus.REACHED:
-                        print("Reached")
-                    else:
-                        print("Unsolvable")
-                    break
 
     def BFS(self):
         # self.root[1].saveHeuristic(self.goals[1])
@@ -798,22 +712,23 @@ class SearchTree:
             # self.visualize()
             # self.frontier[1].sort(key=lambda x: x.getF())
             self.currentNode = self.frontier.pop(0)
+            print(f"{self.currentNode.cell.getSpecialValue()} Floor: {self.currentNode.cell.floor_no}")
 
             # if path found
             if self.currentNode.cell == self.goals[0]:
+
                 tempNode = self.currentNode
                 while tempNode:
                     print(
-                        f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no} Path cost: {tempNode.pathCost}"
+                        f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}"
                     )
                     tempNode = tempNode.parent
-                print("A")
                 self.heatMap()
                 return
 
             self.currentNode.expand(self.goals[0])
             for eachChild in self.currentNode.children:
-                self.frontier.append(eachChild)
+                    self.frontier.append(eachChild)
 
         print("No solution found")
 
@@ -953,6 +868,6 @@ class SearchTree:
 
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input4-level3.txt")
-searchTree2.BFS()
+searchTree2.getInputFile("input//input3-level3.txt")
+searchTree2.Greedy_BFS()
 pass

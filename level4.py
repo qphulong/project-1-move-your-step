@@ -657,10 +657,6 @@ class Node:
                         newNode.stairs[(cell.floor_no, next_floor)] = []
                     newNode.stairs[(cell.floor_no, next_floor)].append(cell)
 
-                    # append new node to tree
-                    self.children.append(
-                        newNode
-                    )  # children của node hiện tại là thêm node mới
                     newNode.parent = self
 
                     if cell_tag == "UP":
@@ -674,10 +670,6 @@ class Node:
                     # Expand the neighbors of the updated cell
                     self.expandFrontierCell(
                         copyCell, BFSvisited, BFSfrontier, BFStempFrontier
-                    )
-
-                    self.expandFrontierCell(
-                        cell, BFSvisited, BFSfrontier, BFStempFrontier
                     )
 
                     BFSvisited.append(copyCell)
