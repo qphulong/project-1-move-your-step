@@ -879,37 +879,37 @@ class SearchTree:
         # Run the GUI
         root.mainloop()
 
-
     def heatMap(self):
         root = tk.Tk()
         self.checkRoot = True
         root.title("Search Tree Visualization - All Floors")
 
         canvas_width = max(self.floors[floor].cols for floor in self.floors) * 40
-        canvas_height = sum(self.floors[floor].rows for floor in self.floors) * 35
+        canvas_height = sum(self.floors[floor].rows for floor in self.floors) * 35 * len(self.floors)
         canvas = tk.Canvas(root, width=canvas_width, height=canvas_height)
         canvas.pack()
 
-        y_offset = 0
+        y_offset = 0  # Offset for drawing floors vertically
 
         for floor_no in self.floors:
             floor = self.floors[floor_no]
 
+            # Draw each row of the floor
             for i in range(floor.rows):
                 for j in range(floor.cols):
-                    x0, y0 = j * 20, (i + y_offset) * 20
-                    x1, y1 = (j + 1) * 20, (i + 1 + y_offset) * 20
+                    x0, y0 = j * 20, i * 35 + y_offset
+                    x1, y1 = (j + 1) * 20, (i + 1) * 35 + y_offset
 
                     if floor.table[i][j].checkValue("-1"):
-                        canvas.create_rectangle(x0, y0, x1, y1, fill="black")
+                        canvas.create_rectangle(x0, y0, x1, y1, fill="black", outline="black")
                     else:
-                        canvas.create_rectangle(x0, y0, x1, y1, fill="white")
+                        canvas.create_rectangle(x0, y0, x1, y1, fill="white", outline="black")
                         specialValue = floor.table[i][j].getSpecialValue()
                         canvas.create_text(
                             x0 + 10, y0 + 10, text=specialValue, fill="black"
                         )
 
-            # draw path
+            # Draw path for the current floor
             tempNode = self.currentNode
             generalPath = []
             while tempNode:
@@ -920,20 +920,34 @@ class SearchTree:
             for eachCell in generalPath:
                 for i in range(floor.rows):
                     for j in range(floor.cols):
-                        x0, y0 = j * 20, (i + y_offset) * 20
-                        x1, y1 = (j + 1) * 20, (i + 1 + y_offset) * 20
+                        x0, y0 = j * 20, i * 35 + y_offset
+                        x1, y1 = (j + 1) * 20, (i + 1) * 35 + y_offset
 
                         if floor.table[i][j] in generalPath:
                             if Counter(generalPath)[floor.table[i][j]] == 1:
-                                canvas.create_rectangle(x0, y0, x1, y1, fill="#ff8888")
+                                canvas.create_rectangle(
+                                    x0, y0, x1, y1, fill="#ff8888", outline="black"
+                                )
                             elif Counter(generalPath)[floor.table[i][j]] == 2:
-                                canvas.create_rectangle(x0, y0, x1, y1, fill="#ff4b4b")
+                                canvas.create_rectangle(
+                                    x0, y0, x1, y1, fill="#ff4b4b", outline="black"
+                                )
                             elif Counter(generalPath)[floor.table[i][j]] == 3:
-                                canvas.create_rectangle(x0, y0, x1, y1, fill="#ff0000")
+                                canvas.create_rectangle(
+                                    x0, y0, x1, y1, fill="#ff0000", outline="black"
+                                )
                             elif Counter(generalPath)[floor.table[i][j]] == 4:
-                                canvas.create_rectangle(x0, y0, x1, y1, fill="#cb0000")
+                                canvas.create_rectangle(
+                                    x0, y0, x1, y1, fill="#cb0000", outline="black"
+                                )
+                        if floor.table[i][j].getSpecialValue() != "":
+                            canvas.create_rectangle(x0, y0, x1, y1, fill="#2ad500", outline="black")
+                            specialValue = floor.table[i][j].getSpecialValue()
+                            canvas.create_text(
+                                x0 + 10, y0 + 10, text=specialValue, fill="black"
+                            )
 
-            y_offset += floor.rows * 20 + 20
+            y_offset += floor.rows * 35 + 20  # Adjust y_offset for next floor
 
         root.mainloop()
 
