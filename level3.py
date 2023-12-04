@@ -855,11 +855,18 @@ class SearchTree:
                                 canvas.create_rectangle(
                                     x0, y0, x1, y1, fill="#cb0000", outline="black"
                                 )
+                        special = floor.table[i][j].getSpecialValue()
                         if floor.table[i][j].getSpecialValue() != "":
+                            if special == "UP" or special == "DO":
+                                canvas.create_rectangle(x0, y0, x1, y1, fill="#34cceb" if special == "UP" else "#f5aa42", outline="black")
+                                canvas.create_text(
+                                    x0 + 10, y0 + 10, text="↑" if special == "UP" else "↓", fill="black"
+                                )
+                                continue
+
                             canvas.create_rectangle(x0, y0, x1, y1, fill="#2ad500", outline="black")
-                            specialValue = floor.table[i][j].getSpecialValue()
                             canvas.create_text(
-                                x0 + 10, y0 + 10, text=specialValue, fill="black"
+                                x0 + 10, y0 + 10, text=special, fill="black"
                             )
 
             y_offset += floor.rows * 35 + 20  # Adjust y_offset for next floor
