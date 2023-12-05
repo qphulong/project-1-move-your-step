@@ -16,6 +16,14 @@ class Cell:
         self.children = []
         self.parrent = None
 
+    def __eq__(self, other):
+        return (
+            self.y == other.y and self.x == other.x and self.floor_no == other.floor_no
+        )
+
+    def __hash__(self):
+        return hash((self.y, self.x, self.floor_no))
+
     def setBelongTo(self, value):
         self.belongTo = value
 
@@ -49,14 +57,6 @@ class Cell:
 
     def isWall(self):
         return "-1" in self.values
-
-    def isAgent(self):
-        special = self.getSpecialValue()
-        return special and special[0] == "A"
-
-    def isOtherAgent(self, agent_no):
-        special = self.getSpecialValue()
-        return special and special[0] == "A" and special[1] != str(agent_no)
 
     def getY(self):
         return self.y
@@ -93,6 +93,13 @@ class Floor:
             None,
         )
 
+    # function that set children and parrent of every cell to empty
+    def clearAllRelation(self):
+        for i in range(self.rows):
+            for j in range(self.cols):
+                self.table[i][j].children = []
+                self.table[i][j].parrent = None
+
     def appendToCell(self, row, col, value):
         self.table[row][col].appendValue(value)
 
@@ -105,10 +112,6 @@ class Floor:
 
     def getCell(self, row, col):
         return self.table[row][col]
-
-
-custom_goals = []
-floor_priorities = []
 
 
 class ClimbStatus(Enum):
@@ -131,6 +134,8 @@ class Node:
         self.children = []  # những con (successor) của node này
         self.parent = None  # cha của node này
 
+        self.path = []
+
     def appendKey(self, value):
         if value not in self.keys:
             self.keys.append(value)
@@ -148,7 +153,7 @@ class Node:
         return self.pathCost
 
     def saveHeuristic(
-            self, GoalCell
+        self, GoalCell
     ):  # calculate heuristic of the current cell to the goal (can be any goal)
         self.heuristic = self.cell.getFloorsHeuristic(GoalCell)
         return self.heuristic
@@ -169,9 +174,12 @@ class Node:
         if (
             cell.y > 0
             and not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isWall()
-            and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x) not in BFSvisited
-            and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x) not in BFSfrontier
-            and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x) not in BFStempFrontier
+            and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x)
+            not in BFSvisited
+            and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x)
+            not in BFSfrontier
+            and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x)
+            not in BFStempFrontier
         ):
             northCell = self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x)
             BFStempFrontier.append(northCell)
@@ -182,9 +190,12 @@ class Node:
         if (
             cell.x > 0
             and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1).isWall()
-            and self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1) not in BFSvisited
-            and self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1) not in BFSfrontier
-            and self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1) not in BFStempFrontier
+            and self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1)
+            not in BFSvisited
+            and self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1)
+            not in BFSfrontier
+            and self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1)
+            not in BFStempFrontier
         ):
             westCell = self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1)
             BFStempFrontier.append(westCell)
@@ -195,9 +206,12 @@ class Node:
         if (
             cell.y < self.belongTo.floors[floor_no].rows - 1
             and not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x).isWall()
-            and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x) not in BFSvisited
-            and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x) not in BFSfrontier
-            and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x) not in BFStempFrontier
+            and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x)
+            not in BFSvisited
+            and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x)
+            not in BFSfrontier
+            and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x)
+            not in BFStempFrontier
         ):
             southCell = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x)
             BFStempFrontier.append(southCell)
@@ -208,9 +222,12 @@ class Node:
         if (
             cell.x < self.belongTo.floors[floor_no].cols - 1
             and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1).isWall()
-            and self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1) not in BFSvisited
-            and self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1) not in BFSfrontier
-            and self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1) not in BFStempFrontier
+            and self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1)
+            not in BFSvisited
+            and self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1)
+            not in BFSfrontier
+            and self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1)
+            not in BFStempFrontier
         ):
             eastCell = self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1)
             BFStempFrontier.append(eastCell)
@@ -223,9 +240,13 @@ class Node:
             and cell.x < self.belongTo.floors[floor_no].cols - 1
             and not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isWall()
             and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1).isWall()
-            and not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1).isWall()
-            and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1) not in BFSvisited
-            and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1) not in BFSfrontier
+            and not self.belongTo.floors[floor_no]
+            .getCell(cell.y - 1, cell.x + 1)
+            .isWall()
+            and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1)
+            not in BFSvisited
+            and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1)
+            not in BFSfrontier
             and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1)
             not in BFStempFrontier
         ):
@@ -240,9 +261,13 @@ class Node:
             and cell.x > 0
             and not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isWall()
             and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1).isWall()
-            and not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1).isWall()
-            and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1) not in BFSvisited
-            and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1) not in BFSfrontier
+            and not self.belongTo.floors[floor_no]
+            .getCell(cell.y - 1, cell.x - 1)
+            .isWall()
+            and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1)
+            not in BFSvisited
+            and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1)
+            not in BFSfrontier
             and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1)
             not in BFStempFrontier
         ):
@@ -257,9 +282,13 @@ class Node:
             and cell.x > 0
             and not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x).isWall()
             and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1).isWall()
-            and not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1).isWall()
-            and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1) not in BFSvisited
-            and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1) not in BFSfrontier
+            and not self.belongTo.floors[floor_no]
+            .getCell(cell.y + 1, cell.x - 1)
+            .isWall()
+            and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1)
+            not in BFSvisited
+            and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1)
+            not in BFSfrontier
             and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1)
             not in BFStempFrontier
         ):
@@ -274,9 +303,13 @@ class Node:
             and cell.x < self.belongTo.floors[floor_no].cols - 1
             and not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x).isWall()
             and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1).isWall()
-            and not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1).isWall()
-            and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1) not in BFSvisited
-            and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1) not in BFSfrontier
+            and not self.belongTo.floors[floor_no]
+            .getCell(cell.y + 1, cell.x + 1)
+            .isWall()
+            and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1)
+            not in BFSvisited
+            and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1)
+            not in BFSfrontier
             and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1)
             not in BFStempFrontier
         ):
@@ -286,14 +319,18 @@ class Node:
             seCell.parrent = cell
 
     def expandAround(self, cell, TempFrontier, SearchTree, agent_no):
+        def inTempFrontier(cell, TempFrontier):
+            for node in TempFrontier:
+                if cell == node.cell:
+                    return True
+            return False
 
         floor_no = cell.floor_no
         # add N cell to tempFrontier
         if (
                 cell.y > 0
                 and not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isWall()
-                and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x)
-                not in TempFrontier
+                and inTempFrontier(self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x), TempFrontier)
                 and self.belongTo.isOtherAgent(cell, agent_no)
         ):
             northCell = self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x)
@@ -307,8 +344,7 @@ class Node:
         if (
                 cell.x > 0
                 and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1).isWall()
-                and self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1)
-                not in TempFrontier
+                and inTempFrontier(self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1), TempFrontier)
                 and self.belongTo.isOtherAgent(cell, agent_no)
         ):
             westCell = self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1)
@@ -322,8 +358,7 @@ class Node:
         if (
                 cell.y < self.belongTo.floors[floor_no].rows - 1
                 and not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x).isWall()
-                and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x)
-                not in TempFrontier
+                and inTempFrontier(self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x), TempFrontier)
                 and self.belongTo.isOtherAgent(cell, agent_no)
         ):
             southCell = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x)
@@ -337,8 +372,7 @@ class Node:
         if (
                 cell.x < self.belongTo.floors[floor_no].cols - 1
                 and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1).isWall()
-                and self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1)
-                not in TempFrontier
+                and inTempFrontier(self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1), TempFrontier)
                 and self.belongTo.isOtherAgent(cell, agent_no)
         ):
             eastCell = self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1)
@@ -357,8 +391,7 @@ class Node:
                 and not self.belongTo.floors[floor_no]
                 .getCell(cell.y - 1, cell.x + 1)
                 .isWall()
-                and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1)
-                not in TempFrontier
+                and inTempFrontier(self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1), TempFrontier)
                 and self.belongTo.isOtherAgent(cell, agent_no)
         ):
             neCell = self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1)
@@ -376,8 +409,7 @@ class Node:
                 and not self.belongTo.floors[floor_no]
                 .getCell(cell.y - 1, cell.x - 1)
                 .isWall()
-                and self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1)
-                not in TempFrontier
+                and inTempFrontier(self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1), TempFrontier)
                 and self.belongTo.isOtherAgent(cell, agent_no)
         ):
             nwCell = self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1)
@@ -396,8 +428,7 @@ class Node:
                 and not self.belongTo.floors[floor_no]
                 .getCell(cell.y + 1, cell.x - 1)
                 .isWall()
-                and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1)
-                not in TempFrontier
+                and inTempFrontier(self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1), TempFrontier)
                 and self.belongTo.isOtherAgent(cell, agent_no)
         ):
             swCell = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1)
@@ -415,8 +446,7 @@ class Node:
                 and not self.belongTo.floors[floor_no]
                 .getCell(cell.y + 1, cell.x + 1)
                 .isWall()
-                and self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1)
-                not in TempFrontier
+                and inTempFrontier(self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1), TempFrontier)
                 and self.belongTo.isOtherAgent(cell, agent_no)
         ):
             seCell = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1)
@@ -459,9 +489,7 @@ class Node:
                 cell_tag = cell.getSpecialValue()  # special value của cell
 
                 # normal cell
-                if cell_tag == "" or (
-                        cell_tag[0] == "A"
-                ):
+                if cell_tag == "" or cell_tag[0] == "A" or (cell_tag[0] == "T" and cell_tag[1] != str(agent_no)):
                     # if self.cell.floor_no != cell.floor_no:
                     #     has_stairs = True
                     #     change = 1 if self.cell.floor_no < cell.floor_no else -1
@@ -588,7 +616,7 @@ class Node:
                         else:
                             pass
 
-                elif cell_tag[0] == "T":
+                elif cell_tag[0] == "T" and cell_tag[1] == str(agent_no):
                     # if self.cell.floor_no != cell.floor_no:
                     #     has_stairs = True
                     #     change = 1 if self.cell.floor_no < cell.floor_no else -1
@@ -657,7 +685,8 @@ class Node:
                         newNode.stairs[(cell.floor_no, next_floor)] = []
                     newNode.stairs[(cell.floor_no, next_floor)].append(cell)
 
-                    newNode.parent = self
+                    if self.cell != cell:
+                        newNode.parent = self
 
                     if cell_tag == "UP":
                         copyCell = self.belongTo.floors[cell.floor_no + 1].getCell(
@@ -681,6 +710,9 @@ class Node:
             # update the frontier
             BFSfrontier = BFStempFrontier
             BFStempFrontier = []
+
+        for floor in self.belongTo.floors:
+            self.belongTo.floors[floor].clearAllRelation()
 
 
 class SearchTree:
@@ -788,57 +820,73 @@ class SearchTree:
                 return True
         return False
 
-    def AStar(self):
+    def GreedyBFS(self):
         self.root[1].saveHeuristic(self.goals[1])
-        self.root[1].saveF()
+        # self.root[1].saveF()
+
         if self.frontier[1]:
             # self.visualize()
-            self.frontier[1].sort(key=lambda x: x.getF())
+            self.frontier[1].sort(key=lambda x: x.heuristic)
+
+            if self.isOtherAgent(self.frontier[1][0].cell, 1):  # meet other agentß
+                frontier_length = len(self.frontier[1])
+                if frontier_length > 1:
+                    i = 1
+                    while i < frontier_length and self.isOtherAgent(
+                            self.frontier[1][i].cell, 1
+                    ):
+                        self.frontier[1][i - 1], self.frontier[1][i] = (
+                            self.frontier[1][i],
+                            self.frontier[1][i - 1],
+                        )
+                        i += 1
+                    if i == frontier_length:
+                        tempFrontier = []
+                        self.frontier[1][0].expandAround(self.agents[1], tempFrontier, self, 1)
+
+                        self.frontier[1] = tempFrontier + self.frontier[1]
+                else:
+                    return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
+
             self.currentNode[1] = self.frontier[1].pop(0)
+
+            self.agents[1] = self.currentNode[1].cell
+
+            # self.visited[1].append(
+            #     (
+            #         self.currentNode[1].cell.y,
+            #         self.currentNode[1].cell.x,
+            #         self.currentNode[1].cell.floor_no,
+            #     )
+            # )
 
             # if path found
             if self.currentNode[1].cell == self.goals[1]:
                 tempNode = self.currentNode[1]
                 while tempNode:
-                    print(
-                        f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}"
-                    )
+                    print(f"{tempNode.cell.y} {tempNode.cell.x} Floor: {tempNode.cell.floor_no}")
                     tempNode = tempNode.parent
                 # self.visualize()
                 return (self.MainStatus.REACHED, None)
 
             self.currentNode[1].expand(1)
+
             for eachChild in self.currentNode[1].children:
-                self.frontier[1].append(eachChild)
-            return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
+                # special = eachChild.cell.getSpecialValue()
+                # if (special[0] == "D" and special[1] != "O") or (special == "UP" or special == "DO") or (
+                #         eachChild.cell.y,
+                #         eachChild.cell.x,
+                #         eachChild.cell.floor_no,
+                # ) not in self.visited[1]:
+                    self.frontier[1].append(eachChild)
+
+            return (
+                self.MainStatus.IN_PROGRESS,
+                self.frontier[1][0] if len(self.frontier[1]) > 0 else None,
+            )
 
         return (self.MainStatus.UNSOLVABLE, None)
 
-    def AStar_CustomGoal(self, goal):
-        self.root[1].saveHeuristic(goal)
-        self.root[1].saveF()
-        if self.frontier[1]:
-            # self.visualize()
-            self.frontier[1].sort(key=lambda x: x.getF())
-            self.currentNode[1] = self.frontier[1].pop(0)
-
-            # if path found
-            if self.currentNode[1].cell == goal:
-                tempNode = self.currentNode[1]
-                while tempNode:
-                    print(
-                        f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}"
-                    )
-                    tempNode = tempNode.parent
-                # self.visualize()
-                return (self.MainStatus.REACHED, None)
-
-            self.currentNode[1].expand(1)
-            for eachChild in self.currentNode[1].children:
-                self.frontier[1].append(eachChild)
-            return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
-
-        return (self.MainStatus.UNSOLVABLE, None)
 
     def BFS(self):
         # self.root[1].saveHeuristic(self.goals[1])
@@ -871,13 +919,13 @@ class SearchTree:
 
             self.currentNode[1] = self.frontier[1].pop(0)
 
-            self.visited[1].append(
-                (
-                    self.currentNode[1].cell.y,
-                    self.currentNode[1].cell.x,
-                    self.currentNode[1].cell.floor_no,
-                )
-            )
+            # self.visited[1].append(
+            #     (
+            #         self.currentNode[1].cell.y,
+            #         self.currentNode[1].cell.x,
+            #         self.currentNode[1].cell.floor_no,
+            #     )
+            # )
 
             self.agents[1] = self.currentNode[1].cell
 
@@ -892,12 +940,12 @@ class SearchTree:
 
             self.currentNode[1].expand(1)
             for eachChild in self.currentNode[1].children:
-                special = eachChild.cell.getSpecialValue()
-                if (special[0] == "D" and special[1] != "O") or (special == "UP" or special == "DO") or (
-                    eachChild.cell.y,
-                    eachChild.cell.x,
-                    eachChild.cell.floor_no,
-                ) not in self.visited[1]:
+                # special = eachChild.cell.getSpecialValue()
+                # if (special[0] == "D" and special[1] != "O") or (special == "UP" or special == "DO") or (
+                #     eachChild.cell.y,
+                #     eachChild.cell.x,
+                #     eachChild.cell.floor_no,
+                # ) not in self.visited[1]:
                     self.frontier[1].append(eachChild)
 
             return (
@@ -961,7 +1009,7 @@ class SearchTree:
 
         while True:
             if current_agent == 1:  # A1
-                res = self.BFS()
+                res = self.GreedyBFS()
                 if res[0] != self.MainStatus.IN_PROGRESS:  # reached goal or unsolvable
                     if res[0] == self.MainStatus.REACHED:
                         print("Found goal")
