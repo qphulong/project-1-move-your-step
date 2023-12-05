@@ -2,6 +2,7 @@ import heapq
 import random
 import re
 import tkinter as tk
+from collections import Counter
 from enum import Enum
 import copy
 
@@ -490,43 +491,28 @@ class Node:
 
                 # normal cell
                 if cell_tag == "" or cell_tag[0] == "A" or (cell_tag[0] == "T" and cell_tag[1] != str(agent_no)):
-                    # if self.cell.floor_no != cell.floor_no:
-                    #     has_stairs = True
-                    #     change = 1 if self.cell.floor_no < cell.floor_no else -1
-                    #     i = self.cell.floor_no
-                    #     while i != cell.floor_no:
-                    #         if self.stairs.get((i, i + change)) is None:
-                    #             BFSvisited.append(cell)
-                    #             has_stairs = False
-                    #             break
-                    #         i = i + change
-                    #
-                    #     if has_stairs:
-                    #         continue
+                    # # add to path
+                    newNode = Node(cell, self.belongTo)
+                    newNode.setPathCost(self.pathCost + steps)
+                    newNode.saveHeuristic(self.belongTo.goals[agent_no])
+                    newNode.saveF()
+
+                    newNode.parent = self
+
+                    tempCell = cell
+                    while tempCell:
+                        newNode.path.append(tempCell)
+                        tempCell = tempCell.parrent
+
                     self.expandFrontierCell(
                         cell, BFSvisited, BFSfrontier, BFStempFrontier
                     )
 
-
                 # key
                 elif cell_tag[0] == "K":
-                    #
-                    # if self.cell.floor_no != cell.floor_no:
-                    #     has_stairs = True
-                    #     change = 1 if self.cell.floor_no < cell.floor_no else -1
-                    #     i = self.cell.floor_no
-                    #     while i != cell.floor_no:
-                    #         if self.stairs.get((i, i + change)) is None:
-                    #             BFSvisited.append(cell)
-                    #             has_stairs = False
-                    #             break
-                    #         i = i + change
-                    #
-                    #     if has_stairs:
-                    #         continue
-
                     # first expand (not worry about duplicates)
                     if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
+
                         self.expandFrontierCell(
                             cell, BFSvisited, BFSfrontier, BFStempFrontier
                         )
@@ -561,6 +547,12 @@ class Node:
                                 )  # add previously collected keys
                             newNode.appendKey(cell_tag)  # add current key
 
+                            # # add to path
+                            tempCell = cell
+                            while tempCell:
+                                newNode.path.append(tempCell)
+                                tempCell = tempCell.parrent
+
                             # expand this cell
                             self.expandFrontierCell(
                                 cell, BFSvisited, BFSfrontier, BFStempFrontier
@@ -568,20 +560,6 @@ class Node:
 
                 # door
                 elif cell_tag[0] == "D" and cell_tag[1] != "O":
-                    # if self.cell.floor_no != cell.floor_no:
-                    #     has_stairs = True
-                    #     change = 1 if self.cell.floor_no < cell.floor_no else -1
-                    #     i = self.cell.floor_no
-                    #     while i != cell.floor_no:
-                    #         if self.stairs.get((i, i + change)) is None:
-                    #             BFSvisited.append(cell)
-                    #             has_stairs = False
-                    #             break
-                    #         i = i + change
-                    #
-                    #     if has_stairs:
-                    #         continue
-
                     # first expand, cause it will not expand since first cell in frontier and dup key
                     if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
                         self.expandFrontierCell(
@@ -604,6 +582,12 @@ class Node:
                             self.children.append(newNode)
                             newNode.parent = self
 
+                            tempCell = cell
+                            while tempCell:
+                                newNode.path.append(tempCell)
+                                tempCell = tempCell.parrent
+
+
                             # if go through the same door with same keys,then delete this new node
                             tempNode = self
                             while tempNode:
@@ -617,20 +601,6 @@ class Node:
                             pass
 
                 elif cell_tag[0] == "T" and cell_tag[1] == str(agent_no):
-                    # if self.cell.floor_no != cell.floor_no:
-                    #     has_stairs = True
-                    #     change = 1 if self.cell.floor_no < cell.floor_no else -1
-                    #     i = self.cell.floor_no
-                    #     while i != cell.floor_no:
-                    #         if self.stairs.get((i, i + change)) is None:
-                    #             BFSvisited.append(cell)
-                    #             has_stairs = False
-                    #             break
-                    #         i = i + change
-                    #
-                    #     if has_stairs:
-                    #         continue
-
                     # create new node
                     newNode = Node(cell, self.belongTo)
                     newNode.setPathCost(self.pathCost + steps)
@@ -638,25 +608,18 @@ class Node:
                     newNode.saveF()
 
                     # append new node to tree
-                    self.children.append(newNode)
-                    newNode.parent = self
+                    if self.cell != cell:
+                        self.children.append(newNode)
+                        newNode.parent = self
+
+                    # # add to path
+                    tempCell = cell
+                    while tempCell:
+                        newNode.path.append(tempCell)
+                        tempCell = tempCell.parrent
 
                 # stairs
                 elif cell_tag == "UP" or cell_tag == "DO":
-                    # if self.cell.floor_no != cell.floor_no:
-                    #     has_stairs = True
-                    #     change = 1 if self.cell.floor_no < cell.floor_no else -1
-                    #     i = self.cell.floor_no
-                    #     while i != cell.floor_no:
-                    #         if self.stairs.get((i, i + change)) is None:
-                    #             BFSvisited.append(cell)
-                    #             has_stairs = False
-                    #             break
-                    #         i = i + change
-                    #
-                    #     if has_stairs:
-                    #         continue
-
                     if len(BFSfrontier) > 1 and (
                             (
                                     BFSfrontier[-1].getSpecialValue() == "UP"
@@ -687,6 +650,11 @@ class Node:
 
                     if self.cell != cell:
                         newNode.parent = self
+
+                    tempCell = cell
+                    while tempCell:
+                        newNode.path.append(tempCell)
+                        tempCell = tempCell.parrent
 
                     if cell_tag == "UP":
                         copyCell = self.belongTo.floors[cell.floor_no + 1].getCell(
@@ -852,13 +820,6 @@ class SearchTree:
 
             self.agents[1] = self.currentNode[1].cell
 
-            # self.visited[1].append(
-            #     (
-            #         self.currentNode[1].cell.y,
-            #         self.currentNode[1].cell.x,
-            #         self.currentNode[1].cell.floor_no,
-            #     )
-            # )
 
             # if path found
             if self.currentNode[1].cell == self.goals[1]:
@@ -872,12 +833,6 @@ class SearchTree:
             self.currentNode[1].expand(1)
 
             for eachChild in self.currentNode[1].children:
-                # special = eachChild.cell.getSpecialValue()
-                # if (special[0] == "D" and special[1] != "O") or (special == "UP" or special == "DO") or (
-                #         eachChild.cell.y,
-                #         eachChild.cell.x,
-                #         eachChild.cell.floor_no,
-                # ) not in self.visited[1]:
                     self.frontier[1].append(eachChild)
 
             return (
@@ -919,13 +874,6 @@ class SearchTree:
 
             self.currentNode[1] = self.frontier[1].pop(0)
 
-            # self.visited[1].append(
-            #     (
-            #         self.currentNode[1].cell.y,
-            #         self.currentNode[1].cell.x,
-            #         self.currentNode[1].cell.floor_no,
-            #     )
-            # )
 
             self.agents[1] = self.currentNode[1].cell
 
@@ -940,12 +888,6 @@ class SearchTree:
 
             self.currentNode[1].expand(1)
             for eachChild in self.currentNode[1].children:
-                # special = eachChild.cell.getSpecialValue()
-                # if (special[0] == "D" and special[1] != "O") or (special == "UP" or special == "DO") or (
-                #     eachChild.cell.y,
-                #     eachChild.cell.x,
-                #     eachChild.cell.floor_no,
-                # ) not in self.visited[1]:
                     self.frontier[1].append(eachChild)
 
             return (
@@ -1012,7 +954,7 @@ class SearchTree:
                 res = self.GreedyBFS()
                 if res[0] != self.MainStatus.IN_PROGRESS:  # reached goal or unsolvable
                     if res[0] == self.MainStatus.REACHED:
-                        print("Found goal")
+                        self.heatMap()
                     elif res[0] == self.MainStatus.UNSOLVABLE:
                         print("Cannot solve")
                     break
@@ -1020,15 +962,6 @@ class SearchTree:
                     if res[1] is None:
                         print("Cannot solve")
                         break
-
-                # self.upcoming[current_agent] = res[1].cell
-                #
-                # for agent, upcoming_cell in self.upcoming.items():  # competing for a cell
-                #     if upcoming_cell is not None and upcoming_cell == res[
-                #         1].cell and agent != 1:  # if there is a cell that is upcoming for other agent
-                #         win_agent = self.competing_cell(agent, current_agent)
-                #         lose_agent = agent if agent != win_agent else current_agent
-                #         self.upcoming[lose_agent] = None  # lose agent will wait
 
             else:  # other agents
                 res = self.BFS_OtherAgents(
@@ -1044,15 +977,6 @@ class SearchTree:
                         self.goals[
                             current_agent
                         ] = self.generate_goal()  # generate new goal for this agent
-
-                    # self.upcoming[current_agent] = res[1].cell
-                    #
-                    # for agent, upcoming_cell in self.upcoming.items():
-                    #     if upcoming_cell is not None and upcoming_cell == res[1].cell and agent != current_agent:
-                    #         win_agent = self.competing_cell(agent, current_agent)
-                    #         lose_agent = agent if agent != win_agent else current_agent
-                    #         self.upcoming[lose_agent] = None
-
 
             current_agent += 1
 
@@ -1076,8 +1000,114 @@ class SearchTree:
 
         return higher_priority
 
+    def heatMap(self):
+        root = tk.Tk()
+        self.checkRoot = True
+        root.title("Search Tree Visualization - All Floors")
+
+        canvas_width = max(self.floors[floor].cols for floor in self.floors) * 40
+        canvas_height = sum(self.floors[floor].rows for floor in self.floors) * 35 * len(self.floors)
+        canvas = tk.Canvas(root, width=canvas_width, height=canvas_height)
+        canvas.pack()
+
+        y_offset = 0  # Offset for drawing floors vertically
+
+        for floor_no in self.floors:
+            floor = self.floors[floor_no]
+
+            # Draw each row of the floor
+            for i in range(floor.rows):
+                for j in range(floor.cols):
+                    x0, y0 = j * 20, i * 35 + y_offset
+                    x1, y1 = (j + 1) * 20, (i + 1) * 35 + y_offset
+
+                    if floor.table[i][j].checkValue("-1"):
+                        canvas.create_rectangle(x0, y0, x1, y1, fill="black", outline="black")
+                    else:
+                        canvas.create_rectangle(x0, y0, x1, y1, fill="white", outline="black")
+                        specialValue = floor.table[i][j].getSpecialValue()
+                        canvas.create_text(
+                            x0 + 10, y0 + 10, text=specialValue, fill="black"
+                        )
+
+            # Draw path for the current floor
+            tempNode = self.currentNode[1]
+            generalPath = []
+            while tempNode:
+                for eachCell in tempNode.path:
+                    generalPath.append(eachCell)
+                tempNode = tempNode.parent
+
+            for eachCell in generalPath:
+                for i in range(floor.rows):
+                    for j in range(floor.cols):
+                        x0, y0 = j * 20, i * 35 + y_offset
+                        x1, y1 = (j + 1) * 20, (i + 1) * 35 + y_offset
+
+                        if floor.table[i][j] in generalPath:
+                            if Counter(generalPath)[floor.table[i][j]] == 1:
+                                canvas.create_rectangle(
+                                    x0, y0, x1, y1, fill="#ff8888", outline="black"
+                                )
+                            elif Counter(generalPath)[floor.table[i][j]] == 2:
+                                canvas.create_rectangle(
+                                    x0, y0, x1, y1, fill="#ff4b4b", outline="black"
+                                )
+                            elif Counter(generalPath)[floor.table[i][j]] == 3:
+                                canvas.create_rectangle(
+                                    x0, y0, x1, y1, fill="#ff0000", outline="black"
+                                )
+                            elif Counter(generalPath)[floor.table[i][j]] == 4:
+                                canvas.create_rectangle(
+                                    x0, y0, x1, y1, fill="#cb0000", outline="black"
+                                )
+                        special = floor.table[i][j].getSpecialValue()
+                        if floor.table[i][j].getSpecialValue() != "":
+                            if special == "UP" or special == "DO":
+                                canvas.create_rectangle(x0, y0, x1, y1, fill="#34cceb" if special == "UP" else "#f5aa42", outline="black")
+                                canvas.create_text(
+                                    x0 + 10, y0 + 10, text="↑" if special == "UP" else "↓", fill="black"
+                                )
+                                continue
+
+                            if special == "T1":
+                                canvas.create_rectangle(x0, y0, x1, y1, fill="#ebb121", outline="black")
+                                canvas.create_text(
+                                    x0 + 10, y0 + 10, text="T1"
+                                )
+                                continue
+
+                            if special[0] == "T":
+                                canvas.create_rectangle(x0, y0, x1, y1, fill="#152b52", outline="black")
+                                canvas.create_text(
+                                    x0 + 10, y0 + 10, text="T1"
+                                )
+                                continue
+
+                            if special == "A1":
+                                canvas.create_rectangle(x0, y0, x1, y1, fill="#5750ba", outline="black")
+                                canvas.create_text(
+                                    x0 + 10, y0 + 10, text="A1"
+                                )
+                                continue
+
+                            if special[0] == "A":
+                                canvas.create_rectangle(x0, y0, x1, y1, fill="#eb6721", outline="black")
+                                canvas.create_text(
+                                    x0 + 10, y0 + 10, text=special
+                                )
+                                continue
+
+                            canvas.create_rectangle(x0, y0, x1, y1, fill="#2ad500", outline="black")
+                            canvas.create_text(
+                                x0 + 10, y0 + 10, text=special, fill="black"
+                            )
+
+            y_offset += floor.rows * 35 + 20  # Adjust y_offset for next floor
+
+        root.mainloop()
+
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input3-level4.txt")
+searchTree2.getInputFile("input//input4-level4.txt")
 searchTree2.agent_turn_based_movement()
-pass

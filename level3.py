@@ -336,40 +336,12 @@ class Node:
 
                 # normal cell
                 if cell_tag == "" or cell_tag[0] == "A":
-                    # if self.cell.floor_no != cell.floor_no:
-                    #     has_stairs = True
-                    #     change = 1 if self.cell.floor_no < cell.floor_no else -1
-                    #     i = self.cell.floor_no
-                    #     while i != cell.floor_no:
-                    #         if self.stairs.get((i, i + change)) is None:
-                    #             BFSvisited.append(cell)
-                    #             has_stairs = False
-                    #             break
-                    #         i = i + change
-                    #
-                    #     if has_stairs:
-                    #         continue
-
                     self.expandFrontierCell(
                         cell, BFSvisited, BFSfrontier, BFStempFrontier
                     )
 
                 # key
                 elif cell_tag[0] == "K":
-                    #
-                    # if self.cell.floor_no != cell.floor_no:
-                    #     has_stairs = True
-                    #     change = 1 if self.cell.floor_no < cell.floor_no else -1
-                    #     i = self.cell.floor_no
-                    #     while i != cell.floor_no:
-                    #         if self.stairs.get((i, i + change)) is None:
-                    #             BFSvisited.append(cell)
-                    #             has_stairs = False
-                    #             break
-                    #         i = i + change
-                    #
-                    #     if has_stairs:
-                    #         continue
 
                     # first expand (not worry about duplicates)
                     if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
@@ -421,19 +393,6 @@ class Node:
 
                 # door
                 elif cell_tag[0] == "D" and cell_tag[1] != "O":
-                    # if self.cell.floor_no != cell.floor_no:
-                    #     has_stairs = True
-                    #     change = 1 if self.cell.floor_no < cell.floor_no else -1
-                    #     i = self.cell.floor_no
-                    #     while i != cell.floor_no:
-                    #         if self.stairs.get((i, i + change)) is None:
-                    #             BFSvisited.append(cell)
-                    #             has_stairs = False
-                    #             break
-                    #         i = i + change
-                    #
-                    #     if has_stairs:
-                    #         continue
 
                     # first expand, cause it will not expand since first cell in frontier and dup key
                     if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
@@ -481,20 +440,6 @@ class Node:
                             pass
 
                 elif cell_tag[0] == "T":
-                    # if self.cell.floor_no != cell.floor_no:
-                    #     has_stairs = True
-                    #     change = 1 if self.cell.floor_no < cell.floor_no else -1
-                    #     i = self.cell.floor_no
-                    #     while i != cell.floor_no:
-                    #         if self.stairs.get((i, i + change)) is None:
-                    #             BFSvisited.append(cell)
-                    #             has_stairs = False
-                    #             break
-                    #         i = i + change
-                    #
-                    #     if has_stairs:
-                    #         continue
-
                     # create new node
                     newNode = Node(cell, self.belongTo)
                     newNode.setPathCost(self.pathCost + steps)
@@ -506,7 +451,7 @@ class Node:
                         self.children.append(newNode)
                         newNode.parent = self
 
-                    # # add to path
+                    # add to path
                     tempCell = cell
                     while tempCell:
                         newNode.path.append(tempCell)
@@ -514,20 +459,6 @@ class Node:
 
                 # stairs
                 elif cell_tag == "UP" or cell_tag == "DO":
-                    # if self.cell.floor_no != cell.floor_no:
-                    #     has_stairs = True
-                    #     change = 1 if self.cell.floor_no < cell.floor_no else -1
-                    #     i = self.cell.floor_no
-                    #     while i != cell.floor_no:
-                    #         if self.stairs.get((i, i + change)) is None:
-                    #             BFSvisited.append(cell)
-                    #             has_stairs = False
-                    #             break
-                    #         i = i + change
-                    #
-                    #     if has_stairs:
-                    #         continue
-
                     if len(BFSfrontier) > 1 and (
                             (
                                     BFSfrontier[-1].getSpecialValue() == "UP"
@@ -558,6 +489,11 @@ class Node:
 
                     if self.cell != cell:
                       newNode.parent = self
+
+                    tempCell = cell
+                    while tempCell:
+                        newNode.path.append(tempCell)
+                        tempCell = tempCell.parrent
 
                     if cell_tag == "UP":
                         copyCell = self.belongTo.floors[cell.floor_no + 1].getCell(
@@ -892,6 +828,20 @@ class SearchTree:
                                 )
                                 continue
 
+                            if special == "T1":
+                                canvas.create_rectangle(x0, y0, x1, y1, fill="#ebb121", outline="black")
+                                canvas.create_text(
+                                    x0 + 10, y0 + 10, text="T1"
+                                )
+                                continue
+
+                            if special == "A1":
+                                canvas.create_rectangle(x0, y0, x1, y1, fill="#5750ba", outline="black")
+                                canvas.create_text(
+                                    x0 + 10, y0 + 10, text="A1"
+                                )
+                                continue
+
                             canvas.create_rectangle(x0, y0, x1, y1, fill="#2ad500", outline="black")
                             canvas.create_text(
                                 x0 + 10, y0 + 10, text=special, fill="black"
@@ -903,6 +853,6 @@ class SearchTree:
 
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input3-level3.txt")
-searchTree2.AStar()
+searchTree2.getInputFile("input//input4-level3.txt")
+searchTree2.Greedy_BFS()
 pass
