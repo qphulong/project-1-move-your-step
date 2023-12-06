@@ -1,4 +1,5 @@
 import re
+import time
 import tkinter as tk
 from enum import Enum
 from collections import Counter
@@ -539,6 +540,10 @@ class SearchTree:
 
         self.goals = []
 
+        self.tkRoot = tk.Tk()
+        self.canvas = tk.Canvas(self.tkRoot, width=0, height=0)
+        self.canvas.pack()
+
     def getInputFile(self, filePath):
         with open(filePath, "r") as file:
             lines = file.readlines()
@@ -610,6 +615,10 @@ class SearchTree:
                 # Regardless of the condition, add the original cell value to the cell
                 self.floors[current_floor].appendToCell(i, j, cell_value)
 
+        canvas_width = max(self.floors[floor].cols for floor in self.floors) * 40
+        canvas_height = sum(self.floors[floor].rows for floor in self.floors) * 35 * len(self.floors)
+        self.canvas = tk.Canvas(self.tkRoot, width=canvas_width, height=canvas_height)
+
     class MainStatus(Enum):
         REACHED = 1
         UNSOLVABLE = -1
@@ -659,7 +668,7 @@ class SearchTree:
                         f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}"
                     )
                     tempNode = tempNode.parent
-                self.heatMap()
+                self.heatMapAnimation()
                 return  # self.MainStatus.REACHED
 
             self.currentNode.expand(self.goals[0])
@@ -852,8 +861,119 @@ class SearchTree:
         root.mainloop()
 
 
+    def heatMapAnimation(self):
+        self.checkRoot = True
+
+        self.canvas.pack()
+
+        y_offset = 0  # Offset for drawing floors vertically
+
+        for floor_no in self.floors:
+            floor = self.floors[floor_no]
+
+            # Draw each row of the floor
+            for i in range(floor.rows):
+                for j in range(floor.cols):
+                    x0, y0 = j * 20, i * 35 + y_offset
+                    x1, y1 = (j + 1) * 20, (i + 1) * 35 + y_offset
+
+                    if floor.table[i][j].checkValue("-1"):
+                        self.canvas.create_rectangle(x0, y0, x1, y1, fill="black", outline="black")
+                    else:
+                        self.canvas.create_rectangle(x0, y0, x1, y1, fill="white", outline="black")
+                        specialValue = floor.table[i][j].getSpecialValue()
+                        self.canvas.create_text(
+                            x0 + 10, y0 + 10, text=specialValue, fill="black"
+                        )
+
+                    special = floor.table[i][j].getSpecialValue()
+                    if special != "":
+                        if special == "UP" or special == "DO":
+                            self.canvas.create_rectangle(x0, y0, x1, y1,
+                                                         fill="#34cceb" if special == "UP" else "#f5aa42",
+                                                         outline="black")
+                            self.canvas.create_text(
+                                x0 + 10, y0 + 10, text="↑" if special == "UP" else "↓", fill="black"
+                            )
+                            continue
+
+                        if special == "T1":
+                            self.canvas.create_rectangle(x0, y0, x1, y1, fill="#ebb121", outline="black")
+                            self.canvas.create_text(
+                                x0 + 10, y0 + 10, text="T1"
+                            )
+                            continue
+
+                        if special[0] == "T":
+                            self.canvas.create_rectangle(x0, y0, x1, y1, fill="#152b52", outline="black")
+                            self.canvas.create_text(
+                                x0 + 10, y0 + 10, text=special
+                            )
+                            continue
+
+                        if special == "A1":
+                            self.canvas.create_rectangle(x0, y0, x1, y1, fill="#5750ba", outline="black")
+                            self.canvas.create_text(
+                                x0 + 10, y0 + 10, text="A1"
+                            )
+                            continue
+
+                        if special[0] == "A":
+                            self.canvas.create_rectangle(x0, y0, x1, y1, fill="#eb6721", outline="black")
+                            self.canvas.create_text(
+                                x0 + 10, y0 + 10, text=special
+                            )
+                            continue
+
+                        self.canvas.create_rectangle(x0, y0, x1, y1, fill="#2ad500", outline="black")
+                        self.canvas.create_text(
+                            x0 + 10, y0 + 10, text=special, fill="black"
+                        )
+
+            y_offset += floor.rows * 35 + 20  # Adjust y_offset for next floor
+
+        # Draw path for the current floor
+        tempNode = self.currentNode
+        generalPath = []
+        while tempNode:
+            for eachCell in tempNode.path:
+                generalPath.append(eachCell)
+            tempNode = tempNode.parent
+
+        while len(generalPath) > 0:
+            eachCell = generalPath[-1]
+            y = eachCell.y
+            x = eachCell.x
+            floor_no = eachCell.floor_no
+            y_offset = (self.floors[floor_no].rows * 35 + 20) * (floor_no - 1)
+            x0, y0 = x * 20, y * 35 + y_offset
+            x1, y1 = (x + 1) * 20, (y + 1) * 35 + y_offset
+
+
+            if Counter(generalPath)[eachCell] == 1:
+                self.canvas.create_rectangle(
+                    x0, y0, x1, y1, fill="#ff8888", outline="black"
+                )
+            elif Counter(generalPath)[eachCell] == 2:
+                self.canvas.create_rectangle(
+                    x0, y0, x1, y1, fill="#ff4b4b", outline="black"
+                )
+            elif Counter(generalPath)[eachCell] == 3:
+                self.canvas.create_rectangle(
+                    x0, y0, x1, y1, fill="#ff0000", outline="black"
+                )
+            elif Counter(generalPath)[eachCell] == 4:
+                self.canvas.create_rectangle(
+                    x0, y0, x1, y1, fill="#cb0000", outline="black"
+                )
+            generalPath.pop(-1)
+
+            self.tkRoot.update()
+            time.sleep(0.4)
+
 searchTree2 = SearchTree()
 searchTree2.getInputFile("input//input1-level3.txt")
 # input1-level3 có solution mà em nó ko ra
+# do thuật toán chưa tính vụ trong phòng hay ngoài phòng đấy
 searchTree2.Greedy_BFS()
 pass
