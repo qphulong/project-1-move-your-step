@@ -408,6 +408,7 @@ class SearchTree:
         self.goalCell = None
         self.floor = None
         self.checkRoot = False
+        self.finalPath=[]
 
     def getCheckRoot(self):
         return self.checkRoot
@@ -471,7 +472,13 @@ class SearchTree:
                 # while (tempNode):
                 #     print(tempNode.cell.getSpecialValue())
                 #     tempNode = tempNode.parent
-                self.heatMap()
+                tempNode = self.currentNode
+                while (tempNode):
+                    for eachCell in tempNode.path:
+                        self.finalPath.append(eachCell)
+                    tempNode = tempNode.parent
+                self.finalPath.reverse()
+                self.pathAnimation()
                 return
 
             self.currentNode.expand()
@@ -607,8 +614,59 @@ class SearchTree:
 
         root.mainloop()
 
+    def pathAnimation(self):
+        # Create the main window
+        root = tk.Tk()
+        root.title("Search Tree Path Animation")
+
+        # Create a canvas to draw on
+        canvas = tk.Canvas(root, width=self.floor.cols * 20, height=self.floor.rows * 20)
+        canvas.pack()
+
+        # Function to update the canvas for animation
+        def update_animation(index):
+            if index < len(self.finalPath):
+                # Clear the canvas
+                canvas.delete("all")
+
+                # Draw rectangles for each cell
+                for i in range(self.floor.rows):
+                    for j in range(self.floor.cols):
+                        x0, y0 = j * 20, i * 20
+                        x1, y1 = (j + 1) * 20, (i + 1) * 20
+
+                        # Set color for cells with value "-1" to black
+                        if self.floor.table[i][j].checkValue("-1"):
+                            canvas.create_rectangle(x0, y0, x1, y1, fill="black")
+                        else:
+                            # Set color for cells with a special value to red
+                            if self.floor.table[i][j].getSpecialValue() != "":
+                                canvas.create_rectangle(x0, y0, x1, y1, fill="red")
+                                # print special value in black text
+                                specialValue = self.floor.table[i][j].getSpecialValue()
+                                canvas.create_text(
+                                    x0 + 10, y0 + 10, text=specialValue, fill="black"
+                                )
+                            else:
+                                canvas.create_rectangle(x0, y0, x1, y1, fill="white")
+
+                        # Set color for cells in the path to green
+                        if self.floor.table[i][j] == self.finalPath[index]:
+                            canvas.create_rectangle(x0, y0, x1, y1, fill="green")
+                
+
+                # Schedule the next update after a delay (adjust the delay as needed)
+                root.after(100, update_animation, index + 1)
+
+        # Start the animation loop
+        update_animation(0)
+
+        # Run the GUI
+        root.mainloop()
+
+
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input4-level1.txt")
+searchTree2.getInputFile("input//input5-level2.txt")
 searchTree2.AStar()
 pass
