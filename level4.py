@@ -830,6 +830,8 @@ class SearchTree:
 
             self.agents[1] = self.currentNode[1].cell
 
+            print(f"{self.agents[1].y} {self.agents[1].x} Floor: {self.agents[1].floor_no} Value: {self.agents[1].getSpecialValue()}")
+
             # if path found
             if self.currentNode[1].cell == self.goals[1]:
                 tempNode = self.currentNode[1]
@@ -908,7 +910,6 @@ class SearchTree:
         current_agent = 1  # Initialize the index to track the current agent
 
         while True:
-            print(f"Agent {current_agent} is moving")
             if current_agent == 1:  # A1
                 res = self.BFS()
                 if res[0] != self.MainStatus.IN_PROGRESS:  # reached goal or unsolvable
@@ -1070,5 +1071,5 @@ class SearchTree:
 
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input3-level4.txt")
+searchTree2.getInputFile("input//input4-level4.txt")
 searchTree2.agent_turn_based_movement()
