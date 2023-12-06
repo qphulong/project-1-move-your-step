@@ -327,12 +327,13 @@ class Node:
             return False
 
         floor_no = cell.floor_no
+
+        special = self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).getSpecialValue()
         # add N cell to tempFrontier
         if (
                 cell.y > 0
-                and not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isWall()
+                and (special == "" or (special[0] == "A" and special[1] == str(agent_no)))
                 and inTempFrontier(self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x), TempFrontier)
-                and self.belongTo.isOtherAgent(cell, agent_no)
         ):
             northCell = self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x)
 
@@ -341,12 +342,12 @@ class Node:
             cell.children.append(northCell)
             northCell.parrent = cell
 
+        special = self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1).getSpecialValue()
         # add W cell to tempFrontier
         if (
                 cell.x > 0
-                and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1).isWall()
+                and (special == "" or (special[0] == "A" and special[1] == str(agent_no)))
                 and inTempFrontier(self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1), TempFrontier)
-                and self.belongTo.isOtherAgent(cell, agent_no)
         ):
             westCell = self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1)
 
@@ -355,12 +356,12 @@ class Node:
             cell.children.append(westCell)
             westCell.parrent = cell
 
+        special = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x).getSpecialValue()
         # add S cell to tempFrontier
         if (
                 cell.y < self.belongTo.floors[floor_no].rows - 1
-                and not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x).isWall()
+                and (special == "" or (special[0] == "A" and special[1] == str(agent_no)))
                 and inTempFrontier(self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x), TempFrontier)
-                and self.belongTo.isOtherAgent(cell, agent_no)
         ):
             southCell = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x)
 
@@ -369,12 +370,12 @@ class Node:
             cell.children.append(southCell)
             southCell.parrent = cell
 
+        special = self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1).getSpecialValue()
         # add E cell to tempFrontier
         if (
                 cell.x < self.belongTo.floors[floor_no].cols - 1
-                and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1).isWall()
+                and (special == "" or (special[0] == "A" and special[1] == str(agent_no)))
                 and inTempFrontier(self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1), TempFrontier)
-                and self.belongTo.isOtherAgent(cell, agent_no)
         ):
             eastCell = self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1)
 
@@ -383,17 +384,15 @@ class Node:
             cell.children.append(eastCell)
             eastCell.parrent = cell
 
+        special = self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1).getSpecialValue()
         # add NE cell to tempFrontier
         if (
                 cell.y > 0
                 and cell.x < self.belongTo.floors[floor_no].cols - 1
                 and not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isWall()
                 and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1).isWall()
-                and not self.belongTo.floors[floor_no]
-                .getCell(cell.y - 1, cell.x + 1)
-                .isWall()
+                and (special == "" or (special[0] == "A" and special[1] == str(agent_no)))
                 and inTempFrontier(self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1), TempFrontier)
-                and self.belongTo.isOtherAgent(cell, agent_no)
         ):
             neCell = self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x + 1)
 
@@ -401,17 +400,17 @@ class Node:
 
             cell.children.append(neCell)
             neCell.parrent = cell
+
+
+        special = self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1).getSpecialValue()
         # Add NW cell to tempFrontier
         if (
                 cell.y > 0
                 and cell.x > 0
                 and not self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x).isWall()
                 and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1).isWall()
-                and not self.belongTo.floors[floor_no]
-                .getCell(cell.y - 1, cell.x - 1)
-                .isWall()
+                and (special == "" or (special[0] == "A" and special[1] == str(agent_no)))
                 and inTempFrontier(self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1), TempFrontier)
-                and self.belongTo.isOtherAgent(cell, agent_no)
         ):
             nwCell = self.belongTo.floors[floor_no].getCell(cell.y - 1, cell.x - 1)
 
@@ -420,17 +419,15 @@ class Node:
             cell.children.append(nwCell)
             nwCell.parrent = cell
 
+        special = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1).getSpecialValue()
         # Add SW cell to tempFrontier
         if (
                 cell.y < self.belongTo.floors[floor_no].rows - 1
                 and cell.x > 0
                 and not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x).isWall()
                 and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x - 1).isWall()
-                and not self.belongTo.floors[floor_no]
-                .getCell(cell.y + 1, cell.x - 1)
-                .isWall()
+                and (special == "" or (special[0] == "A" and special[1] == str(agent_no)))
                 and inTempFrontier(self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1), TempFrontier)
-                and self.belongTo.isOtherAgent(cell, agent_no)
         ):
             swCell = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x - 1)
 
@@ -438,17 +435,17 @@ class Node:
 
             cell.children.append(swCell)
             swCell.parrent = cell
+
+
+        special = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1).getSpecialValue()
         # Add SE cell to tempFrontier
         if (
                 cell.y < self.belongTo.floors[floor_no].rows - 1
                 and cell.x < self.belongTo.floors[floor_no].cols - 1
                 and not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x).isWall()
                 and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1).isWall()
-                and not self.belongTo.floors[floor_no]
-                .getCell(cell.y + 1, cell.x + 1)
-                .isWall()
+                and (special == "" or (special[0] == "A" and special[1] == str(agent_no)))
                 and inTempFrontier(self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1), TempFrontier)
-                and self.belongTo.isOtherAgent(cell, agent_no)
         ):
             seCell = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1)
 
@@ -470,20 +467,6 @@ class Node:
 
             for cell in BFSfrontier:
                 if cell is None:
-                    continue
-
-                if self.belongTo.isOtherAgent(cell, agent_no):
-                    # create new node
-                    newNode = Node(cell, self.belongTo)
-                    newNode.setPathCost(self.pathCost + steps)
-                    newNode.saveHeuristic(self.belongTo.goals[agent_no])
-                    newNode.saveF()
-
-                    # append new node to tree
-                    self.children.append(newNode)
-                    newNode.parent = self
-
-                    # wait here
                     continue
 
                 # analyze cell
@@ -812,6 +795,8 @@ class SearchTree:
                         tempFrontier = []
                         self.frontier[1][0].expandAround(self.agents[1], tempFrontier, self, 1)
 
+                        print(str(tempFrontier))
+
                         self.frontier[1] = tempFrontier + self.frontier[1]
                 else:
                     return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
@@ -825,7 +810,8 @@ class SearchTree:
             if self.currentNode[1].cell == self.goals[1]:
                 tempNode = self.currentNode[1]
                 while tempNode:
-                    print(f"{tempNode.cell.y} {tempNode.cell.x} Floor: {tempNode.cell.floor_no}")
+                    print(
+                        f"{tempNode.cell.y} {tempNode.cell.x} Floor: {tempNode.cell.floor_no} Value: {tempNode.cell.getSpecialValue()}")
                     tempNode = tempNode.parent
                 # self.visualize()
                 return (self.MainStatus.REACHED, None)
@@ -881,7 +867,7 @@ class SearchTree:
             if self.currentNode[1].cell == self.goals[1]:
                 tempNode = self.currentNode[1]
                 while tempNode:
-                    print(f"{tempNode.cell.y} {tempNode.cell.x} Floor: {tempNode.cell.floor_no}")
+
                     tempNode = tempNode.parent
                 # self.visualize()
                 return (self.MainStatus.REACHED, None)
@@ -1080,7 +1066,7 @@ class SearchTree:
                             if special[0] == "T":
                                 canvas.create_rectangle(x0, y0, x1, y1, fill="#152b52", outline="black")
                                 canvas.create_text(
-                                    x0 + 10, y0 + 10, text="T1"
+                                    x0 + 10, y0 + 10, text=special
                                 )
                                 continue
 
@@ -1109,5 +1095,5 @@ class SearchTree:
 
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input4-level4.txt")
+searchTree2.getInputFile("input//input3-level4.txt")
 searchTree2.agent_turn_based_movement()

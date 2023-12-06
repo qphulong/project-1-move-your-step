@@ -853,6 +853,6 @@ class SearchTree:
 
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input4-level3.txt")
+searchTree2.getInputFile("input//input3-level3.txt")
 searchTree2.Greedy_BFS()
 pass
