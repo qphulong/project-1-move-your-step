@@ -487,26 +487,27 @@ class Node:
                 # analyze cell
                 cell_tag = cell.getSpecialValue()  # special value của cell
 
+                if self.belongTo.isOtherAgent(cell, agent_no):
+                    # create new node
+                    newNode = Node(cell, self.belongTo)
+                    newNode.setPathCost(self.pathCost + steps)
+                    newNode.saveHeuristic(self.belongTo.goals[agent_no])
+                    newNode.saveF()
+
+                    # append new node to tree
+                    self.children.append(newNode)
+                    newNode.parent = self
+
+                    tempCell = cell
+                    while tempCell:
+                        newNode.path.append(tempCell)
+                        tempCell = tempCell.parrent
+
+                    # wait here
+                    continue
+
                 # normal cell
                 if cell_tag == "" or cell_tag[0] == "A" or (cell_tag[0] == "T" and cell_tag[1] != str(agent_no)):
-                    if self.belongTo.isOtherAgent(cell, agent_no):
-                        # create new node
-                        newNode = Node(cell, self.belongTo)
-                        newNode.setPathCost(self.pathCost + steps)
-                        newNode.saveHeuristic(self.belongTo.goals[agent_no])
-                        newNode.saveF()
-
-                        # append new node to tree
-                        self.children.append(newNode)
-                        newNode.parent = self
-
-                        tempCell = cell
-                        while tempCell:
-                            newNode.path.append(tempCell)
-                            tempCell = tempCell.parrent
-
-                        # wait here
-                        continue
 
                     self.expandFrontierCell(
                         cell, BFSvisited, BFSfrontier, BFStempFrontier
@@ -1069,5 +1070,5 @@ class SearchTree:
 
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input2-level4.txt")
+searchTree2.getInputFile("input//input3-level4.txt")
 searchTree2.agent_turn_based_movement()
