@@ -27,6 +27,9 @@ class Cell:
     def __hash__(self):
         return hash((self.y, self.x, self.floor_no))
 
+    def __str__(self):
+        return f"({self.y}, {self.x} Floor {self.floor_no} Special value {self.getSpecialValue()})"
+
     def setBelongTo(self, value):
         self.belongTo = value
 
@@ -432,18 +435,14 @@ class Node:
             cell.children.append(swCell)
             swCell.parrent = cell
 
-        special = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1).getSpecialValue() if cell.y < \
-                                                                                                      self.belongTo.floors[
-                                                                                                          floor_no].rows - 1 and cell.x < \
-                                                                                                      self.belongTo.floors[
-                                                                                                          floor_no].cols - 1 else None
+
         # Add SE cell to tempFrontier
         if (
                 cell.y < self.belongTo.floors[floor_no].rows - 1
                 and cell.x < self.belongTo.floors[floor_no].cols - 1
                 and not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x).isWall()
                 and not self.belongTo.floors[floor_no].getCell(cell.y, cell.x + 1).isWall()
-                and (special == "" or (special[0] == "A" and special[1] == str(agent_no)))
+                and not self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1).isWall()
                 and inTempFrontier(self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1), TempFrontier)
         ):
             seCell = self.belongTo.floors[floor_no].getCell(cell.y + 1, cell.x + 1)
@@ -453,7 +452,7 @@ class Node:
             cell.children.append(seCell)
             seCell.parrent = cell
 
-    def expand(self, agent_no):
+    def expand(self, goal, agent_no):
         BFSfrontier = []
         BFStempFrontier = []
         BFSvisited = []
@@ -471,39 +470,17 @@ class Node:
                 # analyze cell
                 cell_tag = cell.getSpecialValue()  # special value của cell
 
-                other = self.belongTo.isOtherAgent(cell, agent_no)
-
-                if other:
-                    # create new node
-                    newNode = Node(cell, self.belongTo)
-                    newNode.setPathCost(self.pathCost + steps)
-                    newNode.saveHeuristic(self.belongTo.goals[agent_no][-1])
-                    newNode.saveF()
-
-                    # append new node to tree
-                    self.children.append(newNode)
-                    newNode.parent = self
-
-                    tempCell = cell
-                    while tempCell:
-                        newNode.path.append(tempCell)
-                        tempCell = tempCell.parrent
-
-                    # wait here
-                    continue
-
                 # normal cell
                 if cell_tag == "" or cell_tag[0] == "A" or (cell_tag[0] == "T" and cell_tag[1] != str(agent_no)):
-
                     self.expandFrontierCell(
                         cell, BFSvisited, BFSfrontier, BFStempFrontier
                     )
 
                 # key
                 elif cell_tag[0] == "K":
+
                     # first expand (not worry about duplicates)
                     if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
-
                         self.expandFrontierCell(
                             cell, BFSvisited, BFSfrontier, BFStempFrontier
                         )
@@ -513,7 +490,7 @@ class Node:
                         addNode = True
                         while tempNode:
                             if (
-                                    cell_tag in tempNode.keys
+                                cell_tag in tempNode.keys
                             ):  # if current key is used before
                                 addNode = False  # found duplicate
                                 break
@@ -524,12 +501,13 @@ class Node:
                             # create new node
                             newNode = Node(cell, self.belongTo)
                             newNode.setPathCost(self.pathCost + steps)
-                            newNode.saveHeuristic(self.belongTo.goals[agent_no][-1])
+                            newNode.saveHeuristic(goal)
                             newNode.saveF()
 
                             # append new node to tree
-                            self.children.append(newNode)
-                            newNode.parent = self
+                            if self.cell != cell:
+                              self.children.append(newNode)
+                              newNode.parent = self
 
                             # inherit collected keys so far
                             for eachKey in self.keys:
@@ -551,6 +529,7 @@ class Node:
 
                 # door
                 elif cell_tag[0] == "D" and cell_tag[1] != "O":
+
                     # first expand, cause it will not expand since first cell in frontier and dup key
                     if len(BFSfrontier) == 1 and BFSfrontier[0] == self.cell:
                         self.expandFrontierCell(
@@ -562,7 +541,7 @@ class Node:
                             # create new node
                             newNode = Node(cell, self.belongTo)
                             newNode.setPathCost(self.pathCost + steps)
-                            newNode.saveHeuristic(self.belongTo.goals[agent_no][-1])
+                            newNode.saveHeuristic(goal)
                             newNode.saveF()
 
                             # inherit key
@@ -570,21 +549,27 @@ class Node:
                                 newNode.appendKey(eachKey)
 
                             # append new node to tree
-                            self.children.append(newNode)
-                            newNode.parent = self
+                            if self.cell != cell:
+                                self.children.append(newNode)
+                                newNode.parent = self
 
+                            # # add to path
                             tempCell = cell
                             while tempCell:
                                 newNode.path.append(tempCell)
                                 tempCell = tempCell.parrent
 
                             # if go through the same door with same keys,then delete this new node
-                            tempNode = self
+                            tempNode = self.parent
                             while tempNode:
-                                if len(newNode.keys) == tempNode.keys:
+                                if (
+                                    len(newNode.keys) == len(tempNode.keys)
+                                    and newNode.cell == tempNode.cell
+                                ):
                                     self.children.remove(newNode)
                                     newNode.parent = None
                                     del newNode
+                                    break
                                 tempNode = tempNode.parent
                         # if does not have key
                         else:
@@ -594,7 +579,7 @@ class Node:
                     # create new node
                     newNode = Node(cell, self.belongTo)
                     newNode.setPathCost(self.pathCost + steps)
-                    newNode.saveHeuristic(self.belongTo.goals[agent_no][-1])
+                    newNode.saveHeuristic(goal)
                     newNode.saveF()
 
                     # append new node to tree
@@ -602,7 +587,7 @@ class Node:
                         self.children.append(newNode)
                         newNode.parent = self
 
-                    # # add to path
+                    # add to path
                     tempCell = cell
                     while tempCell:
                         newNode.path.append(tempCell)
@@ -626,7 +611,7 @@ class Node:
                         cell, self.belongTo
                     )  # tạo node mới từ cell (đang duyệt BFSFrontier)
                     newNode.setPathCost(self.pathCost + steps)
-                    newNode.saveHeuristic(self.belongTo.goals[agent_no][-1])
+                    newNode.saveHeuristic(goal)
                     newNode.saveF()
 
                     # inherit collected stairs so far
@@ -639,7 +624,7 @@ class Node:
                     newNode.stairs[(cell.floor_no, next_floor)].append(cell)
 
                     if self.cell != cell:
-                        newNode.parent = self
+                      newNode.parent = self
 
                     tempCell = cell
                     while tempCell:
@@ -679,6 +664,7 @@ class SearchTree:
         self.agents = {}
         self.goals = {}
         self.currentNode = {}  # save for all agents
+        self.path_iteration = {}  # save current position in path iteration for all agents
         self.frontier = {}
         self.visited = {}
         self.root = {}
@@ -788,72 +774,67 @@ class SearchTree:
                 return agent
         return None
 
-    def BFS(self):
-        # self.root[1].saveHeuristic(self.goals[1])
-        # self.root[1].saveF()
-        if self.frontier[1]:
+
+    def Greedy_BFS(self):
+        self.root[1].saveHeuristic(self.goals[1][-1])  # save heuristic for root
+
+        while self.frontier[1]:
             # self.visualize()
-            # self.frontier[1].sort(key=lambda x: x.getF())
-
-            if self.isOtherAgent(self.frontier[1][0].cell, 1):  # meet other agentß
-                frontier_length = len(self.frontier[1])
-                if frontier_length > 1:
-                    i = 1
-                    while i < frontier_length and self.isOtherAgent(
-                            self.frontier[1][i].cell, 1
-                    ):
-                        self.frontier[1][i - 1], self.frontier[1][i] = (
-                            self.frontier[1][i],
-                            self.frontier[1][i - 1],
-                        )
-                        i += 1
-                    if i == frontier_length:
-                        # return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
-                        # nếu hết lựa chọn checkpoint thì ta chọn những chỗ bth để đi
-                        tempFrontier = []
-                        self.frontier[1][0].expandAround(self.agents[1], tempFrontier, self, 1)
-
-                        if len(tempFrontier) > 0:
-                            self.frontier[1] = tempFrontier + self.frontier[1]
-                        else:
-                            waitingNode = copy.copy(self.frontier[1][0])
-                            waitingNode.waitingNode = True
-                            waitingNode.cell.waitingCell = True
-                            current_parent = self.frontier[1][0].parent
-                            waitingNode.parent = current_parent
-                            self.frontier[1][0].parent = waitingNode
-                            self.frontier[1][0].path.insert(0, waitingNode.cell)
-                            return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
-                else:
-                    waitingNode = copy.copy(self.frontier[1][0])
-                    waitingNode.waitingNode = True
-                    waitingNode.cell.waitingCell = True
-                    current_parent = self.frontier[1][0].parent
-                    waitingNode.parent = current_parent
-                    self.frontier[1][0].parent = waitingNode
-                    self.frontier[1][0].path.insert(0, waitingNode.cell)
-                    return (self.MainStatus.IN_PROGRESS, self.frontier[1][0])
-
+            self.frontier[1].sort(key=lambda x: x.heuristic)
             self.currentNode[1] = self.frontier[1].pop(0)
 
-            self.agents[1] = self.currentNode[1].cell
+            print(self.currentNode[1].cell)
 
             # if path found
             if self.currentNode[1].cell == self.goals[1][-1]:
+                pathToGoal = []
                 tempNode = self.currentNode[1]
                 while tempNode:
+                    print(
+                        f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}"
+                    )
+                    pathToGoal.append(tempNode)
                     tempNode = tempNode.parent
-                # self.visualize()
-                return (self.MainStatus.REACHED, None)
+                pathToGoal.reverse()
+                return (self.MainStatus.REACHED, pathToGoal)
 
-            self.currentNode[1].expand(1)
-            for eachChild in self.currentNode[1].children:
+            self.currentNode[1].expand(self.goals[1][-1],1)
+            for eachChild in set(self.currentNode[1].children):
                 self.frontier[1].append(eachChild)
 
-            return (
-                self.MainStatus.IN_PROGRESS,
-                self.frontier[1][0] if len(self.frontier[1]) > 0 else None,
-            )
+        print("No solution found")
+        return (self.MainStatus.UNSOLVABLE, None)
+
+    def BFS(self):
+        # self.root[1].saveHeuristic(self.goals[1])
+        # self.root[1].saveF()
+        while self.frontier[1]:
+            # self.visualize()
+            # self.frontier[1].sort(key=lambda x: x.getF())
+
+            self.currentNode[1] = self.frontier[1].pop(0)
+
+            print(self.currentNode[1].cell)
+
+            # self.agents[1] = self.currentNode[1].cell
+
+            # if path found
+            if self.currentNode[1].cell == self.goals[1][-1]:
+                pathToGoal = []
+                tempNode = self.currentNode[1]
+                while tempNode:
+                    print(
+                        f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}"
+                    )
+                    pathToGoal.append(tempNode)
+                    tempNode = tempNode.parent
+                pathToGoal.reverse()
+                return (self.MainStatus.REACHED, pathToGoal)
+
+            self.currentNode[1].expand(self.goals[1][-1],1)
+
+            for eachChild in self.currentNode[1].children:
+                self.frontier[1].append(eachChild)
 
         return (self.MainStatus.UNSOLVABLE, None)
 
@@ -864,95 +845,115 @@ class SearchTree:
             # self.visualize()
             # self.frontier[agent_no].sort(key=lambda x: x.getF())
 
-            if self.isOtherAgent(self.frontier[agent_no][0].cell, agent_no):  # meet other agentß
-                frontier_length = len(self.frontier[agent_no])
-                if frontier_length > 1:
-                    i = 1
-                    while i < frontier_length and self.isOtherAgent(
-                            self.frontier[agent_no][i].cell, agent_no
-                    ):
-                        self.frontier[agent_no][i - 1], self.frontier[agent_no][i] = (
-                            self.frontier[agent_no][i],
-                            self.frontier[agent_no][i - 1],
-                        )
-                        i += 1
-                    if i == frontier_length:
-                        # nếu hết lựa chọn checkpoint thì ta chọn những chỗ bth để đi
-                        tempFrontier = []
-                        self.frontier[agent_no][0].expandAround(self.agents[agent_no], tempFrontier, self, agent_no)
-
-                        if len(tempFrontier) > 0:
-                            self.frontier[agent_no] = tempFrontier + self.frontier[agent_no]
-                        else:
-                            waitingNode = copy.copy(self.frontier[agent_no][0])
-                            waitingNode.waitingNode = True
-                            waitingNode.cell.waitingCell = True
-                            current_parent = self.frontier[agent_no][0].parent
-                            waitingNode.parent = current_parent
-                            self.frontier[agent_no][0].parent = waitingNode
-                            self.frontier[agent_no][0].path.insert(0, waitingNode.cell)
-                            return (self.MainStatus.IN_PROGRESS, self.frontier[agent_no][0])
-                else:
-                    waitingNode = copy.copy(self.frontier[agent_no][0])
-                    waitingNode.waitingNode = True
-                    waitingNode.cell.waitingCell = True
-                    current_parent = self.frontier[agent_no][0].parent
-                    waitingNode.parent = current_parent
-                    self.frontier[agent_no][0].parent = waitingNode
-                    self.frontier[agent_no][0].path.insert(0, waitingNode.cell)
-                    return (self.MainStatus.IN_PROGRESS, self.frontier[agent_no][0])
-
             self.currentNode[agent_no] = self.frontier[agent_no].pop(0)
 
-            self.agents[agent_no] = self.currentNode[agent_no].cell
+            # self.agents[agent_no] = self.currentNode[agent_no].cell
 
             # if path found
             if self.currentNode[agent_no].cell == self.goals[agent_no][-1]:
-                return (self.MainStatus.REACHED, None)
+                return self.MainStatus.REACHED
 
-            self.currentNode[agent_no].expand(agent_no)
+            self.currentNode[1].expand(self.goals[agent_no][-1],agent_no)
+
             for eachChild in self.currentNode[agent_no].children:
                 self.frontier[agent_no].append(eachChild)
-            return (
-                self.MainStatus.IN_PROGRESS,
-                self.frontier[agent_no][0]
-                if len(self.frontier[agent_no]) > 0
-                else None,
-            )
+            return self.MainStatus.IN_PROGRESS
 
-        return (self.MainStatus.UNSOLVABLE, None)
+        return self.MainStatus.UNSOLVABLE
 
-    def agent_turn_based_movement(self):
+    def agent_turn_based_movement(self, path_to_goal):
 
         current_agent = 1  # Initialize the index to track the current agent
 
+        current_node = 0
         while True:
             if current_agent == 1:  # A1
-                res = self.BFS()
-                if res[0] != self.MainStatus.IN_PROGRESS:  # reached goal or unsolvable
-                    if res[0] == self.MainStatus.REACHED:
-                        print("Reached goal")
-                        self.heatMapAnimation()
-                    elif res[0] == self.MainStatus.UNSOLVABLE:
-                        print("Cannot solve")
-                    break
-                else:
-                    if res[1] is None:
-                        print("Cannot solve")
-                        break
+                if self.path_iteration.get(1) is None or self.path_iteration[1] < 0:
+                    current_node+=1
+
+                    self.path_iteration[1] = len(path_to_goal[current_node].path) - 1  # duyệt từng path
+
+
+                if self.path_iteration[1] >= 0:
+                    current_cell = path_to_goal[current_node].path[self.path_iteration[1]]
+                    print(f"Agent {current_agent}: ",self.agents[current_agent])
+                    print(f"Ready to {current_agent}: ",current_cell)
+                    print(f"Next ckpt {current_agent}: ",path_to_goal[current_node].cell)
+                    print(f"Iteration {current_agent}: ",self.path_iteration[current_agent])
+
+                    if self.isOtherAgent(current_cell, 1) is None:  # nếu không đụng agent khác
+
+                        self.agents[1] = current_cell
+
+                        self.path_iteration[1] -= 1
+
+                        if current_cell == self.goals[1][-1]:
+                            print("Reached goal")
+                            self.heatMapAnimation()
+                            break
+                    else:  # đụng agent khác
+                        print(f"Waiting for {self.isOtherAgent(current_cell, 1)}")
+
+                        prevCell = self.agents[1]
+                        prevCell.waitingCell = True
+
+                        path_to_goal[current_node].path.insert(self.path_iteration[1],
+                                                             prevCell)  # thêm cell tương tự để chỉ là đang đợi
+
 
             else:  # other agents
-                res = self.BFS_OtherAgents(
-                    current_agent
-                )  # other agents reached their goals
-                if res[0] != self.MainStatus.IN_PROGRESS:  # reached goal or unsolvable
-                    newGoal = self.generate_goal()
-                    self.goals[current_agent].append(newGoal)  # generate new goal for this agent
+                print(f"Agent {current_agent}: ",self.agents[current_agent])
+                if self.path_iteration.get(current_agent) is None or self.path_iteration[
+                    current_agent] < 0:
+                    res = self.BFS_OtherAgents(current_agent)
+
+                    if res == self.MainStatus.UNSOLVABLE:
+                        new_goal = self.generate_goal()
+                        self.goals[current_agent].append(new_goal)
+                        current_agent += 1
+
+                        if current_agent > self.number_agents:
+                            current_agent = 1
+                        continue
+
+                    self.path_iteration[current_agent] = len(
+                        self.currentNode[current_agent].path) - 1  # duyệt từng path
+
+                if self.path_iteration[current_agent] >= 0:
+                    current_cell = self.currentNode[current_agent].path[self.path_iteration[current_agent]]
+
+                    print(f"Agent {current_agent}: ",self.agents[current_agent])
+                    print(f"Current {current_agent}: ",current_cell)
+                    print(f"Next ckpt {current_agent}: ",self.currentNode[current_agent].cell)
+                    print(f"Iteration {current_agent}: ",self.path_iteration[current_agent])
+
+                    if self.isOtherAgent(current_cell, current_agent) is None:  # nếu không đụng agent khác
+                        self.agents[current_agent] = current_cell
+
+                        self.path_iteration[current_agent] -= 1
+
+                        if current_cell == self.goals[current_agent][-1]:
+                            new_goal = self.generate_goal()
+                            self.goals[current_agent].append(new_goal)
+                    else:  # đụng agent khác
+                        print(f"Waiting for {self.isOtherAgent(current_cell, current_agent)}")
+                        prevCell = self.agents[current_agent]
+                        prevCell.waitingCell = True
+                        self.currentNode[current_agent].path.insert(self.path_iteration[current_agent],
+                                                                         prevCell)  # thêm cell tương tự để chỉ là đang đợ
 
             current_agent += 1
 
             if current_agent > self.number_agents:
                 current_agent = 1
+
+    def solve(self):
+        res = self.BFS()
+        if res[0] == self.MainStatus.REACHED:
+            print("Found a way to reach the goal")
+            self.agent_turn_based_movement(res[1])
+        else:
+            print("No solution")
 
     def generate_goal(self):
         random_goal = None
@@ -965,11 +966,7 @@ class SearchTree:
         return random_goal
 
     def competing_cell(self, agent_1, agent_2):
-        higher_priority = (
-            agent_1 if agent_1 < agent_2 else agent_2
-        )  # agent thấp hơn thì ưu tiên hơn
-
-        return higher_priority
+        return agent_1 < agent_2
 
     def heatMap(self):
         root = tk.Tk()
@@ -1150,15 +1147,15 @@ class SearchTree:
                     tempNode = tempNode.parent
 
         agent = 1
-        prevCell = {} # lưu cell trước mà agent đi để xoá chữ
+        prevCell = {}  # lưu cell trước mà agent đi để xoá chữ
         while True:
             if len(generalPath[agent]) > 0:
                 if prevCell.get(agent) is not None:
-                   prevY = prevCell[agent].y
-                   prevX = prevCell[agent].x
-                   prevFloor = prevCell[agent].floor_no
-                   self.canvas.delete(f"{prevY}-{prevX}-{prevFloor}")
-                   self.tkRoot.update()
+                    prevY = prevCell[agent].y
+                    prevX = prevCell[agent].x
+                    prevFloor = prevCell[agent].floor_no
+                    self.canvas.delete(f"{prevY}-{prevX}-{prevFloor}")
+                    self.tkRoot.update()
 
                 eachCell = generalPath[agent][-1]
                 prevCell[agent] = eachCell
@@ -1198,7 +1195,6 @@ class SearchTree:
                         x0 + 10, y0 + 10, text=f"A{agent}", fill="black", tags=f"{y}-{x}-{floor_no}"
                     )
 
-
                 generalPath[agent].pop(-1)
 
                 self.tkRoot.update()
@@ -1208,13 +1204,12 @@ class SearchTree:
                 if agent == 1:
                     break
 
-            agent+=1
+            agent += 1
             if agent > self.number_agents:
                 agent = 1
 
 
-
 searchTree2 = SearchTree()
 searchTree2.getInputFile("input//input3-level4.txt")
-searchTree2.agent_turn_based_movement()
+searchTree2.solve()
 # searchTree2.tkRoot.mainloop()

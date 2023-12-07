@@ -972,8 +972,6 @@ class SearchTree:
             time.sleep(0.4)
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input1-level3.txt")
-# input1-level3 có solution mà em nó ko ra
-# do cách đặt cầu thang đó ngài
+searchTree2.getInputFile("input//input5-level3.txt")
 searchTree2.Greedy_BFS()
 pass
