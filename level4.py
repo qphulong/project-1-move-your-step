@@ -884,8 +884,22 @@ class SearchTree:
                         if len(tempFrontier) > 0:
                             self.frontier[agent_no] = tempFrontier + self.frontier[agent_no]
                         else:
+                            waitingNode = copy.copy(self.frontier[agent_no][0])
+                            waitingNode.waitingNode = True
+                            waitingNode.cell.waitingCell = True
+                            current_parent = self.frontier[agent_no][0].parent
+                            waitingNode.parent = current_parent
+                            self.frontier[agent_no][0].parent = waitingNode
+                            self.frontier[agent_no][0].path.insert(0, waitingNode.cell)
                             return (self.MainStatus.IN_PROGRESS, self.frontier[agent_no][0])
                 else:
+                    waitingNode = copy.copy(self.frontier[agent_no][0])
+                    waitingNode.waitingNode = True
+                    waitingNode.cell.waitingCell = True
+                    current_parent = self.frontier[agent_no][0].parent
+                    waitingNode.parent = current_parent
+                    self.frontier[agent_no][0].parent = waitingNode
+                    self.frontier[agent_no][0].path.insert(0, waitingNode.cell)
                     return (self.MainStatus.IN_PROGRESS, self.frontier[agent_no][0])
 
             self.currentNode[agent_no] = self.frontier[agent_no].pop(0)
