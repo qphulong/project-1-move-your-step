@@ -1181,7 +1181,7 @@ class SearchTree:
                     )
                 else:
                     self.canvas.create_text(
-                        x0 + 10, y0 + 10, text=f"A{agent}", fill="black"
+                        x0 + 10, y0 + 10, text=f"A{agent}", fill="black", tags=f"{y}-{x}-{floor_no}"
                     )
 
 
