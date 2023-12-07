@@ -477,7 +477,7 @@ class Node:
                     # create new node
                     newNode = Node(cell, self.belongTo)
                     newNode.setPathCost(self.pathCost + steps)
-                    newNode.saveHeuristic(self.belongTo.goals[agent_no])
+                    newNode.saveHeuristic(self.belongTo.goals[agent_no][-1])
                     newNode.saveF()
 
                     # append new node to tree
@@ -524,7 +524,7 @@ class Node:
                             # create new node
                             newNode = Node(cell, self.belongTo)
                             newNode.setPathCost(self.pathCost + steps)
-                            newNode.saveHeuristic(self.belongTo.goals[agent_no])
+                            newNode.saveHeuristic(self.belongTo.goals[agent_no][-1])
                             newNode.saveF()
 
                             # append new node to tree
@@ -562,7 +562,7 @@ class Node:
                             # create new node
                             newNode = Node(cell, self.belongTo)
                             newNode.setPathCost(self.pathCost + steps)
-                            newNode.saveHeuristic(self.belongTo.goals[agent_no])
+                            newNode.saveHeuristic(self.belongTo.goals[agent_no][-1])
                             newNode.saveF()
 
                             # inherit key
@@ -594,7 +594,7 @@ class Node:
                     # create new node
                     newNode = Node(cell, self.belongTo)
                     newNode.setPathCost(self.pathCost + steps)
-                    newNode.saveHeuristic(self.belongTo.goals[agent_no])
+                    newNode.saveHeuristic(self.belongTo.goals[agent_no][-1])
                     newNode.saveF()
 
                     # append new node to tree
@@ -626,7 +626,7 @@ class Node:
                         cell, self.belongTo
                     )  # tạo node mới từ cell (đang duyệt BFSFrontier)
                     newNode.setPathCost(self.pathCost + steps)
-                    newNode.saveHeuristic(self.belongTo.goals[agent_no])
+                    newNode.saveHeuristic(self.belongTo.goals[agent_no][-1])
                     newNode.saveF()
 
                     # inherit collected stairs so far
@@ -738,7 +738,9 @@ class SearchTree:
                     ).groups()
 
                     agent_no = int(cell_value[1])
-                    self.goals[agent_no] = self.floors[current_floor].getCell(i, j)
+                    if self.goals.get(agent_no) is None:
+                        self.goals[agent_no] = []
+                    self.goals[agent_no].append(self.floors[current_floor].getCell(i, j))
 
                 # if startCell show up
                 if re.match(r"[A]\d+", cell_value):
@@ -837,15 +839,9 @@ class SearchTree:
             self.agents[1] = self.currentNode[1].cell
 
             # if path found
-            if self.currentNode[1].cell == self.goals[1]:
+            if self.currentNode[1].cell == self.goals[1][-1]:
                 tempNode = self.currentNode[1]
                 while tempNode:
-                    if tempNode.waitingNode:
-                        print(
-                            f"Waiting at {tempNode.cell.y} {tempNode.cell.x} Floor: {tempNode.cell.floor_no} Value: {tempNode.cell.getSpecialValue()}")
-                    else:
-                        print(
-                            f"{tempNode.cell.y} {tempNode.cell.x} Floor: {tempNode.cell.floor_no} Value: {tempNode.cell.getSpecialValue()}")
                     tempNode = tempNode.parent
                 # self.visualize()
                 return (self.MainStatus.REACHED, None)
@@ -897,7 +893,7 @@ class SearchTree:
             self.agents[agent_no] = self.currentNode[agent_no].cell
 
             # if path found
-            if self.currentNode[agent_no].cell == self.goals[agent_no]:
+            if self.currentNode[agent_no].cell == self.goals[agent_no][-1]:
                 return (self.MainStatus.REACHED, None)
 
             self.currentNode[agent_no].expand(agent_no)
@@ -921,6 +917,7 @@ class SearchTree:
                 res = self.BFS()
                 if res[0] != self.MainStatus.IN_PROGRESS:  # reached goal or unsolvable
                     if res[0] == self.MainStatus.REACHED:
+                        print("Reached goal")
                         self.heatMapAnimation()
                     elif res[0] == self.MainStatus.UNSOLVABLE:
                         print("Cannot solve")
@@ -935,15 +932,8 @@ class SearchTree:
                     current_agent
                 )  # other agents reached their goals
                 if res[0] != self.MainStatus.IN_PROGRESS:  # reached goal or unsolvable
-                    self.goals[
-                        current_agent
-                    ] = self.generate_goal()  # generate new goal for this agent
-
-                else:
-                    if res[1] is None:
-                        self.goals[
-                            current_agent
-                        ] = self.generate_goal()  # generate new goal for this agent
+                    newGoal = self.generate_goal()
+                    self.goals[current_agent].append(newGoal)  # generate new goal for this agent
 
             current_agent += 1
 
@@ -1133,53 +1123,81 @@ class SearchTree:
 
             y_offset += floor.rows * 35 + 20  # Adjust y_offset for next floor
 
-        # Draw path for the current floor
-        tempNode = self.currentNode[1]
-        generalPath = []
-        while tempNode:
-            for eachCell in tempNode.path:
-                generalPath.append(eachCell)
-            tempNode = tempNode.parent
+        generalPath = {}
 
-        while len(generalPath) > 0:
-            eachCell = generalPath[-1]
-            y = eachCell.y
-            x = eachCell.x
-            floor_no = eachCell.floor_no
-            y_offset = (self.floors[floor_no].rows * 35 + 20) * (floor_no - 1)
-            x0, y0 = x * 20, y * 35 + y_offset
-            x1, y1 = (x + 1) * 20, (y + 1) * 35 + y_offset
+        for agent in self.agents:
+            if generalPath.get(agent) is None:
+                # Draw path for the current floor
+                tempNode = self.currentNode[agent]
+                generalPath[agent] = []
+                while tempNode:
+                    for eachCell in tempNode.path:
+                        generalPath[agent].append(eachCell)
+                    tempNode = tempNode.parent
+
+        agent = 1
+        prevCell = {} # lưu cell trước mà agent đi để xoá chữ
+        while True:
+            if len(generalPath[agent]) > 0:
+                if prevCell.get(agent) is not None:
+                   prevY = prevCell[agent].y
+                   prevX = prevCell[agent].x
+                   prevFloor = prevCell[agent].floor_no
+                   self.canvas.delete(f"{prevY}-{prevX}-{prevFloor}")
+                   self.tkRoot.update()
+
+                eachCell = generalPath[agent][-1]
+                prevCell[agent] = eachCell
+                y = eachCell.y
+                x = eachCell.x
+                floor_no = eachCell.floor_no
+                y_offset = (self.floors[floor_no].rows * 35 + 20) * (floor_no - 1)
+                x0, y0 = x * 20, y * 35 + y_offset
+                x1, y1 = (x + 1) * 20, (y + 1) * 35 + y_offset
+
+                if Counter(generalPath[agent])[eachCell] == 1:
+                    self.canvas.create_rectangle(
+                        x0, y0, x1, y1, fill="#ff8888", outline="black"
+                    )
+                elif Counter(generalPath[agent])[eachCell] == 2:
+                    self.canvas.create_rectangle(
+                        x0, y0, x1, y1, fill="#ff4b4b", outline="black"
+                    )
+                elif Counter(generalPath[agent])[eachCell] == 3:
+                    self.canvas.create_rectangle(
+                        x0, y0, x1, y1, fill="#ff0000", outline="black"
+                    )
+                elif Counter(generalPath[agent])[eachCell] == 4:
+                    self.canvas.create_rectangle(
+                        x0, y0, x1, y1, fill="#cb0000", outline="black"
+                    )
+
+                if eachCell.waitingCell:
+                    self.canvas.create_rectangle(
+                        x0, y0, x1, y1, fill="#a7f542", outline="black"
+                    )
+                    self.canvas.create_text(
+                        x0 + 10, y0 + 10, text=f"W{agent}", fill="black", tags=f"{y}-{x}-{floor_no}"
+                    )
+                else:
+                    self.canvas.create_text(
+                        x0 + 10, y0 + 10, text=f"A{agent}", fill="black"
+                    )
 
 
-            if Counter(generalPath)[eachCell] == 1:
-                self.canvas.create_rectangle(
-                    x0, y0, x1, y1, fill="#ff8888", outline="black"
-                )
-            elif Counter(generalPath)[eachCell] == 2:
-                self.canvas.create_rectangle(
-                    x0, y0, x1, y1, fill="#ff4b4b", outline="black"
-                )
-            elif Counter(generalPath)[eachCell] == 3:
-                self.canvas.create_rectangle(
-                    x0, y0, x1, y1, fill="#ff0000", outline="black"
-                )
-            elif Counter(generalPath)[eachCell] == 4:
-                self.canvas.create_rectangle(
-                    x0, y0, x1, y1, fill="#cb0000", outline="black"
-                )
+                generalPath[agent].pop(-1)
 
-            if eachCell.waitingCell:
-                self.canvas.create_rectangle(
-                    x0, y0, x1, y1, fill="#a7f542", outline="black"
-                )
-                self.canvas.create_text(
-                    x0 + 10, y0 + 10, text="W", fill="black"
-                )
+                self.tkRoot.update()
+                time.sleep(0.5)
 
-            generalPath.pop(-1)
+            else:
+                if agent == 1:
+                    break
 
-            self.tkRoot.update()
-            time.sleep(0.4)
+            agent+=1
+            if agent > self.number_agents:
+                agent = 1
+
 
 
 searchTree2 = SearchTree()
