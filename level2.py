@@ -462,6 +462,9 @@ class SearchTree:
     def AStar(self):
         self.root.saveHeuristic(self.goalCell)
         self.root.saveF()
+
+
+
         while self.frontier:
             self.frontier.sort(key=lambda x: x.getF())
             self.currentNode = self.frontier.pop(0)
@@ -472,6 +475,8 @@ class SearchTree:
                 # while (tempNode):
                 #     print(tempNode.cell.getSpecialValue())
                 #     tempNode = tempNode.parent
+
+                #animation
                 tempNode = self.currentNode
                 while (tempNode):
                     for eachCell in tempNode.path:
@@ -479,6 +484,9 @@ class SearchTree:
                     tempNode = tempNode.parent
                 self.finalPath.reverse()
                 self.pathAnimation()
+
+                #heatmap
+                # self.heatMap()
                 return
 
             self.currentNode.expand()
@@ -620,8 +628,16 @@ class SearchTree:
         root.title("Search Tree Path Animation")
 
         # Create a canvas to draw on
-        canvas = tk.Canvas(root, width=self.floor.cols * 20, height=self.floor.rows * 20)
+        canvas = tk.Canvas(root, width=self.floor.cols * 35, height=self.floor.rows * 25)
         canvas.pack()
+
+        # Nut back
+        def goback():
+            self.checkRoot = False
+            root.destroy()
+
+        back_button = tk.Button(root, text="Back", height=1, width=10, bg='brown', command=goback)
+        back_button.place(x=self.floor.cols * 25, y=self.floor.rows * 15)
 
         # Function to update the canvas for animation
         def update_animation(index):
@@ -666,7 +682,7 @@ class SearchTree:
 
 
 
-searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input5-level2.txt")
-searchTree2.AStar()
+# searchTree2 = SearchTree()
+# searchTree2.getInputFile("input//input5-level2.txt")
+# searchTree2.AStar()
 pass
