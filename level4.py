@@ -597,6 +597,10 @@ class SearchTree:
         self.canvas = tk.Canvas(self.tkRoot, width=0, height=0)
         self.canvas.pack()
         self.score = 0
+        self.checkRoot = False
+
+    def getCheckRoot(self):
+        return self.checkRoot
 
     def getInputFile(self, filePath):
         with open(filePath, "r") as file:
@@ -1177,7 +1181,7 @@ class SearchTree:
                 agent = 1
 
 
-searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input4-level4.txt")
-searchTree2.solve()
+# searchTree2 = SearchTree()
+# searchTree2.getInputFile("input//input4-level4.txt")
+# searchTree2.solve()
 # searchTree2.tkRoot.mainloop()
