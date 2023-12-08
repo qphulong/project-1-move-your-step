@@ -541,6 +541,7 @@ class SearchTree:
         self.goals = []
 
         self.tkRoot = tk.Tk()
+        self.checkRoot = True
         self.canvas = tk.Canvas(self.tkRoot, width=0, height=0)
         self.canvas.pack()
         self.score = 0
@@ -653,6 +654,8 @@ class SearchTree:
                 self.frontier.append(eachChild)
 
         print("No solution found")
+        not_found = tk.Label(self.tkRoot, font=('Arial', 50), text='Not Found Goal ', fg='Black')
+        not_found.place(x = 100, y=100)
         # return self.MainStatus.UNSOLVABLE
 
     def Greedy_BFS(self):
@@ -870,6 +873,13 @@ class SearchTree:
         # score.place(x=self.floor.cols * 22, y=self.floor.rows * 11)
         score = tk.Label(self.tkRoot,font=('Arial', 15), text='Score: ' + str(self.score), fg='Black')
         score.place(x=self.floors[1].cols * 21, y=100)
+
+        # def goback():
+        #     self.checkRoot = False
+        #     self.tkRoot.destroy()
+        #
+        # back_button = tk.Button(self.tkRoot, text="Back", height = 1, width = 20, bg = 'brown',command = goback)
+        # back_button.place(x=self.floors[1].cols * 21, y=130)
 
         self.canvas.pack()
 
