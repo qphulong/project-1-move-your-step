@@ -756,19 +756,22 @@ class SearchTree:
         return (self.MainStatus.UNSOLVABLE, None)
 
     def BFS_OtherAgents(self, agent_no):
-        self.root[agent_no].saveHeuristic(self.goals[agent_no][-1])
+
         # self.root[agent_no].saveF()
         if self.frontier[agent_no]:
-            # self.visualize()
-            self.frontier[agent_no].sort(key=lambda x: x.heuristic)
 
             self.currentNode[agent_no] = self.frontier[agent_no].pop(0)
+
+            if agent_no == 3:
+                print(f"Current node: {self.currentNode[agent_no].cell.getSpecialValue()}")
 
             # if path found
             if self.currentNode[agent_no].cell == self.goals[agent_no][-1]:
                 return self.MainStatus.REACHED
 
             self.currentNode[agent_no].expand(self.goals[agent_no][-1], agent_no)
+
+            print(f"Children: {len(self.currentNode[agent_no].children)}")
 
             for eachChild in self.currentNode[agent_no].children:
                 self.frontier[agent_no].append(eachChild)
@@ -786,6 +789,7 @@ class SearchTree:
         visited = {}
 
         prev = None
+
 
         while True:
             prev = self.agents[current_agent]
@@ -842,14 +846,16 @@ class SearchTree:
                     current_agent] < 0:
                     res = self.BFS_OtherAgents(current_agent)
 
-                    if res == self.MainStatus.UNSOLVABLE:
-                        new_goal = self.generate_goal()
-                        self.goals[current_agent].append(new_goal)
-                        current_agent += 1
+                    if res == self.MainStatus.UNSOLVABLE: # agent khác không đến được goal
+                        print("No solution for agent", current_agent)
+                        new_goal = self.generate_goal(current_agent)
+                        self.frontier[current_agent].clear()
 
-                        if current_agent > self.number_agents:
-                            current_agent = 1
-                        continue
+                        self.currentNode[current_agent].saveHeuristic(new_goal)
+                        self.frontier[current_agent].append(self.currentNode[current_agent])
+
+                        self.goals[current_agent].append(new_goal)
+                        self.path_iteration[current_agent] = 0
 
                     self.path_iteration[current_agent] = len(
                         self.currentNode[current_agent].path) - 1  # duyệt từng path
@@ -862,9 +868,17 @@ class SearchTree:
 
                         self.path_iteration[current_agent] -= 1
 
-                        if current_cell == self.goals[current_agent][-1]:
-                            new_goal = self.generate_goal()
+                        if current_cell == self.goals[current_agent][-1]: # đụng goal hiện tại thì generate goal mới
+                            new_goal = self.generate_goal(current_agent)
+                            self.frontier[current_agent].clear()
+
+                            self.currentNode[current_agent].saveHeuristic(new_goal)
+                            self.frontier[current_agent].append(self.currentNode[current_agent])
+
                             self.goals[current_agent].append(new_goal)
+
+                            self.path_iteration[current_agent] = 0
+
                     else:  # đụng agent khác
 
                         neighbors = self.agents[current_agent].neighbors(current_agent,self)
@@ -912,7 +926,7 @@ class SearchTree:
         else:
             print("No solution")
 
-    def generate_goal(self):
+    def generate_goal(self, current_agent):
         random_goal = None
 
         while random_goal is None or random_goal.isWall():
@@ -920,6 +934,22 @@ class SearchTree:
             random_y = random.randint(0, self.floors[random_floor].rows - 1)
             random_x = random.randint(0, self.floors[random_floor].cols - 1)
             random_goal = self.floors[random_floor].getCell(random_y, random_x)
+
+        y_offset = (self.floors[random_goal.floor_no].rows * 35 + 20) * (random_goal.floor_no - 1)
+        x0, y0 = random_goal.x * 20, random_goal.y * 35 + y_offset
+        x1, y1 = (random_goal.x + 1) * 20, (random_goal.y + 1) * 35 + y_offset
+
+        self.canvas.delete(f"T{current_agent}")
+        self.canvas.delete(f"T{current_agent}text")
+        self.tkRoot.update()
+
+        self.canvas.create_rectangle(x0, y0, x1, y1, fill="#152b52", outline="black", tags=f"T{current_agent}")
+        self.canvas.create_text(
+            x0 + 10, y0 + 10, text=f"T{current_agent}", tags=f"T{current_agent}text"
+        )
+
+        self.tkRoot.update()
+
         return random_goal
 
     def competing_cell(self, agent_1, agent_2):
@@ -965,9 +995,9 @@ class SearchTree:
                             continue
 
                         if special[0] == "T":
-                            self.canvas.create_rectangle(x0, y0, x1, y1, fill="#152b52", outline="black")
+                            self.canvas.create_rectangle(x0, y0, x1, y1, fill="#152b52", outline="black", tags=special)
                             self.canvas.create_text(
-                                x0 + 10, y0 + 10, text=special
+                                x0 + 10, y0 + 10, text=special, tags=special+"text"
                             )
                             continue
 
