@@ -269,7 +269,6 @@ class Node:
         steps = -1
         while BFSfrontier:
             steps += 1
-
             # block nay de debug
             # if self.cell.checkValue("K1"):
             #     print("Frontier")
@@ -409,6 +408,7 @@ class SearchTree:
         self.floor = None
         self.checkRoot = False
         self.finalPath=[]
+        self.score = 0
 
     def getCheckRoot(self):
         return self.checkRoot
@@ -462,8 +462,6 @@ class SearchTree:
     def AStar(self):
         self.root.saveHeuristic(self.goalCell)
         self.root.saveF()
-
-
 
         while self.frontier:
             self.frontier.sort(key=lambda x: x.getF())
@@ -637,7 +635,10 @@ class SearchTree:
             root.destroy()
 
         back_button = tk.Button(root, text="Back", height=1, width=10, bg='brown', command=goback)
-        back_button.place(x=self.floor.cols * 25, y=self.floor.rows * 15)
+        back_button.place(x=self.floor.cols * 21, y=self.floor.rows * 15)
+
+        # score = tk.Label(root, font=('Arial', 25), text='Score: ' + str(self.score), fg='Black')
+        # score.place(x=self.floor.cols * 23, y=self.floor.rows * 12)
 
         # Function to update the canvas for animation
         def update_animation(index):
@@ -669,6 +670,9 @@ class SearchTree:
                         # Set color for cells in the path to green
                         if self.floor.table[i][j] == self.finalPath[index]:
                             canvas.create_rectangle(x0, y0, x1, y1, fill="green")
+                            self.score+=1
+                            score = tk.Label(root, font=('Arial', 15), text='Score: ' + str(self.score), fg='Black')
+                            score.place(x=self.floor.cols * 22, y=self.floor.rows * 11)
                 
 
                 # Schedule the next update after a delay (adjust the delay as needed)
@@ -682,7 +686,7 @@ class SearchTree:
 
 
 
-# searchTree2 = SearchTree()
-# searchTree2.getInputFile("input//input5-level2.txt")
-# searchTree2.AStar()
+searchTree2 = SearchTree()
+searchTree2.getInputFile("input//input2-level2.txt")
+searchTree2.AStar()
 pass
