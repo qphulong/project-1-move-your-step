@@ -78,107 +78,46 @@ class Cell:
 
     def neighbors(self, agent_no, searchTree):
         children = []
-
         floor_no = self.floor_no
 
-        # add N self to tempFrontier
-        if (
-                self.y > 0
-                and not searchTree.floors[floor_no].getCell(self.y - 1, self.x).isWall()
-        ):
-            northCell = searchTree.floors[floor_no].getCell(self.y - 1, self.x)
-            if searchTree.isOtherAgent(northCell, agent_no) is None:
-                children.append(northCell)
-                northCell.parrent = self
+        def is_valid_position(y, x):
+            return 0 <= y < searchTree.floors[floor_no].rows and 0 <= x < searchTree.floors[floor_no].cols
 
-        # add W self to tempFrontier
-        if (
-                self.x > 0
-                and not searchTree.floors[floor_no].getCell(self.y, self.x - 1).isWall()
-        ):
-            westCell = searchTree.floors[floor_no].getCell(self.y, self.x - 1)
+        def add_cell_if_valid(y, x):
+            if is_valid_position(y, x):
+                cell = searchTree.floors[floor_no].getCell(y, x)
+                special = cell.getSpecialValue() if len(cell.getSpecialValue()) > 0 else ""
+                if not cell.isWall() and (len(special) == 0 or special[0] != "D") and searchTree.isOtherAgent(cell,
+                                                                                                              agent_no) is None:
+                    children.append(cell)
+                    cell.parrent = self
 
-            if searchTree.isOtherAgent(westCell, agent_no) is None:
-                children.append(westCell)
-                westCell.parrent = self
+        # Check neighboring cells
+        add_cell_if_valid(self.y - 1, self.x)  # North
+        add_cell_if_valid(self.y, self.x - 1)  # West
+        add_cell_if_valid(self.y + 1, self.x)  # South
+        add_cell_if_valid(self.y, self.x + 1)  # East
 
-        # add S self to tempFrontier
-        if (
-                self.y < searchTree.floors[floor_no].rows - 1
-                and not searchTree.floors[floor_no].getCell(self.y + 1, self.x).isWall()
-        ):
-            southCell = searchTree.floors[floor_no].getCell(self.y + 1, self.x)
+        # Check diagonal cells considering neighboring walls
+        if self.y > 0 and self.x < searchTree.floors[floor_no].cols - 1:  # NE
+            if not searchTree.floors[floor_no].getCell(self.y - 1, self.x).isWall() and \
+                    not searchTree.floors[floor_no].getCell(self.y, self.x + 1).isWall():
+                add_cell_if_valid(self.y - 1, self.x + 1)
 
-            if searchTree.isOtherAgent(southCell, agent_no) is None:
-                children.append(southCell)
-                southCell.parrent = self
+        if self.y > 0 and self.x > 0:  # NW
+            if not searchTree.floors[floor_no].getCell(self.y - 1, self.x).isWall() and \
+                    not searchTree.floors[floor_no].getCell(self.y, self.x - 1).isWall():
+                add_cell_if_valid(self.y - 1, self.x - 1)
 
-        # add E self to tempFrontier
-        if (
-                self.x < searchTree.floors[floor_no].cols - 1
-                and not searchTree.floors[floor_no].getCell(self.y, self.x + 1).isWall()
-        ):
-            eastCell = searchTree.floors[floor_no].getCell(self.y, self.x + 1)
+        if self.y < searchTree.floors[floor_no].rows - 1 and self.x > 0:  # SW
+            if not searchTree.floors[floor_no].getCell(self.y + 1, self.x).isWall() and \
+                    not searchTree.floors[floor_no].getCell(self.y, self.x - 1).isWall():
+                add_cell_if_valid(self.y + 1, self.x - 1)
 
-            if searchTree.isOtherAgent(eastCell, agent_no) is None:
-                children.append(eastCell)
-                eastCell.parrent = self
-
-        # add NE self to tempFrontier
-        if (
-                self.y > 0
-                and self.x < searchTree.floors[floor_no].cols - 1
-                and not searchTree.floors[floor_no].getCell(self.y - 1, self.x).isWall()
-                and not searchTree.floors[floor_no].getCell(self.y, self.x + 1).isWall()
-                and not searchTree.floors[floor_no].getCell(self.y - 1, self.x + 1).isWall()
-        ):
-            neCell = searchTree.floors[floor_no].getCell(self.y - 1, self.x + 1)
-
-            if searchTree.isOtherAgent(neCell, agent_no) is None:
-                children.append(neCell)
-                neCell.parrent = self
-
-        # Add NW self to tempFrontier
-        if (
-                self.y > 0
-                and self.x > 0
-                and not searchTree.floors[floor_no].getCell(self.y - 1, self.x).isWall()
-                and not searchTree.floors[floor_no].getCell(self.y, self.x - 1).isWall()
-                and not searchTree.floors[floor_no].getCell(self.y - 1, self.x - 1).isWall()
-        ):
-            nwCell = searchTree.floors[floor_no].getCell(self.y - 1, self.x - 1)
-
-            if searchTree.isOtherAgent(nwCell, agent_no) is None:
-                children.append(nwCell)
-                nwCell.parrent = self
-
-        # Add SW self to tempFrontier
-        if (
-                self.y < searchTree.floors[floor_no].rows - 1
-                and self.x > 0
-                and not searchTree.floors[floor_no].getCell(self.y + 1, self.x).isWall()
-                and not searchTree.floors[floor_no].getCell(self.y, self.x - 1).isWall()
-                and not searchTree.floors[floor_no].getCell(self.y + 1, self.x - 1).isWall()
-        ):
-            swCell = searchTree.floors[floor_no].getCell(self.y + 1, self.x - 1)
-
-            if searchTree.isOtherAgent(swCell, agent_no) is None:
-                children.append(swCell)
-                swCell.parrent = self
-
-        # Add SE self to tempFrontier
-        if (
-                self.y < searchTree.floors[floor_no].rows - 1
-                and self.x < searchTree.floors[floor_no].cols - 1
-                and not searchTree.floors[floor_no].getCell(self.y + 1, self.x).isWall()
-                and not searchTree.floors[floor_no].getCell(self.y, self.x + 1).isWall()
-                and not searchTree.floors[floor_no].getCell(self.y + 1, self.x + 1).isWall()
-        ):
-            seCell = searchTree.floors[floor_no].getCell(self.y + 1, self.x + 1)
-
-            if searchTree.isOtherAgent(seCell, agent_no) is None:
-                children.append(seCell)
-                seCell.parrent = self
+        if self.y < searchTree.floors[floor_no].rows - 1 and self.x < searchTree.floors[floor_no].cols - 1:  # SE
+            if not searchTree.floors[floor_no].getCell(self.y + 1, self.x).isWall() and \
+                    not searchTree.floors[floor_no].getCell(self.y, self.x + 1).isWall():
+                add_cell_if_valid(self.y + 1, self.x + 1)
 
         return children
 
@@ -838,11 +777,19 @@ class SearchTree:
         return self.MainStatus.UNSOLVABLE
 
     def agent_turn_based_movement(self, path_to_goal):
+        self.initialHeatMap()
 
         current_agent = 1  # Initialize the index to track the current agent
 
         current_node = -1
+
+        visited = {}
+
+        prev = None
+
         while True:
+            prev = self.agents[current_agent]
+
             if current_agent == 1:  # A1
 
                 if self.path_iteration.get(1) is None or self.path_iteration[1] < 0:
@@ -853,8 +800,6 @@ class SearchTree:
                 if self.path_iteration[1] >= 0:
                     current_cell = path_to_goal[current_node].path[self.path_iteration[1]]
 
-                    print(f"A1: {self.agents[1]}")
-
                     if self.isOtherAgent(current_cell, 1) is None:  # nếu không đụng agent khác
 
                         self.agents[1] = current_cell
@@ -863,10 +808,9 @@ class SearchTree:
 
                         if current_cell == self.goals[1][-1]:
                             print("Reached goal")
-                            self.heatMapAnimation(path_to_goal)
                             break
+
                     else:  # đụng agent khác
-                        print(f"Waiting for {self.isOtherAgent(current_cell, 1)}")
 
                         prevCell = self.agents[1]
                         prevCell.waitingCell = True
@@ -893,6 +837,7 @@ class SearchTree:
 
 
             else:  # other agents
+                # mai thử cho chạy hết 3 thằng rồi mới đi tìm path
                 if self.path_iteration.get(current_agent) is None or self.path_iteration[
                     current_agent] < 0:
                     res = self.BFS_OtherAgents(current_agent)
@@ -912,8 +857,6 @@ class SearchTree:
                 if self.path_iteration[current_agent] >= 0:
                     current_cell = self.currentNode[current_agent].path[self.path_iteration[current_agent]]
 
-                    print(f"A{current_agent}: {self.agents[current_agent]}")
-
                     if self.isOtherAgent(current_cell, current_agent) is None:  # nếu không đụng agent khác
                         self.agents[current_agent] = current_cell
 
@@ -923,7 +866,6 @@ class SearchTree:
                             new_goal = self.generate_goal()
                             self.goals[current_agent].append(new_goal)
                     else:  # đụng agent khác
-                        print(f"Waiting for {self.isOtherAgent(current_cell, current_agent)}")
 
                         neighbors = self.agents[current_agent].neighbors(current_agent,self)
 
@@ -949,6 +891,12 @@ class SearchTree:
                             self.currentNode[current_agent].path.insert(self.path_iteration[current_agent] + 1,
                                                                         prevCell)  # thêm cell tương tự để chỉ là đang đợi
 
+            if visited.get(self.agents[current_agent]) is None:
+                visited[self.agents[current_agent]] = 0
+            visited[self.agents[current_agent]]+=1
+
+
+            self.heatMapUpdate(current_agent, self.agents[current_agent], prev, visited)
 
             current_agent += 1
 
@@ -977,102 +925,7 @@ class SearchTree:
     def competing_cell(self, agent_1, agent_2):
         return agent_1 < agent_2
 
-    def heatMap(self):
-        root = tk.Tk()
-        self.checkRoot = True
-        root.title("Search Tree Visualization - All Floors")
-
-        canvas_width = max(self.floors[floor].cols for floor in self.floors) * 40
-        canvas_height = sum(self.floors[floor].rows for floor in self.floors) * 35 * len(self.floors)
-        canvas = tk.Canvas(root, width=canvas_width, height=canvas_height)
-        canvas.pack()
-
-        y_offset = 0  # Offset for drawing floors vertically
-
-        for floor_no in self.floors:
-            floor = self.floors[floor_no]
-
-            # Draw each row of the floor
-            for i in range(floor.rows):
-                for j in range(floor.cols):
-                    x0, y0 = j * 20, i * 35 + y_offset
-                    x1, y1 = (j + 1) * 20, (i + 1) * 35 + y_offset
-
-                    if floor.table[i][j].checkValue("-1"):
-                        canvas.create_rectangle(x0, y0, x1, y1, fill="black", outline="black")
-                    else:
-                        canvas.create_rectangle(x0, y0, x1, y1, fill="white", outline="black")
-                        specialValue = floor.table[i][j].getSpecialValue()
-                        canvas.create_text(
-                            x0 + 10, y0 + 10, text=specialValue if specialValue[0]!="A" else "", fill="black"
-                        )
-
-            # Draw path for the current floor
-            tempNode = self.currentNode[1]
-            generalPath = []
-            while tempNode:
-                for eachCell in tempNode.path:
-                    generalPath.append(eachCell)
-                tempNode = tempNode.parent
-
-            for i in range(floor.rows):
-                for j in range(floor.cols):
-                    x0, y0 = j * 20, i * 35 + y_offset
-                    x1, y1 = (j + 1) * 20, (i + 1) * 35 + y_offset
-
-                    if floor.table[i][j] in generalPath:
-                        if Counter(generalPath)[floor.table[i][j]] == 1:
-                            canvas.create_rectangle(
-                                x0, y0, x1, y1, fill="#ff8888", outline="black"
-                            )
-                        elif Counter(generalPath)[floor.table[i][j]] == 2:
-                            canvas.create_rectangle(
-                                x0, y0, x1, y1, fill="#ff4b4b", outline="black"
-                            )
-                        elif Counter(generalPath)[floor.table[i][j]] == 3:
-                            canvas.create_rectangle(
-                                x0, y0, x1, y1, fill="#ff0000", outline="black"
-                            )
-                        elif Counter(generalPath)[floor.table[i][j]] == 4:
-                            canvas.create_rectangle(
-                                x0, y0, x1, y1, fill="#cb0000", outline="black"
-                            )
-
-                    special = floor.table[i][j].getSpecialValue()
-                    if floor.table[i][j].getSpecialValue() != "":
-                        if special == "UP" or special == "DO":
-                            canvas.create_rectangle(x0, y0, x1, y1,
-                                                    fill="#34cceb" if special == "UP" else "#f5aa42",
-                                                    outline="black")
-                            canvas.create_text(
-                                x0 + 10, y0 + 10, text="↑" if special == "UP" else "↓", fill="black"
-                            )
-                            continue
-
-                        if special == "T1":
-                            canvas.create_rectangle(x0, y0, x1, y1, fill="#ebb121", outline="black")
-                            canvas.create_text(
-                                x0 + 10, y0 + 10, text="T1"
-                            )
-                            continue
-
-                        if special == "A1":
-                            canvas.create_rectangle(x0, y0, x1, y1, fill="#5750ba", outline="black")
-                            canvas.create_text(
-                                x0 + 10, y0 + 10, text="A1"
-                            )
-                            continue
-
-                        canvas.create_rectangle(x0, y0, x1, y1, fill="#2ad500", outline="black")
-                        canvas.create_text(
-                            x0 + 10, y0 + 10, text=special, fill="black"
-                        )
-
-            y_offset += floor.rows * 35 + 20  # Adjust y_offset for next floor
-
-        root.mainloop()
-
-    def heatMapAnimation(self, path_to_goal):
+    def initialHeatMap(self):
         self.checkRoot = True
 
         self.canvas.pack()
@@ -1118,13 +971,58 @@ class SearchTree:
                             )
                             continue
 
-                        self.canvas.create_rectangle(x0, y0, x1, y1, fill="#2ad500", outline="black")
+                        self.canvas.create_rectangle(x0, y0, x1, y1, fill="#78977F", outline="black")
                         self.canvas.create_text(
-                            x0 + 10, y0 + 10, text=special if special[0]!="A" else "", fill="black"
+                            x0 + 10, y0 + 10, text=special, fill="black"
                         )
 
             y_offset += floor.rows * 35 + 20  # Adjust y_offset for next floor
 
+    def heatMapUpdate(self, current_agent, cell, prev, visited):
+        print(f"A{current_agent}: {cell}")
+        if prev is not None:
+            prevY = prev.y
+            prevX = prev.x
+            prevFloor = prev.floor_no
+            self.canvas.delete(f"{prevY}-{prevX}-{prevFloor}")
+            self.tkRoot.update()
+
+        y = cell.y
+        x = cell.x
+        floor_no = cell.floor_no
+        y_offset = (self.floors[floor_no].rows * 35 + 20) * (floor_no - 1)
+        x0, y0 = x * 20, y * 35 + y_offset
+        x1, y1 = (x + 1) * 20, (y + 1) * 35 + y_offset
+
+        if visited[cell] == 1:
+            self.canvas.create_rectangle(
+                x0, y0, x1, y1, fill="#ff8888", outline="black"
+            )
+        elif visited[cell] == 1:
+            self.canvas.create_rectangle(
+                x0, y0, x1, y1, fill="#ff4b4b", outline="black"
+            )
+        elif visited[cell] == 1:
+            self.canvas.create_rectangle(
+                x0, y0, x1, y1, fill="#ff0000", outline="black"
+            )
+        elif visited[cell] == 1:
+            self.canvas.create_rectangle(
+                x0, y0, x1, y1, fill="#cb0000", outline="black"
+            )
+        else:
+            self.canvas.create_rectangle(
+                x0, y0, x1, y1, fill="#977878", outline="black"
+            )
+
+        self.canvas.create_text(
+            x0 + 10, y0 + 10, text=f"A{current_agent}", fill="black", tags=f"{y}-{x}-{floor_no}"
+        )
+
+        self.tkRoot.update()
+        time.sleep(0.5)
+
+    def heatMapAnimation(self, path_to_goal):
         generalPath = {}
 
         for agent in self.agents:
@@ -1153,6 +1051,7 @@ class SearchTree:
                 eachCell = generalPath[agent][-1]
                 print(f"A{agent}: {eachCell}")
                 prevCell[agent] = eachCell
+
                 y = eachCell.y
                 x = eachCell.x
                 floor_no = eachCell.floor_no
