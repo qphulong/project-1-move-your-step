@@ -765,12 +765,6 @@ class SearchTree:
 
             print(f"Agent {agent_no} {self.currentNode[agent_no].cell.getSpecialValue()}")
 
-            i = len(self.currentNode[agent_no].path) - 1
-            while i>=0:
-                print(f"Path agent {agent_no} {self.currentNode[agent_no].path[i]}")
-                i-=1
-
-
             # if path found
             if self.currentNode[agent_no].cell == self.goals[agent_no][-1]:
                 return self.MainStatus.REACHED
@@ -1091,7 +1085,7 @@ class SearchTree:
         )
 
         self.tkRoot.update()
-        time.sleep(0.5)
+        time.sleep(0.3)
 
     def heatMapAnimation(self, path_to_goal):
         generalPath = {}
