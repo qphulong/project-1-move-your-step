@@ -87,8 +87,7 @@ class Cell:
             if is_valid_position(y, x):
                 cell = searchTree.floors[floor_no].getCell(y, x)
                 special = cell.getSpecialValue() if len(cell.getSpecialValue()) > 0 else ""
-                if not cell.isWall() and (len(special) == 0 or special[0] != "D") and searchTree.isOtherAgent(cell,
-                                                                                                              agent_no) is None:
+                if not cell.isWall() and special == "" and searchTree.isOtherAgent(cell, agent_no) is None:
                     children.append(cell)
                     cell.parrent = self
 
@@ -760,10 +759,17 @@ class SearchTree:
         # self.root[agent_no].saveF()
         if self.frontier[agent_no]:
 
+            self.frontier[agent_no].sort(key=lambda x: x.heuristic)
+
             self.currentNode[agent_no] = self.frontier[agent_no].pop(0)
 
-            if agent_no == 3:
-                print(f"Current node: {self.currentNode[agent_no].cell.getSpecialValue()}")
+            print(f"Agent {agent_no} {self.currentNode[agent_no].cell.getSpecialValue()}")
+
+            i = len(self.currentNode[agent_no].path) - 1
+            while i>=0:
+                print(f"Path agent {agent_no} {self.currentNode[agent_no].path[i]}")
+                i-=1
+
 
             # if path found
             if self.currentNode[agent_no].cell == self.goals[agent_no][-1]:
@@ -771,9 +777,9 @@ class SearchTree:
 
             self.currentNode[agent_no].expand(self.goals[agent_no][-1], agent_no)
 
-            print(f"Children: {len(self.currentNode[agent_no].children)}")
-
             for eachChild in self.currentNode[agent_no].children:
+                print(f"Children Agent {agent_no} {eachChild.cell} - Heuristic {eachChild.heuristic}")
+                print(f"Current goal {self.goals[agent_no][-1]}")
                 self.frontier[agent_no].append(eachChild)
             return self.MainStatus.IN_PROGRESS
 
@@ -847,15 +853,28 @@ class SearchTree:
                     res = self.BFS_OtherAgents(current_agent)
 
                     if res == self.MainStatus.UNSOLVABLE: # agent khác không đến được goal
-                        print("No solution for agent", current_agent)
+                        old_goal = self.goals[current_agent][-1]
+                        self.floors[old_goal.floor_no].table[old_goal.y][old_goal.x].removeValue(
+                            "T" + str(current_agent))
+
+
                         new_goal = self.generate_goal(current_agent)
+                        self.floors[new_goal.floor_no].table[new_goal.y][new_goal.x].appendValue(
+                            "T" + str(current_agent))
+
                         self.frontier[current_agent].clear()
 
-                        self.currentNode[current_agent].saveHeuristic(new_goal)
-                        self.frontier[current_agent].append(self.currentNode[current_agent])
+                        i = self.currentNode[current_agent].cell.y
+                        j = self.currentNode[current_agent].cell.x
+                        floor_no = self.currentNode[current_agent].cell.floor_no
+
+                        nextStartNode = Node(self.floors[floor_no].getCell(i, j), self)
+
+                        nextStartNode.saveHeuristic(new_goal)
+                        nextStartNode.cell.appendValue("A" + str(current_agent))
+                        self.frontier[current_agent].append(nextStartNode)
 
                         self.goals[current_agent].append(new_goal)
-                        self.path_iteration[current_agent] = 0
 
                     self.path_iteration[current_agent] = len(
                         self.currentNode[current_agent].path) - 1  # duyệt từng path
@@ -869,18 +888,31 @@ class SearchTree:
                         self.path_iteration[current_agent] -= 1
 
                         if current_cell == self.goals[current_agent][-1]: # đụng goal hiện tại thì generate goal mới
+                            old_goal = self.goals[current_agent][-1]
+                            self.floors[old_goal.floor_no].table[old_goal.y][old_goal.x].removeValue(
+                                "T" + str(current_agent))
+
                             new_goal = self.generate_goal(current_agent)
+                            self.floors[new_goal.floor_no].table[new_goal.y][new_goal.x].appendValue(
+                                "T" + str(current_agent))
+
                             self.frontier[current_agent].clear()
 
-                            self.currentNode[current_agent].saveHeuristic(new_goal)
-                            self.frontier[current_agent].append(self.currentNode[current_agent])
+                            i = current_cell.y
+                            j = current_cell.x
+                            floor_no = current_cell.floor_no
+
+                            nextStartNode = Node(self.floors[floor_no].getCell(i, j), self)
+
+                            nextStartNode.saveHeuristic(new_goal)
+                            nextStartNode.cell.appendValue("A" + str(current_agent))
+                            self.frontier[current_agent].append(nextStartNode)
 
                             self.goals[current_agent].append(new_goal)
 
-                            self.path_iteration[current_agent] = 0
+                            self.path_iteration[current_agent] = None
 
                     else:  # đụng agent khác
-
                         neighbors = self.agents[current_agent].neighbors(current_agent,self)
 
                         prevCell = self.agents[current_agent]
@@ -922,18 +954,27 @@ class SearchTree:
         if res[0] == self.MainStatus.REACHED:
             print("Found a way to reach the goal")
             path_to_goal = res[1]
+
+            for agent in range(2,self.number_agents):
+                self.root[agent].saveHeuristic(self.goals[agent][-1])
             self.agent_turn_based_movement(path_to_goal)
         else:
             print("No solution")
 
     def generate_goal(self, current_agent):
-        random_goal = None
+        current_floor = self.goals[current_agent][-1].floor_no
+        random_x = random.randint(0, self.floors[current_floor].cols - 1)
+        random_y = random.randint(0, self.floors[current_floor].rows - 1)
+        random_goal = self.floors[current_floor].getCell(random_y, random_x)
 
-        while random_goal is None or random_goal.isWall():
-            random_floor = random.randint(1, len(self.floors))
-            random_y = random.randint(0, self.floors[random_floor].rows - 1)
-            random_x = random.randint(0, self.floors[random_floor].cols - 1)
-            random_goal = self.floors[random_floor].getCell(random_y, random_x)
+        special = random_goal.getSpecialValue()
+
+        while random_goal.isWall() or special != "":
+            current_floor = self.goals[current_agent][-1].floor_no
+            random_x = random.randint(0, self.floors[current_floor].cols - 1)
+            random_y = random.randint(0, self.floors[current_floor].rows - 1)
+            random_goal = self.floors[current_floor].getCell(random_y, random_x)
+            special = random_goal.getSpecialValue()
 
         y_offset = (self.floors[random_goal.floor_no].rows * 35 + 20) * (random_goal.floor_no - 1)
         x0, y0 = random_goal.x * 20, random_goal.y * 35 + y_offset
