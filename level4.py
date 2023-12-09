@@ -57,7 +57,7 @@ class Cell:
         return abs(self.x - Cell.x) + abs(self.y - Cell.y)
 
     def getFloorsHeuristic(self, GoalCell):
-        return self.getManhattanFrom(GoalCell) + abs(self.floor_no - GoalCell.floor_no)
+        return self.getPhanTrungDucDistance(GoalCell) + abs(self.floor_no - GoalCell.floor_no)
 
     def getPhanTrungDucDistance(self, Cell):
         return max(abs(self.x - Cell.x), abs(self.y - Cell.y))

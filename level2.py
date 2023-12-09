@@ -129,7 +129,7 @@ class Node:
         return self.pathCost
 
     def saveHeuristic(self, Cell):
-        self.heuristic = self.cell.getManhattanFrom(Cell)
+        self.heuristic = self.cell.getPhanTrungDucDistance(Cell)
         return self.heuristic
 
     def saveF(self):
