@@ -1,6 +1,11 @@
 from tkinter import *
 import tkinter as tk
-from level2 import SearchTree
+
+import level3
+import level2
+import level4
+# from level2 import SearchTree
+# from level3 import SearchTree
 # import level3
 # import level1
 # import level2
@@ -162,7 +167,7 @@ def solve_level(level,win,testcase):
     win.destroy()
     print(f"Solving level {level}")
     if level == 2:
-        searchTree2 = SearchTree()
+        searchTree2 = level2.SearchTree()
         if testcase == 1: searchTree2.getInputFile("input//input1-level2.txt")
         if testcase == 2: searchTree2.getInputFile("input//input2-level2.txt")
         if testcase == 3: searchTree2.getInputFile("input//input3-level2.txt")
@@ -173,6 +178,31 @@ def solve_level(level,win,testcase):
         if(searchTree2.getCheckRoot() == False):
             print('false')
             testcase_level234(tk.Tk(),level)
+
+    if level == 3:
+        searchTree2 = level3.SearchTree()
+        if testcase == 1: searchTree2.getInputFile("input//input1-level3.txt")
+        if testcase == 2: searchTree2.getInputFile("input//input2-level3.txt")
+        if testcase == 3: searchTree2.getInputFile("input//input3-level3.txt")
+        if testcase == 4: searchTree2.getInputFile("input//input4-level3.txt")
+        if testcase == 5: searchTree2.getInputFile("input//input5-level3.txt")
+        searchTree2.Greedy_BFS()
+
+        if (searchTree2.getCheckRoot() == False):
+            print('false')
+            testcase_level234(tk.Tk(), level)
+
+    if level == 4:
+        searchTree2 = level4.SearchTree()
+        if testcase == 1: searchTree2.getInputFile("input//input1-level4.txt")
+        # if testcase == 2: searchTree2.getInputFile("input//input2-level4.txt")
+        if testcase == 3: searchTree2.getInputFile("input//input3-level4.txt")
+        if testcase == 4: searchTree2.getInputFile("input//input4-level4.txt")
+        # if testcase == 5: searchTree2.getInputFile("input//input5-level4.txt")
+        searchTree2.solve()
+
+
+        testcase_level234(tk.Tk(), level)
 
 
 

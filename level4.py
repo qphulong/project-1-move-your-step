@@ -626,6 +626,11 @@ class SearchTree:
         self.tkRoot = tk.Tk()
         self.canvas = tk.Canvas(self.tkRoot, width=0, height=0)
         self.canvas.pack()
+        self.score = 0
+        self.checkRoot = False
+
+    def getCheckRoot(self):
+        return self.checkRoot
 
     def getInputFile(self, filePath):
         with open(filePath, "r") as file:
@@ -1028,7 +1033,9 @@ class SearchTree:
 
     def initialHeatMap(self):
         self.checkRoot = True
-
+        # self.score+=1
+        score = tk.Label(self.tkRoot, font=('Arial', 15), text='Score: '+str(self.score), fg='Black')
+        score.place(x=self.floors[1].cols * 21, y=100)
         self.canvas.pack()
 
         y_offset = 0  # Offset for drawing floors vertically
@@ -1099,22 +1106,37 @@ class SearchTree:
             self.canvas.create_rectangle(
                 x0, y0, x1, y1, fill="#ff8888", outline="black"
             )
+            self.score += 1
+            score = tk.Label(self.tkRoot, font=('Arial', 15), text='Score: ' + str(self.score), fg='Black')
+            score.place(x=self.floors[1].cols * 21, y=100)
         elif visited[cell] == 1:
             self.canvas.create_rectangle(
                 x0, y0, x1, y1, fill="#ff4b4b", outline="black"
             )
+            self.score += 1
+            score = tk.Label(self.tkRoot, font=('Arial', 15), text='Score: ' + str(self.score), fg='Black')
+            score.place(x=self.floors[1].cols * 21, y=100)
         elif visited[cell] == 1:
             self.canvas.create_rectangle(
                 x0, y0, x1, y1, fill="#ff0000", outline="black"
             )
+            self.score += 1
+            score = tk.Label(self.tkRoot, font=('Arial', 15), text='Score: ' + str(self.score), fg='Black')
+            score.place(x=self.floors[1].cols * 21, y=100)
         elif visited[cell] == 1:
             self.canvas.create_rectangle(
                 x0, y0, x1, y1, fill="#cb0000", outline="black"
             )
+            self.score += 1
+            score = tk.Label(self.tkRoot, font=('Arial', 15), text='Score: ' + str(self.score), fg='Black')
+            score.place(x=self.floors[1].cols * 21, y=100)
         else:
             self.canvas.create_rectangle(
                 x0, y0, x1, y1, fill="#977878", outline="black"
             )
+            self.score += 1
+            score = tk.Label(self.tkRoot, font=('Arial', 15), text='Score: ' + str(self.score), fg='Black')
+            score.place(x=self.floors[1].cols * 21, y=100)
 
         self.canvas.create_text(
             x0 + 10, y0 + 10, text=f"A{current_agent}", fill="black", tags=f"{y}-{x}-{floor_no}"
@@ -1195,7 +1217,7 @@ class SearchTree:
                 agent = 1
 
 
-searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input3-level4.txt")
-searchTree2.solve()
+# searchTree2 = SearchTree()
+# searchTree2.getInputFile("input//input4-level4.txt")
+# searchTree2.solve()
 # searchTree2.tkRoot.mainloop()
