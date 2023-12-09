@@ -311,8 +311,8 @@ class Level1:
         pass
 
     def solve(self):
-        # path = self.algo.AStar_Level1(self)[1]
-        path = self.algo.UCS_Level1(self)[1]
+        path = self.algo.AStar_Level1(self)[1]
+        # path = self.algo.UCS_Level1(self)[1]
         # path = self.algo.BFS_Level1(self)[1]
         start_x = self.agent_Xposition
         start_y = self.agent_Yposition
@@ -327,5 +327,5 @@ class Level1:
 
 
 myLevel1 = Level1()
-myLevel1.getInputFile("input//input3-level1.txt")
+myLevel1.getInputFile("input//input4-level1.txt")
 myLevel1.solve()
