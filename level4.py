@@ -6,6 +6,7 @@ import tkinter as tk
 from collections import Counter
 from enum import Enum
 import copy
+from algorithm import export_heatmap
 
 
 class Cell:
@@ -846,6 +847,7 @@ class SearchTree:
                             visited[self.agents[current_agent]] += 1
 
                             self.heatMapUpdate(current_agent, self.agents[current_agent], prev, visited)
+                            export_heatmap(self.tkRoot)
                             self.tkRoot.mainloop()
                             break
 
