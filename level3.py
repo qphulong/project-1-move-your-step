@@ -23,6 +23,9 @@ class Cell:
     def __hash__(self):
         return hash((self.y, self.x, self.floor_no))
 
+    def __str__(self):
+        return f"({self.y}, {self.x} Floor {self.floor_no} Special value {self.getSpecialValue()})"
+
     def setBelongTo(self, value):
         self.belongTo = value
 
@@ -167,7 +170,7 @@ class Node:
 
     # a function that add neighbour cell to tempFrontier if they not in frontier and
     # not in visited and not in tempFrontier
-    def expandFrontierCell(self, cell, BFSvisited, BFSfrontier, BFStempFrontier):
+    def expandFrontierCell(self, cell, BFSvisited, BFSfrontier, BFStempFrontier, prevCell = None):
         floor_no = cell.floor_no
         # add N cell to tempFrontier
         if (
@@ -184,6 +187,9 @@ class Node:
             BFStempFrontier.append(northCell)
             cell.children.append(northCell)
             northCell.parrent = cell
+            if prevCell is not None:
+                prevCell.children.append(cell)
+                cell.parrent = prevCell
 
         # add W cell to tempFrontier
         if (
@@ -200,6 +206,9 @@ class Node:
             BFStempFrontier.append(westCell)
             cell.children.append(westCell)
             westCell.parrent = cell
+            if prevCell is not None:
+                prevCell.children.append(cell)
+                cell.parrent = prevCell
 
         # add S cell to tempFrontier
         if (
@@ -216,6 +225,9 @@ class Node:
             BFStempFrontier.append(southCell)
             cell.children.append(southCell)
             southCell.parrent = cell
+            if prevCell is not None:
+                prevCell.children.append(cell)
+                cell.parrent = prevCell
 
         # add E cell to tempFrontier
         if (
@@ -232,6 +244,9 @@ class Node:
             BFStempFrontier.append(eastCell)
             cell.children.append(eastCell)
             eastCell.parrent = cell
+            if prevCell is not None:
+                prevCell.children.append(cell)
+                cell.parrent = prevCell
 
         # add NE cell to tempFrontier
         if (
@@ -253,6 +268,9 @@ class Node:
             BFStempFrontier.append(neCell)
             cell.children.append(neCell)
             neCell.parrent = cell
+            if prevCell is not None:
+                prevCell.children.append(cell)
+                cell.parrent = prevCell
 
         # Add NW cell to tempFrontier
         if (
@@ -274,6 +292,9 @@ class Node:
             BFStempFrontier.append(nwCell)
             cell.children.append(nwCell)
             nwCell.parrent = cell
+            if prevCell is not None:
+                prevCell.children.append(cell)
+                cell.parrent = prevCell
 
         # Add SW cell to tempFrontier
         if (
@@ -295,6 +316,9 @@ class Node:
             BFStempFrontier.append(swCell)
             cell.children.append(swCell)
             swCell.parrent = cell
+            if prevCell is not None:
+                prevCell.children.append(cell)
+                cell.parrent = prevCell
 
         # Add SE cell to tempFrontier
         if (
@@ -316,6 +340,9 @@ class Node:
             BFStempFrontier.append(seCell)
             cell.children.append(seCell)
             seCell.parrent = cell
+            if prevCell is not None:
+                prevCell.children.append(cell)
+                cell.parrent = prevCell
 
     def expand(self, goal):
         BFSfrontier = []
@@ -491,11 +518,6 @@ class Node:
                     if self.cell != cell:
                       newNode.parent = self
 
-                    tempCell = cell
-                    while tempCell:
-                        newNode.path.append(tempCell)
-                        tempCell = tempCell.parrent
-
                     if cell_tag == "UP":
                         copyCell = self.belongTo.floors[cell.floor_no + 1].getCell(
                             cell.y, cell.x
@@ -504,9 +526,18 @@ class Node:
                         copyCell = self.belongTo.floors[cell.floor_no - 1].getCell(
                             cell.y, cell.x
                         )
+
+                    newNode.path.append(copyCell)
+                    tempCell = cell
+
+                    while tempCell:
+                        newNode.path.append(tempCell)
+                        tempCell = tempCell.parrent
+
+
                     # Expand the neighbors of the updated cell
                     self.expandFrontierCell(
-                        copyCell, BFSvisited, BFSfrontier, BFStempFrontier
+                        copyCell, BFSvisited, BFSfrontier, BFStempFrontier, cell
                     )
 
                     BFSvisited.append(copyCell)
@@ -659,6 +690,8 @@ class SearchTree:
             # self.visualize()
             self.frontier.sort(key=lambda x: x.heuristic)
             self.currentNode = self.frontier.pop(0)
+
+            print(f"{self.currentNode.cell}")
 
             # if path found
             if self.currentNode.cell == self.goals[0]:
@@ -972,6 +1005,6 @@ class SearchTree:
             time.sleep(0.4)
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input1-level3.txt")
+searchTree2.getInputFile("input//input4-level3.txt")
 searchTree2.Greedy_BFS()
 pass
