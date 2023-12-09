@@ -3,7 +3,7 @@ import time
 import tkinter as tk
 from enum import Enum
 from collections import Counter
-
+from algorithm import export_heatmap
 
 class Cell:
     def __init__(self, y, x, floor_no):
@@ -702,6 +702,7 @@ class SearchTree:
                     )
                     tempNode = tempNode.parent
                 self.heatMapAnimation()
+                export_heatmap(self.tkRoot)
                 return  # self.MainStatus.REACHED
 
             self.currentNode.expand(self.goals[0])
@@ -729,7 +730,7 @@ class SearchTree:
                         f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}"
                     )
                     tempNode = tempNode.parent
-                self.heatMap()
+                self.heatMapAnimation()
                 return
 
             self.currentNode.expand(self.goals[0])
@@ -798,99 +799,6 @@ class SearchTree:
             # Move to the parent node
             tempNode = tempNode.parent
         # Run the GUI
-        root.mainloop()
-
-    def heatMap(self):
-        root = tk.Tk()
-        self.checkRoot = True
-        root.title("Search Tree Visualization - All Floors")
-
-        canvas_width = max(self.floors[floor].cols for floor in self.floors) * 40
-        canvas_height = sum(self.floors[floor].rows for floor in self.floors) * 35 * len(self.floors)
-        canvas = tk.Canvas(root, width=canvas_width, height=canvas_height)
-        canvas.pack()
-
-        y_offset = 0  # Offset for drawing floors vertically
-
-        for floor_no in self.floors:
-            floor = self.floors[floor_no]
-
-            # Draw each row of the floor
-            for i in range(floor.rows):
-                for j in range(floor.cols):
-                    x0, y0 = j * 20, i * 35 + y_offset
-                    x1, y1 = (j + 1) * 20, (i + 1) * 35 + y_offset
-
-                    if floor.table[i][j].checkValue("-1"):
-                        canvas.create_rectangle(x0, y0, x1, y1, fill="black", outline="black")
-                    else:
-                        canvas.create_rectangle(x0, y0, x1, y1, fill="white", outline="black")
-                        specialValue = floor.table[i][j].getSpecialValue()
-                        canvas.create_text(
-                            x0 + 10, y0 + 10, text=specialValue, fill="black"
-                        )
-
-            # Draw path for the current floor
-            tempNode = self.currentNode
-            generalPath = []
-            while tempNode:
-                for eachCell in tempNode.path:
-                    generalPath.append(eachCell)
-                tempNode = tempNode.parent
-
-            for eachCell in generalPath:
-                for i in range(floor.rows):
-                    for j in range(floor.cols):
-                        x0, y0 = j * 20, i * 35 + y_offset
-                        x1, y1 = (j + 1) * 20, (i + 1) * 35 + y_offset
-
-                        if floor.table[i][j] in generalPath:
-                            if Counter(generalPath)[floor.table[i][j]] == 1:
-                                canvas.create_rectangle(
-                                    x0, y0, x1, y1, fill="#ff8888", outline="black"
-                                )
-                            elif Counter(generalPath)[floor.table[i][j]] == 2:
-                                canvas.create_rectangle(
-                                    x0, y0, x1, y1, fill="#ff4b4b", outline="black"
-                                )
-                            elif Counter(generalPath)[floor.table[i][j]] == 3:
-                                canvas.create_rectangle(
-                                    x0, y0, x1, y1, fill="#ff0000", outline="black"
-                                )
-                            elif Counter(generalPath)[floor.table[i][j]] == 4:
-                                canvas.create_rectangle(
-                                    x0, y0, x1, y1, fill="#cb0000", outline="black"
-                                )
-                        special = floor.table[i][j].getSpecialValue()
-                        if floor.table[i][j].getSpecialValue() != "":
-                            if special == "UP" or special == "DO":
-                                canvas.create_rectangle(x0, y0, x1, y1, fill="#34cceb" if special == "UP" else "#f5aa42", outline="black")
-                                canvas.create_text(
-                                    x0 + 10, y0 + 10, text="↑" if special == "UP" else "↓", fill="black"
-                                )
-                                continue
-
-                            if special == "T1":
-                                canvas.create_rectangle(x0, y0, x1, y1, fill="#ebb121", outline="black")
-                                canvas.create_text(
-                                    x0 + 10, y0 + 10, text="T1"
-                                )
-                                continue
-
-                            if special == "A1":
-                                canvas.create_rectangle(x0, y0, x1, y1, fill="#5750ba", outline="black")
-                                canvas.create_text(
-                                    x0 + 10, y0 + 10, text="A1"
-                                )
-                                continue
-
-                            canvas.create_rectangle(x0, y0, x1, y1, fill="#2ad500", outline="black")
-                            canvas.create_text(
-                                x0 + 10, y0 + 10, text=special, fill="black"
-                            )
-
-            y_offset += floor.rows * 35 + 20  # Adjust y_offset for next floor
-
         root.mainloop()
 
 
@@ -1004,7 +912,6 @@ class SearchTree:
             self.tkRoot.update()
             time.sleep(0.4)
 
-# searchTree2 = SearchTree()
-# searchTree2.getInputFile("input//input4-level3.txt")
-# searchTree2.Greedy_BFS()
-pass
+searchTree2 = SearchTree()
+searchTree2.getInputFile("input//input3-level3.txt")
+searchTree2.Greedy_BFS()

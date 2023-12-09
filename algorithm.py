@@ -2,11 +2,15 @@ import heapq
 import tkinter as tk
 from graphical import root
 import numpy as np
+from PIL import Image, ImageGrab
+import platform
+import os
+import subprocess
 
 
 class Algorithm:
     def heuristic_Level1(self, current_state, goal_x, goal_y):
-        return np.sqrt((current_state.agent_Xposition - goal_x)**2 + (current_state.agent_Yposition - goal_y)**2)
+        return np.sqrt((current_state.agent_Xposition - goal_x) ** 2 + (current_state.agent_Yposition - goal_y) ** 2)
 
     def BFS_Level1(self, start):
         visited = set()
@@ -16,7 +20,8 @@ class Algorithm:
         goal_x = start.goal_Xposition
         goal_y = start.goal_Yposition
 
-        heapq.heappush(frontier, (self.heuristic_Level1(start, goal_x, goal_y) + 0, start))  # priority queue based on moves
+        heapq.heappush(frontier,
+                       (self.heuristic_Level1(start, goal_x, goal_y) + 0, start))  # priority queue based on moves
 
         found = False
 
@@ -212,9 +217,28 @@ class Algorithm:
                 text_y = y1 + cell_size // 2
 
                 canvas.create_text(text_x, text_y,
-                                   text=("A1" if i == start_x and j == start_y else "T1" if i == goal_x and j == goal_y else "")
+                                   text=(
+                                       "A1" if i == start_x and j == start_y else "T1" if i == goal_x and j == goal_y else "")
                                    , fill=(
                         "blue" if i == goal_x and j == goal_y else "red" if i == start_x and j == start_y else "white")
                                    , font=("Arial", 10))
 
+        export_heatmap(root)
         root.mainloop()
+
+
+def export_heatmap(Tkroot):
+    x = Tkroot.winfo_rootx()
+    y = Tkroot.winfo_rooty()
+    width = Tkroot.winfo_width()
+    height = Tkroot.winfo_height()
+    screenshot = ImageGrab.grab(bbox=(x, y, x + width, y + height))
+    screenshot.save("heatmap.png")
+
+    image_folder = os.path.dirname(os.path.abspath("heatmap.png"))
+
+    operating_system = platform.system()
+    if operating_system == "Darwin":
+        subprocess.run(["open", image_folder])  # Opens the folder in Windows File Explorer
+    elif operating_system == "Windows":
+        subprocess.run(["explorer", image_folder])  # Opens the folder in Windows File Explorer

@@ -1,6 +1,7 @@
 import re
 import tkinter as tk
 from collections import Counter
+from algorithm import export_heatmap
 
 
 class Cell:
@@ -682,6 +683,7 @@ class SearchTree:
         update_animation(0)
 
         # Run the GUI
+        export_heatmap(root)
         root.mainloop()
 
 
