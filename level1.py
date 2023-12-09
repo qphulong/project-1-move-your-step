@@ -327,5 +327,5 @@ class Level1:
 
 
 myLevel1 = Level1()
-myLevel1.getInputFile("input//input4-level1.txt")
+myLevel1.getInputFile("input//input5-level1.txt")
 myLevel1.solve()
