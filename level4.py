@@ -794,7 +794,7 @@ class SearchTree:
         # self.root[agent_no].saveF()
         if self.frontier[agent_no]:
 
-            # self.frontier[agent_no].sort(key=lambda x: x.heuristic)
+            self.frontier[agent_no].sort(key=lambda x: x.heuristic)
 
             self.currentNode[agent_no] = self.frontier[agent_no].pop(0)
 
