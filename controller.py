@@ -196,7 +196,7 @@ def solve_level(level,win,testcase):
         if testcase == 2: searchTree2.getInputFile("input//input2-level4.txt")
         if testcase == 3: searchTree2.getInputFile("input//input3-level4.txt")
         if testcase == 4: searchTree2.getInputFile("input//input4-level4.txt")
-        # if testcase == 5: searchTree2.getInputFile("input//input5-level4.txt")
+        if testcase == 5: searchTree2.getInputFile("input//input5-level4.txt")
         searchTree2.solve()
 
 
