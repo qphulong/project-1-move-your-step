@@ -1200,7 +1200,7 @@ class SearchTree:
                 agent = 1
 
 
-searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input4-level4.txt")
-searchTree2.solve()
+# searchTree2 = SearchTree()
+# searchTree2.getInputFile("input//input4-level4.txt")
+# searchTree2.solve()
 # searchTree2.tkRoot.mainloop()
