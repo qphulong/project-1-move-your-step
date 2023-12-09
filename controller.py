@@ -193,7 +193,7 @@ def solve_level(level,win,testcase):
     if level == 4:
         searchTree2 = level4.SearchTree()
         if testcase == 1: searchTree2.getInputFile("input//input1-level4.txt")
-        # if testcase == 2: searchTree2.getInputFile("input//input2-level4.txt")
+        if testcase == 2: searchTree2.getInputFile("input//input2-level4.txt")
         if testcase == 3: searchTree2.getInputFile("input//input3-level4.txt")
         if testcase == 4: searchTree2.getInputFile("input//input4-level4.txt")
         # if testcase == 5: searchTree2.getInputFile("input//input5-level4.txt")
@@ -201,11 +201,6 @@ def solve_level(level,win,testcase):
 
 
         testcase_level234(tk.Tk(), level)
-
-    if level == 1:
-        myLevel1 = level1.Level1()
-        myLevel1.getInputFile("input//input5-level1.txt")
-        myLevel1.solve()
 
 def solve_level1(str,testcase):
     if str == 'astar':
