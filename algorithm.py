@@ -12,7 +12,7 @@ class Algorithm:
     def heuristic_Level1(self, current_state, goal_x, goal_y):
         return np.sqrt((current_state.agent_Xposition - goal_x) ** 2 + (current_state.agent_Yposition - goal_y) ** 2)
 
-    def BFS_Level1(self, start):
+    def AStar_Level1(self, start): # astar
         visited = set()
         current_path = []
         frontier = []  # queue
@@ -77,18 +77,66 @@ class Algorithm:
 
         return (found, current_path)
 
-    def AStar(self, start, current_agent, goal=None):
-        print(f'Goal {goal.x} {goal.y} {goal.floor}')
-
+    def BFS_Level1(self, start):  # bfs
         visited = set()
         current_path = []
         frontier = []  # queue
-        heapq.heappush(frontier, (0, start))  # priority queue based on moves
+        frontier.append(start)
+
+        goal_x = start.goal_Xposition
+        goal_y = start.goal_Yposition
 
         found = False
-        current_state = None
 
         while frontier:
+
+            current_state = frontier.pop(0)
+
+            if current_state is None:
+                continue
+
+            visited.add(current_state.floor_rep())
+
+            # check goal
+            if current_state.checkGoal():
+                current_path.append((current_state.agent_Xposition, current_state.agent_Yposition))
+                previous = current_state.previous
+
+                while previous is not None:
+                    current_path.append((previous.agent_Xposition, previous.agent_Yposition))
+                    previous = previous.previous
+                found = True
+                break
+
+            successors = current_state.successors()
+
+            for successor in successors:
+                if successor is None:
+                    continue
+
+                if tuple(successor.floor_rep()) not in visited:
+                    frontier.append(successor)
+
+        if found == False:
+            current_path = None
+
+        return (found, current_path)
+
+    def UCS_Level1(self, start): # ucs
+        visited = set()
+        current_path = []
+        frontier = []  # queue
+
+        goal_x = start.goal_Xposition
+        goal_y = start.goal_Yposition
+
+        heapq.heappush(frontier,
+                       (0, start))  # priority queue based on moves
+
+        found = False
+
+        while frontier:
+
             current_state = heapq.heappop(frontier)[1]
 
             if current_state is None:
@@ -96,40 +144,47 @@ class Algorithm:
 
             visited.add(current_state.floor_rep())
 
-            current_state.checkKey()  # lượm key
-
             # check goal
-            if current_state.checkGoal(goal):
-                current_path.append(current_state.agents[current_agent])
-                print(current_state.agents[current_agent])
+            if current_state.checkGoal():
+                current_path.append((current_state.agent_Xposition, current_state.agent_Yposition))
                 previous = current_state.previous
 
                 while previous is not None:
-                    current_path.append(previous.agents[current_agent])
-                    print(previous.agents[current_agent])
+                    current_path.append((previous.agent_Xposition, previous.agent_Yposition))
                     previous = previous.previous
                 found = True
                 break
 
-            successors = current_state.successors(current_agent)
+            successors = current_state.successors()
 
             for successor in successors:
-
                 if successor is None:
                     continue
 
-                total_cost = successor.moves[current_agent] + successor.heuristic_lvl4(current_agent)
-                if successor.floor_rep() not in visited and not any(successor == s for _, s in frontier):
-                    heapq.heappush(frontier, (total_cost, successor))
-                elif any(total_cost < cost for cost, s in frontier if s == successor):
+
+                if tuple(successor.floor_rep()) not in visited and not any(
+                        successor == s for _, s in frontier
+                ):
+                    heapq.heappush(frontier, (successor.moves, successor))
+                elif any(
+                        successor.moves < cost
+                        for cost, s in frontier
+                        if s.floor_rep() == successor.floor_rep()
+                ):
                     # if in frontier already but higher path cost
-                    frontier.remove(successor)
-                    heapq.heappush(frontier, (total_cost, successor))  # replace with lower path cost
+                    frontier = [
+                        (cost, s)
+                        for cost, s in frontier
+                        if s.floor_rep() != successor.floor_rep()
+                    ]
+                    heapq.heappush(
+                        frontier, (successor.moves, successor)
+                    )  # replace with lower path cost
 
         if found == False:
             current_path = None
 
-        return (found, (current_state, current_path))
+        return (found, current_path)
 
     # mở cửa phòng
     def open_door(self, room_no, level4, goal):
