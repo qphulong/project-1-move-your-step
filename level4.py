@@ -87,7 +87,7 @@ class Cell:
             if is_valid_position(y, x):
                 cell = searchTree.floors[floor_no].getCell(y, x)
                 special = cell.getSpecialValue() if len(cell.getSpecialValue()) > 0 else ""
-                if not cell.isWall() and special == "" and searchTree.isOtherAgent(cell, agent_no) is None:
+                if not cell.isWall() and (special == "" or special == f"A{agent_no}") and searchTree.isOtherAgent(cell, agent_no) is None:
                     children.append(cell)
                     cell.parrent = self
 
@@ -794,11 +794,11 @@ class SearchTree:
         # self.root[agent_no].saveF()
         if self.frontier[agent_no]:
 
-            self.frontier[agent_no].sort(key=lambda x: x.heuristic)
+            # self.frontier[agent_no].sort(key=lambda x: x.heuristic)
 
             self.currentNode[agent_no] = self.frontier[agent_no].pop(0)
 
-            print(f"Agent {agent_no} {self.currentNode[agent_no].cell.getSpecialValue()}")
+            # print(f"Agent {agent_no} {self.currentNode[agent_no].cell.getSpecialValue()}")
 
             # if path found
             if self.currentNode[agent_no].cell == self.goals[agent_no][-1]:
@@ -807,8 +807,8 @@ class SearchTree:
             self.currentNode[agent_no].expand(self.goals[agent_no][-1], agent_no)
 
             for eachChild in self.currentNode[agent_no].children:
-                print(f"Children Agent {agent_no} {eachChild.cell} - Heuristic {eachChild.heuristic}")
-                print(f"Current goal {self.goals[agent_no][-1]}")
+                # print(f"Children Agent {agent_no} {eachChild.cell} - Heuristic {eachChild.heuristic}")
+                # print(f"Current goal {self.goals[agent_no][-1]}")
                 self.frontier[agent_no].append(eachChild)
             return self.MainStatus.IN_PROGRESS
 
@@ -997,19 +997,8 @@ class SearchTree:
             print("No solution")
 
     def generate_goal(self, current_agent):
-        current_floor = self.goals[current_agent][-1].floor_no
-        random_x = random.randint(0, self.floors[current_floor].cols - 1)
-        random_y = random.randint(0, self.floors[current_floor].rows - 1)
-        random_goal = self.floors[current_floor].getCell(random_y, random_x)
-
-        special = random_goal.getSpecialValue()
-
-        while random_goal.isWall() or special != "":
-            current_floor = self.goals[current_agent][-1].floor_no
-            random_x = random.randint(0, self.floors[current_floor].cols - 1)
-            random_y = random.randint(0, self.floors[current_floor].rows - 1)
-            random_goal = self.floors[current_floor].getCell(random_y, random_x)
-            special = random_goal.getSpecialValue()
+        neighbors = self.agents[current_agent].neighbors(current_agent,self)
+        random_goal = neighbors[random.randint(0, len(neighbors) - 1)]
 
         y_offset = (self.floors[random_goal.floor_no].rows * 35 + 20) * (random_goal.floor_no - 1)
         x0, y0 = random_goal.x * 20, random_goal.y * 35 + y_offset
@@ -1217,7 +1206,7 @@ class SearchTree:
                 agent = 1
 
 
-# searchTree2 = SearchTree()
-# searchTree2.getInputFile("input//input4-level4.txt")
-# searchTree2.solve()
+searchTree2 = SearchTree()
+searchTree2.getInputFile("input//input4-level4.txt")
+searchTree2.solve()
 # searchTree2.tkRoot.mainloop()
