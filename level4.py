@@ -1207,6 +1207,6 @@ class SearchTree:
 
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input3-level4.txt")
+searchTree2.getInputFile("input//input1-level4.txt")
 searchTree2.solve()
 # searchTree2.tkRoot.mainloop()

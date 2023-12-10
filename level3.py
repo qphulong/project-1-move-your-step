@@ -966,7 +966,7 @@ class SearchTree:
             self.tkRoot.update()
             time.sleep(0.4)
 
-# searchTree2 = SearchTree()
-# searchTree2.getInputFile("input//input5-level3.txt")
-# searchTree2.Greedy_BFS()
+searchTree2 = SearchTree()
+searchTree2.getInputFile("input//input3-level3.txt")
+searchTree2.Greedy_BFS()
 # searchTree2.AStar()
