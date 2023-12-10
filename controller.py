@@ -186,9 +186,7 @@ def solve_level(level,win,testcase):
         if testcase == 5: searchTree2.getInputFile("input//input5-level3.txt")
         searchTree2.Greedy_BFS()
 
-        if (searchTree2.getCheckRoot() == False):
-            print('false')
-            testcase_level234(tk.Tk(), level)
+        testcase_level234(tk.Tk(), level)
 
     if level == 4:
         searchTree2 = level4.SearchTree()
