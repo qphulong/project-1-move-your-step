@@ -319,7 +319,7 @@ class Level1:
         canvas = tk.Canvas(root, width=board_size * cell_size, height=board_size * cell_size)
         canvas.pack()
 
-        score = tk.Label(root, font=('Arial', 25), text='Score: '+str(len(path)), fg='Black')
+        score = tk.Label(root, font=('Arial', 25), text='Score: '+str(len(path)-1), fg='Black')
         score.place(x=floor.cols*13, y=floor.rows*23)
 
         # Draw the board

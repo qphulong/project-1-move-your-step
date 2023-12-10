@@ -578,6 +578,10 @@ class SearchTree:
         self.tkRoot = tk.Tk()
         self.canvas = tk.Canvas(self.tkRoot, width=0, height=0)
         self.canvas.pack()
+        self.score = 0
+
+    def getCheckRoot(self):
+        return self.checkRoot
 
     def getInputFile(self, filePath):
         with open(filePath, "r") as file:
@@ -659,6 +663,34 @@ class SearchTree:
         UNSOLVABLE = -1
         IN_PROGRESS = 0
 
+
+    def AStar(self):
+        self.root.saveHeuristic(self.goals[0])  # save heuristic for root
+        self.root.saveF()
+
+        while self.frontier:
+            # self.visualize()
+            self.frontier.sort(key=lambda x: x.getF())
+            self.currentNode = self.frontier.pop(0)
+
+            # if path found
+            if self.currentNode.cell == self.goals[0]:
+                tempNode = self.currentNode
+                while tempNode:
+                    print(
+                        f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}"
+                    )
+                    tempNode = tempNode.parent
+                self.heatMap()
+                return  # self.MainStatus.REACHED
+
+            self.currentNode.expand(self.goals[0])
+            for eachChild in set(self.currentNode.children):
+                self.frontier.append(eachChild)
+
+        print("No solution found")
+        # return self.MainStatus.UNSOLVABLE
+
     def Greedy_BFS(self):
         self.root.saveHeuristic(self.goals[0])  # save heuristic for root
 
@@ -666,6 +698,37 @@ class SearchTree:
             # self.visualize()
             self.frontier.sort(key=lambda x: x.heuristic)
             self.currentNode = self.frontier.pop(0)
+
+            print(f"{self.currentNode.cell}")
+
+            # if path found
+            if self.currentNode.cell == self.goals[0]:
+                tempNode = self.currentNode
+                while tempNode:
+                    print(
+                        f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}"
+                    )
+                    tempNode = tempNode.parent
+                self.heatMapAnimation()
+                export_heatmap(self.tkRoot)
+                return  # self.MainStatus.REACHED
+
+            self.currentNode.expand(self.goals[0])
+            for eachChild in set(self.currentNode.children):
+                self.frontier.append(eachChild)
+
+        print("No solution found")
+        # return self.MainStatus.UNSOLVABLE
+
+    def AStar(self):
+        self.root.saveHeuristic(self.goals[0])  # save heuristic for root
+
+        while self.frontier:
+            # self.visualize()
+            self.frontier.sort(key=lambda x: x.heuristic + x.pathCost)
+            self.currentNode = self.frontier.pop(0)
+
+            print(f"{self.currentNode.cell}")
 
             # if path found
             if self.currentNode.cell == self.goals[0]:
@@ -779,6 +842,11 @@ class SearchTree:
     def heatMapAnimation(self):
         self.checkRoot = True
 
+        # score = tk.Label(root, font=('Arial', 15), text='Score: ' + str(self.score), fg='Black')
+        # score.place(x=self.floor.cols * 22, y=self.floor.rows * 11)
+        score = tk.Label(self.tkRoot, font=('Arial', 15), text='Score: ' + str(self.score), fg='Black')
+        score.place(x=self.floors[1].cols * 21, y=100)
+
         self.canvas.pack()
 
         y_offset = 0  # Offset for drawing floors vertically
@@ -869,24 +937,36 @@ class SearchTree:
                 self.canvas.create_rectangle(
                     x0, y0, x1, y1, fill="#ff8888", outline="black"
                 )
+                self.score += 1
+                score = tk.Label(self.tkRoot, font=('Arial', 15), text='Score: ' + str(self.score), fg='Black')
+                score.place(x=self.floors[1].cols * 21, y=100)
             elif Counter(generalPath)[eachCell] == 2:
                 self.canvas.create_rectangle(
                     x0, y0, x1, y1, fill="#ff4b4b", outline="black"
                 )
+                self.score += 1
+                score = tk.Label(self.tkRoot, font=('Arial', 15), text='Score: ' + str(self.score), fg='Black')
+                score.place(x=self.floors[1].cols * 21, y=100)
             elif Counter(generalPath)[eachCell] == 3:
                 self.canvas.create_rectangle(
                     x0, y0, x1, y1, fill="#ff0000", outline="black"
                 )
+                self.score += 1
+                score = tk.Label(self.tkRoot, font=('Arial', 15), text='Score: ' + str(self.score), fg='Black')
+                score.place(x=self.floors[1].cols * 21, y=100)
             elif Counter(generalPath)[eachCell] == 4:
                 self.canvas.create_rectangle(
                     x0, y0, x1, y1, fill="#cb0000", outline="black"
                 )
+                self.score += 1
+                score = tk.Label(self.tkRoot, font=('Arial', 15), text='Score: ' + str(self.score), fg='Black')
+                score.place(x=self.floors[1].cols * 21, y=100)
             generalPath.pop(-1)
 
             self.tkRoot.update()
             time.sleep(0.4)
 
-searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input3-level3.txt")
-searchTree2.Greedy_BFS()
+# searchTree2 = SearchTree()
+# searchTree2.getInputFile("input//input5-level3.txt")
+# searchTree2.Greedy_BFS()
 # searchTree2.AStar()
