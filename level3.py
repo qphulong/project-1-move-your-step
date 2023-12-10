@@ -578,6 +578,10 @@ class SearchTree:
         self.tkRoot = tk.Tk()
         self.canvas = tk.Canvas(self.tkRoot, width=0, height=0)
         self.canvas.pack()
+        self.score = 0
+
+    def getCheckRoot(self):
+        return self.checkRoot
 
     def getInputFile(self, filePath):
         with open(filePath, "r") as file:
@@ -838,6 +842,11 @@ class SearchTree:
     def heatMapAnimation(self):
         self.checkRoot = True
 
+        # score = tk.Label(root, font=('Arial', 15), text='Score: ' + str(self.score), fg='Black')
+        # score.place(x=self.floor.cols * 22, y=self.floor.rows * 11)
+        score = tk.Label(self.tkRoot, font=('Arial', 15), text='Score: ' + str(self.score), fg='Black')
+        score.place(x=self.floors[1].cols * 21, y=100)
+
         self.canvas.pack()
 
         y_offset = 0  # Offset for drawing floors vertically
@@ -928,24 +937,36 @@ class SearchTree:
                 self.canvas.create_rectangle(
                     x0, y0, x1, y1, fill="#ff8888", outline="black"
                 )
+                self.score += 1
+                score = tk.Label(self.tkRoot, font=('Arial', 15), text='Score: ' + str(self.score), fg='Black')
+                score.place(x=self.floors[1].cols * 21, y=100)
             elif Counter(generalPath)[eachCell] == 2:
                 self.canvas.create_rectangle(
                     x0, y0, x1, y1, fill="#ff4b4b", outline="black"
                 )
+                self.score += 1
+                score = tk.Label(self.tkRoot, font=('Arial', 15), text='Score: ' + str(self.score), fg='Black')
+                score.place(x=self.floors[1].cols * 21, y=100)
             elif Counter(generalPath)[eachCell] == 3:
                 self.canvas.create_rectangle(
                     x0, y0, x1, y1, fill="#ff0000", outline="black"
                 )
+                self.score += 1
+                score = tk.Label(self.tkRoot, font=('Arial', 15), text='Score: ' + str(self.score), fg='Black')
+                score.place(x=self.floors[1].cols * 21, y=100)
             elif Counter(generalPath)[eachCell] == 4:
                 self.canvas.create_rectangle(
                     x0, y0, x1, y1, fill="#cb0000", outline="black"
                 )
+                self.score += 1
+                score = tk.Label(self.tkRoot, font=('Arial', 15), text='Score: ' + str(self.score), fg='Black')
+                score.place(x=self.floors[1].cols * 21, y=100)
             generalPath.pop(-1)
 
             self.tkRoot.update()
             time.sleep(0.4)
 
 # searchTree2 = SearchTree()
-# searchTree2.getInputFile("input//input3-level3.txt")
+# searchTree2.getInputFile("input//input5-level3.txt")
 # searchTree2.Greedy_BFS()
 # searchTree2.AStar()
