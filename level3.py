@@ -4,6 +4,7 @@ import tkinter as tk
 from enum import Enum
 from collections import Counter
 from algorithm import export_heatmap
+import math
 
 class Cell:
     def __init__(self, y, x, floor_no):
@@ -51,8 +52,11 @@ class Cell:
     def getManhattanFrom(self, Cell):
         return abs(self.x - Cell.x) + abs(self.y - Cell.y)
 
+    def getEuclidean(self, Cell):
+        return math.sqrt((self.x - Cell.x) ** 2 + (self.y - Cell.y) ** 2)
+
     def getFloorsHeuristic(self, GoalCell):
-        return self.getPhanTrungDucDistance(GoalCell) + abs(self.floor_no - GoalCell.floor_no)
+        return self.getEuclidean(GoalCell) + abs(self.floor_no - GoalCell.floor_no)
 
     def getPhanTrungDucDistance(self, Cell):
         return max(abs(self.x - Cell.x), abs(self.y - Cell.y))

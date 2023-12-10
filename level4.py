@@ -7,6 +7,7 @@ from collections import Counter
 from enum import Enum
 import copy
 from algorithm import export_heatmap
+import math
 
 
 class Cell:
@@ -56,8 +57,11 @@ class Cell:
     def getManhattanFrom(self, Cell):
         return abs(self.x - Cell.x) + abs(self.y - Cell.y)
 
+    def getEuclidean(self, Cell):
+        return math.sqrt((self.x - Cell.x) ** 2 + (self.y - Cell.y) ** 2)
+
     def getFloorsHeuristic(self, GoalCell):
-        return self.getPhanTrungDucDistance(GoalCell) + abs(self.floor_no - GoalCell.floor_no)
+        return self.getEuclidean(GoalCell) + abs(self.floor_no - GoalCell.floor_no)
 
     def getPhanTrungDucDistance(self, Cell):
         return max(abs(self.x - Cell.x), abs(self.y - Cell.y))
@@ -1191,7 +1195,7 @@ class SearchTree:
                 generalPath[agent].pop(-1)
 
                 self.tkRoot.update()
-                time.sleep(0.1)
+                time.sleep(0.4)
 
             else:
                 if agent == 1:
@@ -1202,7 +1206,7 @@ class SearchTree:
                 agent = 1
 
 
-# searchTree2 = SearchTree()
-# searchTree2.getInputFile("input//input4-level4.txt")
-# searchTree2.solve()
+searchTree2 = SearchTree()
+searchTree2.getInputFile("input//input1-level4.txt")
+searchTree2.solve()
 # searchTree2.tkRoot.mainloop()

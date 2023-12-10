@@ -312,8 +312,8 @@ class Level1:
 
     def solve(self):
         # path = self.algo.AStar_Level1(self)[1]
-        path = self.algo.UCS_Level1(self)[1]
-        # path = self.algo.BFS_Level1(self)[1]
+        # path = self.algo.UCS_Level1(self)[1]
+        path = self.algo.BFS_Level1(self)[1]
         start_x = self.agent_Xposition
         start_y = self.agent_Yposition
         goal_x = self.goal_Xposition
