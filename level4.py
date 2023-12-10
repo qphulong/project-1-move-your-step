@@ -955,8 +955,8 @@ class SearchTree:
                         prevCell.waitingCell = True
 
                         if len(neighbors) > 0:
-                            tempCell = neighbors[0]
-                            while self.isOtherAgent(tempCell, current_agent) is not None:
+                            tempCell = None
+                            while tempCell is None or self.isOtherAgent(tempCell, 1) is not None:
                                 tempCell = neighbors[random.randint(0, len(neighbors) - 1)]
 
                             tempCell.waitingCell = True
@@ -1132,7 +1132,7 @@ class SearchTree:
         )
 
         self.tkRoot.update()
-        time.sleep(0.4)
+        time.sleep(0.2)
 
     def heatMapAnimation(self, path_to_goal):
         generalPath = {}
@@ -1195,7 +1195,7 @@ class SearchTree:
                 generalPath[agent].pop(-1)
 
                 self.tkRoot.update()
-                time.sleep(0.4)
+                time.sleep(0.2)
 
             else:
                 if agent == 1:
@@ -1206,7 +1206,7 @@ class SearchTree:
                 agent = 1
 
 
-# searchTree2 = SearchTree()
-# searchTree2.getInputFile("input//input5-level4.txt")
-# searchTree2.solve()
+searchTree2 = SearchTree()
+searchTree2.getInputFile("input//input3-level4.txt")
+searchTree2.solve()
 # searchTree2.tkRoot.mainloop()
