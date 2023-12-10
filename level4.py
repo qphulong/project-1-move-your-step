@@ -61,7 +61,7 @@ class Cell:
         return math.sqrt((self.x - Cell.x) ** 2 + (self.y - Cell.y) ** 2)
 
     def getFloorsHeuristic(self, GoalCell):
-        return self.getEuclidean(GoalCell) + abs(self.floor_no - GoalCell.floor_no)
+        return self.getPhanTrungDucDistance(GoalCell) + abs(self.floor_no - GoalCell.floor_no)
 
     def getPhanTrungDucDistance(self, Cell):
         return max(abs(self.x - Cell.x), abs(self.y - Cell.y))
@@ -96,8 +96,6 @@ class Cell:
                     if len(special)>0 and special[0] == "D":
                         if str("K" + str(special[1])) not in searchTree.currentNode[agent_no].keys and (key_cell for cell in path if cell.getSpecialValue() == str("K" + str(special[1]))) is None:
                             return
-
-
                     children.append(cell)
                     cell.parrent = self
 
@@ -955,8 +953,8 @@ class SearchTree:
                         prevCell.waitingCell = True
 
                         if len(neighbors) > 0:
-                            tempCell = neighbors[0]
-                            while self.isOtherAgent(tempCell, current_agent) is not None:
+                            tempCell = None
+                            while tempCell is None or self.isOtherAgent(tempCell, 1) is not None:
                                 tempCell = neighbors[random.randint(0, len(neighbors) - 1)]
 
                             tempCell.waitingCell = True
@@ -1161,7 +1159,6 @@ class SearchTree:
                     self.tkRoot.update()
 
                 eachCell = generalPath[agent][-1]
-                print(f"A{agent}: {eachCell}")
                 prevCell[agent] = eachCell
 
                 y = eachCell.y
@@ -1207,6 +1204,6 @@ class SearchTree:
 
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input5-level4.txt")
+searchTree2.getInputFile("input//input3-level4.txt")
 searchTree2.solve()
 # searchTree2.tkRoot.mainloop()

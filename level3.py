@@ -659,34 +659,6 @@ class SearchTree:
         UNSOLVABLE = -1
         IN_PROGRESS = 0
 
-
-    def AStar(self):
-        self.root.saveHeuristic(self.goals[0])  # save heuristic for root
-        self.root.saveF()
-
-        while self.frontier:
-            # self.visualize()
-            self.frontier.sort(key=lambda x: x.getF())
-            self.currentNode = self.frontier.pop(0)
-
-            # if path found
-            if self.currentNode.cell == self.goals[0]:
-                tempNode = self.currentNode
-                while tempNode:
-                    print(
-                        f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}"
-                    )
-                    tempNode = tempNode.parent
-                self.heatMap()
-                return  # self.MainStatus.REACHED
-
-            self.currentNode.expand(self.goals[0])
-            for eachChild in set(self.currentNode.children):
-                self.frontier.append(eachChild)
-
-        print("No solution found")
-        # return self.MainStatus.UNSOLVABLE
-
     def Greedy_BFS(self):
         self.root.saveHeuristic(self.goals[0])  # save heuristic for root
 
@@ -694,37 +666,6 @@ class SearchTree:
             # self.visualize()
             self.frontier.sort(key=lambda x: x.heuristic)
             self.currentNode = self.frontier.pop(0)
-
-            print(f"{self.currentNode.cell}")
-
-            # if path found
-            if self.currentNode.cell == self.goals[0]:
-                tempNode = self.currentNode
-                while tempNode:
-                    print(
-                        f"{tempNode.cell.getSpecialValue()} Floor: {tempNode.cell.floor_no}"
-                    )
-                    tempNode = tempNode.parent
-                self.heatMapAnimation()
-                export_heatmap(self.tkRoot)
-                return  # self.MainStatus.REACHED
-
-            self.currentNode.expand(self.goals[0])
-            for eachChild in set(self.currentNode.children):
-                self.frontier.append(eachChild)
-
-        print("No solution found")
-        # return self.MainStatus.UNSOLVABLE
-
-    def AStar(self):
-        self.root.saveHeuristic(self.goals[0])  # save heuristic for root
-
-        while self.frontier:
-            # self.visualize()
-            self.frontier.sort(key=lambda x: x.heuristic + x.pathCost)
-            self.currentNode = self.frontier.pop(0)
-
-            print(f"{self.currentNode.cell}")
 
             # if path found
             if self.currentNode.cell == self.goals[0]:
@@ -945,7 +886,7 @@ class SearchTree:
             self.tkRoot.update()
             time.sleep(0.4)
 
-# searchTree2 = SearchTree()
-# searchTree2.getInputFile("input//input3-level3.txt")
-# searchTree2.Greedy_BFS()
+searchTree2 = SearchTree()
+searchTree2.getInputFile("input//input3-level3.txt")
+searchTree2.Greedy_BFS()
 # searchTree2.AStar()
