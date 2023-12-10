@@ -683,7 +683,7 @@ class SearchTree:
         update_animation(0)
 
         # Run the GUI
-        export_heatmap(root)
+        # export_heatmap(root)
         root.mainloop()
 
 

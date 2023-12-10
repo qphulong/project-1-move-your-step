@@ -695,7 +695,7 @@ class SearchTree:
 
     def Greedy_BFS(self):
         start_time = time.time()
-        start_mem = memory_usage()[0]
+        # start_mem = memory_usage()[0]
         self.root.saveHeuristic(self.goals[0])  # save heuristic for root
 
         while self.frontier:
@@ -705,10 +705,10 @@ class SearchTree:
 
             # if path found
             if self.currentNode.cell == self.goals[0]:
-                end_mem = memory_usage()[0]
+                # end_mem = memory_usage()[0]
                 end_time = time.time()
-                print(f"Memory: {end_mem - start_mem} MB")
-                print(f"Time: {end_time - start_time} seconds")
+                # print(f"Memory: {end_mem - start_mem} MB")
+                # print(f"Time: {end_time - start_time} seconds")
                 tempNode = self.currentNode
                 while tempNode:
                     print(
@@ -716,7 +716,7 @@ class SearchTree:
                     )
                     tempNode = tempNode.parent
                 self.heatMapAnimation()
-                export_heatmap(self.tkRoot)
+                # export_heatmap(self.tkRoot)
                 return  # self.MainStatus.REACHED
 
             self.currentNode.expand(self.goals[0])
@@ -745,7 +745,7 @@ class SearchTree:
                     )
                     tempNode = tempNode.parent
                 self.heatMapAnimation()
-                export_heatmap(self.tkRoot)
+                # export_heatmap(self.tkRoot)
                 return  # self.MainStatus.REACHED
 
             self.currentNode.expand(self.goals[0])
@@ -972,7 +972,7 @@ class SearchTree:
             self.tkRoot.update()
             time.sleep(0.4)
 
-searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input5-level3.txt")
-searchTree2.Greedy_BFS()
+# searchTree2 = SearchTree()
+# searchTree2.getInputFile("input//input5-level3.txt")
+# searchTree2.Greedy_BFS()
 # searchTree2.AStar()
