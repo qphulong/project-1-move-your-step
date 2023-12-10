@@ -1,7 +1,7 @@
 import floor
 from algorithm import Algorithm
 import copy
-
+import tkinter as tk
 
 class Level1:
     def __init__(self):
@@ -310,10 +310,50 @@ class Level1:
     def __del__(self):
         pass
 
-    def solve(self):
-        # path = self.algo.AStar_Level1(self)[1]
-        # path = self.algo.UCS_Level1(self)[1]
-        path = self.algo.BFS_Level1(self)[1]
+    def visualize_path(self, start_x, start_y, goal_x, goal_y, floor, path):
+
+        root = tk.Tk()
+        board_size = 30  # Define the size of the board
+        cell_size = 20  # Define the size of each cell in pixels
+
+        canvas = tk.Canvas(root, width=board_size * cell_size, height=board_size * cell_size)
+        canvas.pack()
+
+        score = tk.Label(root, font=('Arial', 25), text='Score: '+str(len(path)), fg='Black')
+        score.place(x=floor.cols*13, y=floor.rows*23)
+
+        # Draw the board
+        for i in range(floor.rows):
+            for j in range(floor.cols):
+                x1 = j * cell_size
+                y1 = i * cell_size
+                x2 = x1 + cell_size
+                y2 = y1 + cell_size
+
+                canvas.create_rectangle(
+                    x1, y1, x2, y2,
+                    fill=(
+                        "black" if floor.table[i][j].checkValue("-1") else "green" if (i, j) in path else "white"),
+                    outline="grey"  # Specify the color of the border (here, "grey")
+                )
+
+                text_x = x1 + cell_size // 2
+                text_y = y1 + cell_size // 2
+
+                canvas.create_text(text_x, text_y,
+                                   text=(
+                                       "A1" if i == start_x and j == start_y else "T1" if i == goal_x and j == goal_y else "")
+                                   , fill=(
+                        "blue" if i == goal_x and j == goal_y else "red" if i == start_x and j == start_y else "white")
+                                   , font=("Arial", 10))
+
+        # export_heatmap(root)
+        root.mainloop()
+
+    def solve(self,num):
+        if num == 1: path = self.algo.AStar_Level1(self)[1]
+        if num == 2: path = self.algo.UCS_Level1(self)[1]
+        if num == 3: path = self.algo.BFS_Level1(self)[1]
         start_x = self.agent_Xposition
         start_y = self.agent_Yposition
         goal_x = self.goal_Xposition
@@ -322,10 +362,10 @@ class Level1:
             print("No solutions found")
             return False
         print(f"Path: {path}")
-        self.algo.visualize_path(start_x, start_y, goal_x, goal_y, self.floor, path)
+        self.visualize_path(start_x, start_y, goal_x, goal_y, self.floor, path)
         return True
 
 
-myLevel1 = Level1()
-myLevel1.getInputFile("input//input3-level1.txt")
-myLevel1.solve()
+# myLevel1 = Level1()
+# myLevel1.getInputFile("input//input5-level1.txt")
+# myLevel1.solve()

@@ -247,11 +247,14 @@ class Algorithm:
             return self.discover_floor(level4, next_floor, goal_floor, goal)
 
     def visualize_path(self, start_x, start_y, goal_x, goal_y, floor, path):
-        board_size = 50  # Define the size of the board
+        board_size = 30  # Define the size of the board
         cell_size = 20  # Define the size of each cell in pixels
 
         canvas = tk.Canvas(root, width=board_size * cell_size, height=board_size * cell_size)
         canvas.pack()
+
+        score = tk.Label(root, font=('Arial', 25), text='Score: '+str(len(path)), fg='Black')
+        score.place(x=floor.cols*13, y=floor.rows*23)
 
         # Draw the board
         for i in range(floor.rows):
@@ -278,7 +281,7 @@ class Algorithm:
                         "blue" if i == goal_x and j == goal_y else "red" if i == start_x and j == start_y else "white")
                                    , font=("Arial", 10))
 
-        export_heatmap(root)
+        # export_heatmap(root)
         root.mainloop()
 
 
