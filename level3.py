@@ -7,7 +7,6 @@ from algorithm import export_heatmap
 import math
 
 import time
-from memory_profiler import memory_usage
 
 class Cell:
     def __init__(self, y, x, floor_no):
