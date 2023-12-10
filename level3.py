@@ -6,6 +6,9 @@ from collections import Counter
 from algorithm import export_heatmap
 import math
 
+import time
+from memory_profiler import memory_usage
+
 class Cell:
     def __init__(self, y, x, floor_no):
         self.y = y
@@ -56,7 +59,7 @@ class Cell:
         return math.sqrt((self.x - Cell.x) ** 2 + (self.y - Cell.y) ** 2)
 
     def getFloorsHeuristic(self, GoalCell):
-        return self.getEuclidean(GoalCell) + abs(self.floor_no - GoalCell.floor_no)
+        return self.getPhanTrungDucDistance(GoalCell) + abs(self.floor_no - GoalCell.floor_no)
 
     def getPhanTrungDucDistance(self, Cell):
         return max(abs(self.x - Cell.x), abs(self.y - Cell.y))
@@ -692,6 +695,8 @@ class SearchTree:
         # return self.MainStatus.UNSOLVABLE
 
     def Greedy_BFS(self):
+        start_time = time.time()
+        start_mem = memory_usage()[0]
         self.root.saveHeuristic(self.goals[0])  # save heuristic for root
 
         while self.frontier:
@@ -699,10 +704,12 @@ class SearchTree:
             self.frontier.sort(key=lambda x: x.heuristic)
             self.currentNode = self.frontier.pop(0)
 
-            print(f"{self.currentNode.cell}")
-
             # if path found
             if self.currentNode.cell == self.goals[0]:
+                end_mem = memory_usage()[0]
+                end_time = time.time()
+                print(f"Memory: {end_mem - start_mem} MB")
+                print(f"Time: {end_time - start_time} seconds")
                 tempNode = self.currentNode
                 while tempNode:
                     print(
@@ -967,6 +974,6 @@ class SearchTree:
             time.sleep(0.4)
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input3-level3.txt")
+searchTree2.getInputFile("input//input5-level3.txt")
 searchTree2.Greedy_BFS()
 # searchTree2.AStar()

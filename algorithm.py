@@ -6,6 +6,7 @@ from PIL import Image, ImageGrab
 import platform
 import os
 import subprocess
+import psutil
 
 
 class Algorithm:
@@ -300,3 +301,12 @@ def export_heatmap(Tkroot):
         subprocess.run(["open", image_folder])  # Opens the folder in Windows File Explorer
     elif operating_system == "Windows":
         subprocess.run(["explorer", image_folder])  # Opens the folder in Windows File Explorer
+
+def get_memory_usage():
+    # Get memory usage in bytes
+    memory_info = psutil.Process().memory_info()
+    memory_usage = memory_info.rss  # Get Resident Set Size (memory used)
+
+    # Convert bytes to megabytes for readability
+    memory_usage_mb = memory_usage / (1024 * 1024)
+    return memory_usage_mb

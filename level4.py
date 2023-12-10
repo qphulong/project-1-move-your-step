@@ -9,6 +9,10 @@ import copy
 from algorithm import export_heatmap
 import math
 
+import time
+
+start_time = None
+end_time = None
 
 class Cell:
     def __init__(self, y, x, floor_no):
@@ -61,7 +65,7 @@ class Cell:
         return math.sqrt((self.x - Cell.x) ** 2 + (self.y - Cell.y) ** 2)
 
     def getFloorsHeuristic(self, GoalCell):
-        return self.getEuclidean(GoalCell) + abs(self.floor_no - GoalCell.floor_no)
+        return self.getPhanTrungDucDistance(GoalCell) + abs(self.floor_no - GoalCell.floor_no)
 
     def getPhanTrungDucDistance(self, Cell):
         return max(abs(self.x - Cell.x), abs(self.y - Cell.y))
@@ -737,6 +741,7 @@ class SearchTree:
     def Greedy_BFS(self):
         self.root[1].saveHeuristic(self.goals[1][-1])  # save heuristic for root
 
+
         while self.frontier[1]:
             # self.visualize()
             self.frontier[1].sort(key=lambda x: x.heuristic)
@@ -846,6 +851,9 @@ class SearchTree:
 
                         if current_cell == self.goals[1][-1]:
                             print("Reached goal")
+                            end_time = time.time()
+                            print(f"End time: {end_time}s")
+                            print(f"Total time: {end_time - start_time}s")
                             if visited.get(self.agents[current_agent]) is None:
                                 visited[self.agents[current_agent]] = 0
                             visited[self.agents[current_agent]] += 1
@@ -984,7 +992,11 @@ class SearchTree:
             if current_agent > self.number_agents:
                 current_agent = 1
 
+
+
     def solve(self):
+        start_time = time.time()
+        print(f"Start time: {start_time}s")
         res = self.BFS()
         if res[0] == self.MainStatus.REACHED:
             print("Found a way to reach the goal")
@@ -1083,7 +1095,6 @@ class SearchTree:
             y_offset += floor.rows * 35 + 20  # Adjust y_offset for next floor
 
     def heatMapUpdate(self, current_agent, cell, prev, visited):
-        print(f"A{current_agent}: {cell}")
         if current_agent == 1 and prev != cell: self.score += 1
         score = tk.Label(self.tkRoot, font=('Arial', 15), text='Score: ' + str(self.score), fg='Black')
         score.place(x=self.floors[1].cols * 21, y=100)
@@ -1207,6 +1218,6 @@ class SearchTree:
 
 
 searchTree2 = SearchTree()
-searchTree2.getInputFile("input//input1-level4.txt")
+searchTree2.getInputFile("input//input5-level4.txt")
 searchTree2.solve()
 # searchTree2.tkRoot.mainloop()
